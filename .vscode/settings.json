@@ -1,0 +1,19 @@
+{
+	"search.exclude": {
+		"export/**/*.hx": true
+	},
+	"[haxe]": {
+		"editor.codeActionsOnSave": {
+			"source.sortImports": true
+		}
+	},
+	"haxe.enableExtendedIndentation": true,
+    "emeraldwalk.runonsave": {
+        "commands": [
+            {
+                "match": "\\.hx",
+                "cmd": "lime build html5"
+            }
+        ]
+    }
+}
