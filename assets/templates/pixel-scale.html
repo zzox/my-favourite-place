@@ -66,6 +66,8 @@
 	<script type="text/javascript">
 		lime.embed ("::APP_FILE::", "openfl-content", ::WIN_WIDTH::, ::WIN_HEIGHT::, { parameters: {} });
 
+        document.oncontextmenu = function () { return false; };
+
         var resize = function () {
             document.body.style.overflow = 'hidden';
 
