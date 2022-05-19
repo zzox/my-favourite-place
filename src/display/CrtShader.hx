@@ -3,7 +3,7 @@ package display;
 import flixel.FlxG;
 import flixel.system.FlxAssets.FlxShader;
 
-// https://gist.github.com/Beeblerox/54324d9d5aa19b27651b7cda9130f5dd
+// from: https://gist.github.com/Beeblerox/54324d9d5aa19b27651b7cda9130f5dd
 
 class CrtShader extends FlxShader {
     @:glFragmentSource('
@@ -47,7 +47,7 @@ class CrtShader extends FlxShader {
 
             // vignette effect
             float vig = (0.0 + 1.0 * 16.0 * uv.x * uv.y * (1.0 - uv.x) * (1.0 - uv.y));
-            // change to lower value to lower vignette (~0.1)
+            // lower vignetteVal to lower vignette (~0.1)
             col *= vec3(pow(vig, vignetteVal));
             
             // slight green increase

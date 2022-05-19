@@ -286,7 +286,7 @@
         {
             "type": "TODOComment",
             "props": {
-                "format": "^\\s*(ATTN|PROD|TODO|FIXME|HACK|XXX|BUG|MD)"
+                "format": "^\\s*(ATTN|PROD|TODO|FIXME|HACK|XXX|BUG|MD|TEMP)"
             }
         },
         {
