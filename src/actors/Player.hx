@@ -6,6 +6,8 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.math.FlxPoint;
 import flixel.math.FlxVelocity;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
 import util.Snapper;
 import util.Utils;
 
@@ -82,7 +84,7 @@ class Player extends FlxSprite {
 
         if (dead) {
             super.update(elapsed);
-            trace('dead');
+            trace('dead', scale);
             return;
         }
 
@@ -280,5 +282,17 @@ class Player extends FlxSprite {
         if (acceleration.x > 0 && !flipX) {
             flipX = true;
         }
+    }
+
+    public function die () {
+        dead = true;
+        animation.pause();
+        FlxTween.tween(this, { 'scale.x': 0.0 }, 0.5, { ease: FlxEase.backIn });
+        FlxTween.tween(
+            this,
+            { 'scale.y': 2 },
+            0.75,
+            { ease: FlxEase.quintIn }
+        );
     }
 }

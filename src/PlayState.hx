@@ -2,6 +2,7 @@ import actors.Player;
 import data.Constants;
 import display.CrtShader;
 import flixel.FlxG;
+import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup.FlxTypedGroup;
@@ -23,7 +24,7 @@ class NamedMap extends FlxTilemap {
 
 typedef Room = {
     var collide:FlxTilemap;
-    var spikes:FlxTypedGroup<FlxTilemap>;
+    var spikes:FlxTypedGroup<NamedMap>;
 }
 
 class PlayState extends FlxState {
@@ -66,13 +67,21 @@ class PlayState extends FlxState {
         for (i in 0...3) {
             // TODO: shuffle rooms
 
-            // position
-            final spikes = new FlxTypedGroup<FlxTilemap>();
-            // final spikesUp = createTileLayer(map, 'spikes-up', startPoint.x, startPoint.y + 4);
-            // final spikesDown = createTileLayer(map, 'spikes-down', startPoint.x, startPoint.y - 4);
+            final spikes = new FlxTypedGroup<NamedMap>();
+
+            final spikesUp = createTileLayer(world, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 4 });
+            if (spikesUp != null) {
+                spikesUp.offset.set(0, 4);
+                spikes.add(spikesUp);
+            }
+
+            final spikesDown = createTileLayer(world, 'Level_$i', 'Spikes_down', { x: point.x, y: point.y - 4 });
+            if (spikesDown != null) {
+                spikesDown.offset.set(0, 4);
+                spikes.add(spikesDown);
+            }
 
             final collide = createTileLayer(world, 'Level_$i', 'Ground', point);
-            trace(collide);
             rooms[i] = {
                 collide: collide,
                 spikes: spikes,
@@ -117,14 +126,14 @@ class PlayState extends FlxState {
         super.update(elapsed);
 
         FlxG.collide(rooms[currentRoom].collide, player);
-
-        trace(currentRoom);
+        FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
 
         if (player.y + player.height > screenPoint.y + 90) {
             moveRoom();
         }
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0) {
+            // TODO: this needs to be sized to the game and centered, not scale.
             camera.setScale(cameraXScale, cameraYScale);
         }
 
@@ -137,6 +146,31 @@ class PlayState extends FlxState {
                 FlxG.camera.setFilters([]);
             }
         }
+    }
+
+    function collideSpikes (spikes:NamedMap, player:Player) {
+        if (!player.dead && ((player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_up') ||
+            (player.isTouching(FlxObject.UP) && spikes.name == 'Spikes_down') ||
+            (player.isTouching(FlxObject.LEFT) && spikes.name == 'Spikes_down') ||
+            (player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
+            trace('losing!');
+            loseLevel();
+        }
+    }
+
+    function loseLevel () {
+        player.die();
+        // TODO: scroll up all the way and show results.
+        FlxTween.tween(
+            camera,
+            { 'scroll.y': camera.scroll.y - 100 },
+            1,
+            { ease: FlxEase.quintIn, onComplete:
+                (_:FlxTween) -> {
+                    FlxG.switchState(new PlayState());
+                }
+            }
+        );
     }
 
     function moveRoom () {
