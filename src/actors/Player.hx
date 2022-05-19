@@ -76,9 +76,15 @@ class Player extends FlxSprite {
     }
 
     override public function update (elapsed:Float) {
-        // if (scene.transitioning) {
-        //     return;
-        // }
+        if (scene.transitioning) {
+            return;
+        }
+
+        if (dead) {
+            super.update(elapsed);
+            trace('dead');
+            return;
+        }
 
         var lrAcc = handleInputs(elapsed);
         final touchingFloor = isTouching(FlxObject.DOWN);

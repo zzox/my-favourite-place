@@ -21,8 +21,17 @@ class NamedMap extends FlxTilemap {
     }
 }
 
+typedef Room = {
+    var collide:FlxTilemap;
+    var spikes:FlxTypedGroup<FlxTilemap>;
+}
+
 class PlayState extends FlxState {
     static inline final BULLET_POOL_SIZE:Int = 100;
+    static inline final ROOM_HEIGHT:Int = 96;
+
+    var currentRoom:Int = 0;
+    var rooms:Array<Room> = [];
 
     var player:Player;
     var projectiles:FlxTypedGroup<Projectile>;
@@ -34,8 +43,8 @@ class PlayState extends FlxState {
     var cameraXScale:Float = 0;
     var cameraYScale:Float = 0;
 
-    // TEMP: collision
-    var collide:FlxTilemap;
+    public var transitioning:Bool = false;
+
     // TEMP:
     final SHOOT_VEL = 120;
 
@@ -53,8 +62,24 @@ class PlayState extends FlxState {
         bg.scrollFactor.set(0, 0);
         add(bg);
 
-        collide = createTileLayer(world, 'Level_0', 'Ground', point);
-        add(collide);
+        var point = { x: 0, y: 0 };
+        for (i in 0...3) {
+            // TODO: shuffle rooms
+
+            // position
+            final spikes = new FlxTypedGroup<FlxTilemap>();
+            // final spikesUp = createTileLayer(map, 'spikes-up', startPoint.x, startPoint.y + 4);
+            // final spikesDown = createTileLayer(map, 'spikes-down', startPoint.x, startPoint.y - 4);
+
+            final collide = createTileLayer(world, 'Level_$i', 'Ground', point);
+            trace(collide);
+            rooms[i] = {
+                collide: collide,
+                spikes: spikes,
+            };
+
+            point.y += ROOM_HEIGHT;
+        }
 
         player = new Player(25, 25, this);
         add(player);
@@ -84,24 +109,20 @@ class PlayState extends FlxState {
 
         camera.setScale(0, 0);
         FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
-        FlxTween.tween(
-            this,
-            { cameraYScale: 1.0 },
-            0.75,
-            { ease: FlxEase.quintIn, onComplete:
-                (_:FlxTween) -> {
-                    setBounds();
-                }
-            }
-        );
+        FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
     }
 
     override public function update(elapsed:Float) {
         positionAimer();
         super.update(elapsed);
 
-        FlxG.collide(collide, player);
-        // FlxG.collide(rooms[currentRoom].collide, player);
+        FlxG.collide(rooms[currentRoom].collide, player);
+
+        trace(currentRoom);
+
+        if (player.y + player.height > screenPoint.y + 90) {
+            moveRoom();
+        }
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0) {
             camera.setScale(cameraXScale, cameraYScale);
@@ -116,6 +137,27 @@ class PlayState extends FlxState {
                 FlxG.camera.setFilters([]);
             }
         }
+    }
+
+    function moveRoom () {
+        transitioning = true;
+
+        // currentRoom = worlds[currentWorld].rooms[currentRoom].exits[dir];
+        screenPoint.y += ROOM_HEIGHT;
+        currentRoom++;
+
+        FlxTween.tween(player, { y: player.y + 24 }, 0.5);
+        FlxTween.tween(
+            camera.scroll,
+            { y: screenPoint.y },
+            0.5,
+            { ease: FlxEase.circInOut, onComplete: (_:FlxTween) -> finishMovingRoom() }
+        );
+    }
+
+    function finishMovingRoom () {
+        transitioning = false;
+        setBounds();
     }
 
     public function generateProjectile (owner:FlxSprite, angle:Float) {
