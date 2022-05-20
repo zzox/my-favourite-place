@@ -47,7 +47,7 @@ class PlayState extends FlxState {
     public var transitioning:Bool = false;
 
     // TEMP:
-    final SHOOT_VEL = 120;
+    final SHOOT_VEL = 250;
 
     override public function create() {
         super.create();
@@ -153,7 +153,6 @@ class PlayState extends FlxState {
             (player.isTouching(FlxObject.UP) && spikes.name == 'Spikes_down') ||
             (player.isTouching(FlxObject.LEFT) && spikes.name == 'Spikes_down') ||
             (player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
-            trace('losing!');
             loseLevel();
         }
     }
@@ -197,7 +196,7 @@ class PlayState extends FlxState {
     public function generateProjectile (owner:FlxSprite, angle:Float) {
         final proj = projectiles.getFirstAvailable();
         final point = owner.getMidpoint();
-        proj.shoot(point.x + 4, point.y, angle, SHOOT_VEL);
+        proj.shoot(point.x, point.y - 4, angle, SHOOT_VEL);
         // final kb = projMap[type].knockback;
         // FlxG.camera.shake(
         //     0.01 + (0.025 * kb / 1000),
