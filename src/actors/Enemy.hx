@@ -15,7 +15,7 @@ enum EnemyType {
 }
 final enemyData:Map<EnemyType, EnemyData> = [
     Saucer => {
-        path: AssetPaths.enemy_1__png,
+        path: AssetPaths.enemies__png,
         hp: 1,
     }
 ];

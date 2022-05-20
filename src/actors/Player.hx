@@ -322,6 +322,7 @@ class Player extends FlxSprite {
 
     public function die () {
         dead = true;
+        stopDash();
         animation.pause();
         acceleration.set(0, 0);
         velocity.set(0, 0);

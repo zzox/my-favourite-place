@@ -26,6 +26,8 @@ class NamedMap extends FlxTilemap {
 
 typedef Room = {
     var collide:FlxTilemap;
+    var downPlugs:FlxTilemap;
+    var upPlugs:FlxTilemap;
     var spikes:FlxTypedGroup<NamedMap>;
     var enemies:Array<Enemy>;
 }
@@ -61,7 +63,6 @@ class PlayState extends FlxState {
         // camera.pixelPerfectRender = true;
 
         final world = new LdtkWorld(AssetPaths.world1__ldtk);
-        var point = { x: 0, y: 0 };
 
         final bg = new FlxSprite(0, 0);
         bg.makeGraphic(160, 90, 0xffffe9c5);
@@ -90,6 +91,13 @@ class PlayState extends FlxState {
             }
 
             final collide = createTileLayer(world, 'Level_$i', 'Ground', point);
+            final downPlugs = createTileLayer(world, 'Level_$i', 'Plugs_down', point);
+            if (i == 0) {
+                downPlugs.destroy();
+            }
+
+            final upPlugs = createTileLayer(world, 'Level_$i', 'Plugs_up', point);
+            upPlugs.visible = false;
 
             final roomEnemies = [];
             if (roomData.enemies != null) {
@@ -109,7 +117,9 @@ class PlayState extends FlxState {
             rooms[i] = {
                 collide: collide,
                 spikes: spikes,
-                enemies: roomEnemies
+                enemies: roomEnemies,
+                upPlugs: upPlugs,
+                downPlugs: downPlugs
             };
 
             point.y += ROOM_HEIGHT;
@@ -153,6 +163,8 @@ class PlayState extends FlxState {
         super.update(elapsed);
 
         FlxG.collide(rooms[currentRoom].collide, player);
+        FlxG.collide(rooms[currentRoom].downPlugs, player);
+        FlxG.collide(rooms[currentRoom].upPlugs, player);
         FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
         FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
         FlxG.overlap(enemies, player, enemyHitPlayer);
@@ -199,16 +211,16 @@ class PlayState extends FlxState {
         }
     }
 
-    function enemyHitPLayer (enemy:Enemy, player:Player) {
+    function enemyHitPlayer (enemy:Enemy, player:Player) {
         if (!enemy.dead && !player.dead) {
-            player.die();
+            loseLevel();
         }
     }
 
     public function enemyDie () {
         numEnemiesKilled++;
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
-            trace('beat enemies!!!');
+            rooms[currentRoom].downPlugs.destroy();
         }
     }
 
@@ -235,7 +247,7 @@ class PlayState extends FlxState {
         screenPoint.y += ROOM_HEIGHT;
         currentRoom++;
 
-        FlxTween.tween(player, { y: player.y + 24 }, 0.5);
+        FlxTween.tween(player, { y: player.y + 32 }, 0.5);
         FlxTween.tween(
             camera.scroll,
             { y: screenPoint.y },
@@ -251,6 +263,7 @@ class PlayState extends FlxState {
         for (enemy in rooms[currentRoom].enemies) {
             enemy.active = true;
         }
+        rooms[currentRoom].upPlugs.visible = true;
     }
 
     public function generateProjectile (owner:FlxSprite, angle:Float) {
