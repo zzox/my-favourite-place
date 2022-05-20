@@ -1,5 +1,7 @@
+import actors.Enemy;
 import actors.Player;
 import data.Constants;
+import data.Levels;
 import display.CrtShader;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -25,6 +27,7 @@ class NamedMap extends FlxTilemap {
 typedef Room = {
     var collide:FlxTilemap;
     var spikes:FlxTypedGroup<NamedMap>;
+    var enemies:Array<Enemy>;
 }
 
 class PlayState extends FlxState {
@@ -35,6 +38,7 @@ class PlayState extends FlxState {
     var rooms:Array<Room> = [];
 
     var player:Player;
+    var enemies:FlxTypedGroup<Enemy>;
     var projectiles:FlxTypedGroup<Projectile>;
     var aimer:FlxSprite;
 
@@ -44,6 +48,7 @@ class PlayState extends FlxState {
     var cameraXScale:Float = 0;
     var cameraYScale:Float = 0;
 
+    var numEnemiesKilled:Int = 0;
     public var transitioning:Bool = false;
 
     // TEMP:
@@ -63,9 +68,12 @@ class PlayState extends FlxState {
         bg.scrollFactor.set(0, 0);
         add(bg);
 
+        enemies = new FlxTypedGroup<Enemy>();
+
         var point = { x: 0, y: 0 };
-        for (i in 0...3) {
+        for (i in 0...4) {
             // TODO: shuffle rooms
+            final roomData = levels[i];
 
             final spikes = new FlxTypedGroup<NamedMap>();
 
@@ -82,13 +90,32 @@ class PlayState extends FlxState {
             }
 
             final collide = createTileLayer(world, 'Level_$i', 'Ground', point);
+
+            final roomEnemies = [];
+            if (roomData.enemies != null) {
+                for (e in roomData.enemies) {
+                    final enemy = new Enemy(
+                        point.x + e.pos.x,
+                        point.y + e.pos.y,
+                        this,
+                        e.type,
+                        e.vel
+                    );
+                    roomEnemies.push(enemy);
+                    enemies.add(enemy);
+                }
+            }
+
             rooms[i] = {
                 collide: collide,
                 spikes: spikes,
+                enemies: roomEnemies
             };
 
             point.y += ROOM_HEIGHT;
         }
+
+        add(enemies);
 
         player = new Player(25, 25, this);
         add(player);
@@ -127,6 +154,9 @@ class PlayState extends FlxState {
 
         FlxG.collide(rooms[currentRoom].collide, player);
         FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
+        FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
+        FlxG.overlap(enemies, player, enemyHitPlayer);
+        FlxG.overlap(projectiles, enemies, projHitEnemy);
 
         if (player.y + player.height > screenPoint.y + 90) {
             moveRoom();
@@ -157,6 +187,31 @@ class PlayState extends FlxState {
         }
     }
 
+    function projHitGroud (_:FlxTilemap, proj:Projectile) {
+        // makeExplosion(proj.getMidpoint(), 'small', angle);
+        proj.kill();
+    }
+
+    function projHitEnemy (proj:Projectile, enemy:Enemy) {
+        if (!enemy.dead) {
+            proj.kill();
+            enemy.hit();
+        }
+    }
+
+    function enemyHitPLayer (enemy:Enemy, player:Player) {
+        if (!enemy.dead && !player.dead) {
+            player.die();
+        }
+    }
+
+    public function enemyDie () {
+        numEnemiesKilled++;
+        if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
+            trace('beat enemies!!!');
+        }
+    }
+
     function loseLevel () {
         player.die();
         // TODO: scroll up all the way and show results.
@@ -174,6 +229,7 @@ class PlayState extends FlxState {
 
     function moveRoom () {
         transitioning = true;
+        player.stopDash();
 
         // currentRoom = worlds[currentWorld].rooms[currentRoom].exits[dir];
         screenPoint.y += ROOM_HEIGHT;
@@ -191,6 +247,10 @@ class PlayState extends FlxState {
     function finishMovingRoom () {
         transitioning = false;
         setBounds();
+        numEnemiesKilled = 0;
+        for (enemy in rooms[currentRoom].enemies) {
+            enemy.active = true;
+        }
     }
 
     public function generateProjectile (owner:FlxSprite, angle:Float) {

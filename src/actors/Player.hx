@@ -55,7 +55,7 @@ class Player extends FlxSprite {
 
     var dashPressedTime:Float = DASH_BUFFER;
     var dashing:Bool = false;
-    var dashTime:Float = 0.0;
+    public var dashTime:Float = 0.0;
 
     public var dead:Bool = false;
 
@@ -119,13 +119,7 @@ class Player extends FlxSprite {
             colorTransform.color = FLASH_COLORS[Math.floor(dashTime / 0.01) % FLASH_COLORS.length];
 
             if (dashTime <= 0.0) {
-                dashing = false;
-                velocity.set(velocity.x, velocity.y / 4);
-                maxVelocity.set(MAX_VELOCITY.x, MAX_VELOCITY.y);
-                colorTransform = new ColorTransform();
-                scene.remove(trail);
-                trail.destroy();
-                trail = null;
+                stopDash();
             }
         } else {
             if (touchingFloor) {
@@ -206,7 +200,7 @@ class Player extends FlxSprite {
 
     function shoot () {
         // MD: 100
-        final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 100);
+        final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 250);
         trace('kbvel $knockbackVel');
         scene.generateProjectile(this, aimerDegree);
         final muzzleFlash = FlxVelocity.velocityFromAngle(aimerDegree, 2);
@@ -231,6 +225,18 @@ class Player extends FlxSprite {
         dashing = true;
         trail = new FlxTrail(this, null, 10, 2, 0.5);
         scene.add(trail);
+    }
+
+    public function stopDash () {
+        dashing = false;
+        velocity.set(velocity.x, velocity.y / 4);
+        maxVelocity.set(MAX_VELOCITY.x, MAX_VELOCITY.y);
+        colorTransform = new ColorTransform();
+        if (trail != null) {
+            scene.remove(trail);
+            trail.destroy();
+            trail = null;
+        }
     }
 
     // checks inputs and updates state.
@@ -311,13 +317,7 @@ class Player extends FlxSprite {
             animation.play('in-air');
         }
 
-        if (acceleration.x < 0 && flipX) {
-            flipX = false;
-        }
-
-        if (acceleration.x > 0 && !flipX) {
-            flipX = true;
-        }
+        flipX = FlxG.mouse.x > getMidpoint().x;
     }
 
     public function die () {
