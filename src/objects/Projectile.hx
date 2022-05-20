@@ -13,7 +13,7 @@ class Projectile extends FlxSprite {
     override public function update (elapsed:Float) {
         super.update(elapsed);
         if (!inWorldBounds()) {
-            this.kill();
+            kill();
         }
     }
 

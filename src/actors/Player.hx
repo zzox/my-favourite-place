@@ -122,7 +122,11 @@ class Player extends FlxSprite {
                 stopDash();
             }
         } else {
+            final midpoint = getMidpoint();
             if (touchingFloor) {
+                if (airTime != 0) {
+                    scene.generateExplosion(midpoint.x, y + height, 'land');
+                }
                 airTime = 0;
                 highDrag();
             } else {
@@ -164,6 +168,7 @@ class Player extends FlxSprite {
             if (jumpPressedTime < JUMP_BUFFER && airTime < AIR_TIME_BUFFER && !jumping) {
                 jumping = true;
                 jumpTime = JUMP_START_TIME;
+                scene.generateExplosion(midpoint.x, y + height, 'jump');
                 // jumpSound.play();
             }
 
@@ -199,19 +204,12 @@ class Player extends FlxSprite {
     }
 
     function shoot () {
-        // MD: 100
+        // MD: 250
         final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 250);
-        trace('kbvel $knockbackVel');
         scene.generateProjectile(this, aimerDegree);
-        final muzzleFlash = FlxVelocity.velocityFromAngle(aimerDegree, 2);
-        // scene.makeExplosion(
-        //     new FlxPoint(
-        //         getMidpoint().x + muzzleFlash.x, getMidpoint().y + muzzleFlash.y
-        //     ),
-        //     'tiny' // small ring
-        // );
+        // TODO: remove knockback?
         velocity.x += knockbackVel.x;
-        velocity.y += knockbackVel.y;
+        velocity.y += knockbackVel.y / 4;
         // shootTime = projMap[projType].reloadTime;
     }
 

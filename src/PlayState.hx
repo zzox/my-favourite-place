@@ -12,6 +12,8 @@ import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
+import objects.Explosion;
 import objects.Projectile;
 import openfl.filters.ShaderFilter;
 import util.LdtkWorld;
@@ -42,6 +44,7 @@ class PlayState extends FlxState {
     var player:Player;
     var enemies:FlxTypedGroup<Enemy>;
     var projectiles:FlxTypedGroup<Projectile>;
+    var explosions:FlxTypedGroup<Explosion>;
     var aimer:FlxSprite;
 
     var crtShader:CrtShader;
@@ -138,6 +141,14 @@ class PlayState extends FlxState {
         }
         add(projectiles);
 
+        explosions = new FlxTypedGroup<Explosion>(BULLET_POOL_SIZE);
+        for (_ in 0...BULLET_POOL_SIZE) {
+            final expl = new Explosion();
+            expl.kill();
+            explosions.add(expl);
+        }
+        add(explosions);
+
         screenPoint = { x: 0, y: GLOBAL_Y_OFFSET };
 
         aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
@@ -150,8 +161,8 @@ class PlayState extends FlxState {
         camera.scroll.y = screenPoint.y;
         setBounds();
 
-        // crtShader = new CrtShader();
-        // FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+        crtShader = new CrtShader();
+        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
 
         camera.setScale(0, 0);
         FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
@@ -200,12 +211,15 @@ class PlayState extends FlxState {
     }
 
     function projHitGroud (_:FlxTilemap, proj:Projectile) {
-        // makeExplosion(proj.getMidpoint(), 'small', angle);
+        final midpoint = proj.getMidpoint();
+        generateExplosion(midpoint.x, midpoint.y, 'pop');
         proj.kill();
     }
 
     function projHitEnemy (proj:Projectile, enemy:Enemy) {
         if (!enemy.dead) {
+            final midpoint = proj.getMidpoint();
+            generateExplosion(midpoint.x, midpoint.y, 'pop');
             proj.kill();
             enemy.hit();
         }
@@ -220,7 +234,11 @@ class PlayState extends FlxState {
     public function enemyDie () {
         numEnemiesKilled++;
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
-            rooms[currentRoom].downPlugs.destroy();
+            generateExplosion(screenPoint.x + 48, screenPoint.y + 84, 'warn');
+            generateExplosion(screenPoint.x + 112, screenPoint.y + 84, 'warn');
+            new FlxTimer().start(0.5, (_:FlxTimer) -> {
+                rooms[currentRoom].downPlugs.destroy();
+            });
         }
     }
 
@@ -278,6 +296,11 @@ class PlayState extends FlxState {
         // POTENTIALLY:
         // just very large knockback has a tiny screenshake
         // FlxG.camera.shake(0.01, 0.05);
+    }
+
+    public function generateExplosion (x:Float, y:Float, anim:String) {
+        final expl = explosions.getFirstAvailable();
+        expl.play(x, y, anim);
     }
 
     function positionAimer () {
