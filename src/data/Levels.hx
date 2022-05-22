@@ -9,11 +9,15 @@ typedef EnemyPlacement = {
     var vel:IntPoint;
 }
 
-enum Choices {
-    PlusOneJump;
-    PlusOneDash;
-    Faster;
-    Higher;
+enum abstract Choices(String) to String {
+    var Faster = 'Faster';
+    var Higher = 'Higher';
+    var LongerDash = 'Long Dash';
+    var FasterDash = 'Fast Dash';
+    var PlusOneJump = '+1 Jump';
+    var PlusOneDash = '+1 Dash';
+    var MinusOneJump = '-1 Jump';
+    var MinusOneDash = '-1 Dash';
 }
 
 typedef LevelData = {
@@ -33,7 +37,7 @@ final levels:Array<LevelData> = [{
         pos: { x: -32, y: 24 },
         vel: { x: 120, y: 0 }
     }],
-    choices: [Faster, Higher]
+    choices: [PlusOneJump, PlusOneDash]
 }, {
     enemies: [{
         type: Saucer,
@@ -47,6 +51,39 @@ final levels:Array<LevelData> = [{
         type: Saucer,
         pos: { x: 232, y: 64 },
         vel: { x: -120, y: 0 }
+    }],
+    choices: [LongerDash, FasterDash]
+}, {
+    enemies: [{
+        type: Saucer,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Saucer,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
+    }],
+    choices: [Faster, Higher]
+}, {
+    enemies: [{
+        type: Saucer,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Saucer,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
+    }],
+    choices: [Faster, Higher]
+}, {
+    enemies: [{
+        type: Saucer,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Saucer,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
     }],
     choices: [Faster, Higher]
 }, {

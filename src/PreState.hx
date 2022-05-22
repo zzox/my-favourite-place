@@ -1,11 +1,12 @@
 package;
 
+import display.CrtShader;
+import display.Font;
 import flixel.FlxG;
 import flixel.FlxState;
-import flixel.graphics.frames.FlxBitmapFont;
 import flixel.system.scaleModes.PixelPerfectScaleMode;
 import flixel.text.FlxBitmapText;
-import openfl.Assets;
+import openfl.filters.ShaderFilter;
 
 class PreState extends FlxState {
     override public function create () {
@@ -30,9 +31,7 @@ class PreState extends FlxState {
 
         bgColor = 0xff000000;
 
-        var textBytes = Assets.getText(AssetPaths.miniset__fnt);
-        var XMLData = Xml.parse(textBytes);
-        var fontAngelCode = FlxBitmapFont.fromAngelCode(AssetPaths.miniset__png, XMLData);
+        final fontAngelCode = getFont();
 
         var text = new FlxBitmapText(fontAngelCode);
         text.color = 0xffffffff;
@@ -40,6 +39,9 @@ class PreState extends FlxState {
         text.letterSpacing = -1;
         text.setPosition((FlxG.width - text.width) / 2, 40);
         add(text);
+
+        final crtShader = new CrtShader();
+        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
     }
 
     override public function update (elapsed:Float) {

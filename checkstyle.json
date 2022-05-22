@@ -51,11 +51,11 @@
                 "thresholds": [
                     {
                         "severity": "WARNING",
-                        "complexity": 32
+                        "complexity": 40
                     },
                     {
                         "severity": "ERROR",
-                        "complexity": 40
+                        "complexity": 50
                     }
                 ]
             }

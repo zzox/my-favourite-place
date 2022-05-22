@@ -21,16 +21,12 @@ typedef HoldsObj = {
 final FLASH_COLORS = [0xff82ce, 0xcc69a4, 0x8cd612];
 
 class Player extends FlxSprite {
-    static inline final RUN_ACCELERATION:Float = 800.0;
     static inline final GRAVITY:Float = 400.0;
     static inline final JUMP_START_TIME:Float = 0.15;
-    static inline final JUMP_VELOCITY:Float = 90.0;
     static inline final JUMP_BUFFER:Float = 0.075;
     static inline final HANG_START_TIME:Float = 0.08;
     static inline final AIR_TIME_BUFFER:Float = 0.1;
-    static final MAX_VELOCITY:FlxPoint = new FlxPoint(90, 180);
-    static inline final DASH_VELOCITY:Float = 250;
-    static inline final DASH_START_TIME:Float = 0.125;
+    static inline final POST_DASH_TIME:Float = 0.05;
 
     static inline final DASH_BUFFER:Float = 0.1;
 
@@ -44,6 +40,7 @@ class Player extends FlxSprite {
     var jumping:Bool = false;
     var jumpTime:Float = 0.0;
     var jumpPressedTime:Float = JUMP_BUFFER;
+    var jumps:Int = 0;
     var hanging:Bool = false;
     var hangTime:Float = 0.0;
     var hasHung:Bool = false;
@@ -53,9 +50,11 @@ class Player extends FlxSprite {
     var reloadTime:Float = 0.5;
     var lastShotTime:Float = 0.0;
 
+    var dashes:Int = 0;
     var dashPressedTime:Float = DASH_BUFFER;
-    var dashing:Bool = false;
+    public var dashing:Bool = false;
     public var dashTime:Float = 0.0;
+    public var postDashTime:Float = 0.0;
 
     public var dead:Bool = false;
 
@@ -84,7 +83,7 @@ class Player extends FlxSprite {
             0.025
         );
 
-        maxVelocity.set(MAX_VELOCITY.x, MAX_VELOCITY.y);
+        maxVelocity.set(scene.skills.xVel, scene.skills.yVel);
         highDrag();
     }
 
@@ -113,6 +112,7 @@ class Player extends FlxSprite {
 
         dashPressedTime += elapsed;
         dashTime -= elapsed;
+        postDashTime -= elapsed;
 
         if (dashing) {
             colorTransform = new ColorTransform();
@@ -129,7 +129,13 @@ class Player extends FlxSprite {
                 }
                 airTime = 0;
                 highDrag();
+                jumps = 0;
+                dashes = 0;
             } else {
+                // give the first jump away if falling
+                if (airTime > AIR_TIME_BUFFER && jumps == 0) {
+                    jumps++;
+                }
                 airTime += elapsed;
                 lrAcc = lrAcc * 2 / 3;
                 lowDrag();
@@ -139,17 +145,17 @@ class Player extends FlxSprite {
             // if we are pressing down, we double max velocity and double gravity
             if (downPressed && !touchingFloor) {
                 downAcc *= 2;
-                maxVelocity.y = MAX_VELOCITY.y * 2;
+                maxVelocity.y = scene.skills.yVel * 2;
                 // only strech if we are heading downwards
                 if (velocity.y > 0) {
                     stretchDownSnapper.push();
                 }
             } else {
-                maxVelocity.y = MAX_VELOCITY.y;
+                maxVelocity.y = scene.skills.yVel;
                 stretchDownSnapper.pull();
             }
 
-            acceleration.set(lrAcc * RUN_ACCELERATION, downAcc);
+            acceleration.set(lrAcc * scene.skills.xVel * 10, downAcc);
 
             // we hang in y=0 velocity space.  Used to make jumps feel more floaty,
             // but also at the end of a dash.
@@ -165,10 +171,13 @@ class Player extends FlxSprite {
 
             // if we pressed jump and are touching the floor
             // (or if we are within coyote time/air buffer time)
-            if (jumpPressedTime < JUMP_BUFFER && airTime < AIR_TIME_BUFFER && !jumping) {
+            if (jumpPressedTime < JUMP_BUFFER && !jumping && scene.skills.jumps > 0 &&
+                (jumps < scene.skills.jumps || airTime < AIR_TIME_BUFFER)
+            ) {
                 jumping = true;
                 jumpTime = JUMP_START_TIME;
                 scene.generateExplosion(midpoint.x, y + height, 'jump');
+                jumps++;
                 // jumpSound.play();
             }
 
@@ -182,7 +191,7 @@ class Player extends FlxSprite {
 
             // if the jumping flag is set, we add the jump velocity
             if (jumping) {
-                velocity.y = -JUMP_VELOCITY;
+                velocity.y = -scene.skills.jumpVel;
 
                 // if we let go of jump, run out of jump time, or are touching the ground,
                 // (and haven't just immediately set the flag) we end the jump
@@ -193,7 +202,7 @@ class Player extends FlxSprite {
                 }
             }
 
-            if (dashPressedTime < DASH_BUFFER) {
+            if (dashPressedTime < DASH_BUFFER && dashes < scene.skills.dashes) {
                 dash();
             }
         }
@@ -203,38 +212,43 @@ class Player extends FlxSprite {
         super.update(elapsed);
     }
 
-    function shoot () {
-        // MD: 250
-        final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 250);
-        scene.generateProjectile(this, aimerDegree);
-        // TODO: remove knockback?
-        velocity.x += knockbackVel.x;
-        velocity.y += knockbackVel.y / 4;
-        // shootTime = projMap[projType].reloadTime;
-    }
+    // TODO: remove
+    // function shoot () {
+    //     // MD: 250
+    //     final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 250);
+    //     scene.generateProjectile(this, aimerDegree);
+    //     // TODO: remove knockback?
+    //     velocity.x += knockbackVel.x;
+    //     velocity.y += knockbackVel.y / 4;
+    //     // shootTime = projMap[projType].reloadTime;
+    // }
 
     function dash () {
-        final dashVel = FlxVelocity.velocityFromAngle(aimerDegree, DASH_VELOCITY);
+        final dashVel = FlxVelocity.velocityFromAngle(aimerDegree, scene.skills.dashVel);
         velocity.set(dashVel.x, dashVel.y);
         acceleration.set(0, 0);
         drag.set(0, 0);
         maxVelocity.set(0, 0);
-        dashTime = DASH_START_TIME;
+        dashTime = scene.skills.dashTime;
         dashing = true;
         trail = new FlxTrail(this, null, 10, 2, 0.5);
         scene.add(trail);
+        elasticity = 1;
+        dashes++;
     }
 
     public function stopDash () {
         dashing = false;
         velocity.set(velocity.x, velocity.y / 4);
-        maxVelocity.set(MAX_VELOCITY.x, MAX_VELOCITY.y);
+        maxVelocity.set(scene.skills.xVel, scene.skills.yVel);
         colorTransform = new ColorTransform();
         if (trail != null) {
             scene.remove(trail);
             trail.destroy();
             trail = null;
         }
+        postDashTime = POST_DASH_TIME;
+        elasticity = 0;
     }
 
     // checks inputs and updates state.
@@ -277,16 +291,16 @@ class Player extends FlxSprite {
         midPoint.y -= 4;
         aimerDegree = angleBetweenMouse(midPoint, 2, true);
 
-        var dashing = false;
-        if (FlxG.mouse.justPressedRight || FlxG.mouse.justPressed && FlxG.keys.pressed.CONTROL) {
+        if (FlxG.mouse.justPressed || FlxG.mouse.justPressedRight) {
             dashPressedTime = 0;
-            dashing = true;
         }
 
-        if (FlxG.mouse.pressed && !dashing && lastShotTime < 0) {
-            shoot();
-            lastShotTime = reloadTime;
-        }
+        // disabled for now?
+        // TODO: remove
+        // if (FlxG.mouse.pressed && !dashing && lastShotTime < 0) {
+        //     shoot();
+        //     lastShotTime = reloadTime;
+        // }
 
         // if jump is just pressed, we set the buffer time to 0
         if (FlxG.keys.anyJustPressed([UP, W, SPACE])) {

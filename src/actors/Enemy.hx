@@ -78,12 +78,12 @@ class Enemy extends FlxSprite {
         dead = true;
         acceleration.set(0, 0);
         velocity.set(0, 0);
-        FlxTween.tween(this, { 'scale.x': 0.0 }, 0.25, { ease: FlxEase.backIn });
+        FlxTween.tween(this, { 'scale.x': 0.0 }, 0.2, { ease: FlxEase.backIn });
         FlxTween.tween(
             this,
             { 'scale.y': 2 },
-            0.17,
-            { ease: FlxEase.quintIn, startDelay: 0.08 }
+            0.14,
+            { ease: FlxEase.quintIn, startDelay: 0.06 }
         );
         scene.enemyDie();
     }
