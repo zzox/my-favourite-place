@@ -9,6 +9,7 @@ import flixel.math.FlxPoint;
 import flixel.math.FlxVelocity;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
 import openfl.geom.ColorTransform;
 import util.Snapper;
 import util.Utils;
@@ -25,10 +26,10 @@ class Player extends FlxSprite {
     static inline final JUMP_START_TIME:Float = 0.15;
     static inline final JUMP_BUFFER:Float = 0.075;
     static inline final HANG_START_TIME:Float = 0.08;
-    static inline final AIR_TIME_BUFFER:Float = 0.1;
+    static inline final AIR_TIME_BUFFER:Float = 0.05;
     static inline final POST_DASH_TIME:Float = 0.05;
 
-    static inline final DASH_BUFFER:Float = 0.1;
+    static inline final DASH_BUFFER:Float = 0.05;
 
     var scene:PlayState;
     var holds:HoldsObj = {
@@ -117,6 +118,9 @@ class Player extends FlxSprite {
         if (dashing) {
             colorTransform = new ColorTransform();
             colorTransform.color = FLASH_COLORS[Math.floor(dashTime / 0.01) % FLASH_COLORS.length];
+
+            trail.colorTransform = new ColorTransform();
+            trail.colorTransform.color = FLASH_COLORS[Math.floor(dashTime / 0.01) % FLASH_COLORS.length];
 
             if (dashTime <= 0.0) {
                 stopDash();
@@ -338,12 +342,14 @@ class Player extends FlxSprite {
         animation.pause();
         acceleration.set(0, 0);
         velocity.set(0, 0);
-        FlxTween.tween(this, { 'scale.x': 0.0 }, 0.5, { ease: FlxEase.backIn });
-        FlxTween.tween(
-            this,
-            { 'scale.y': 2 },
-            0.33,
-            { ease: FlxEase.quintIn, startDelay: 0.17 }
-        );
+        new FlxTimer().start(0.25, (_:FlxTimer) -> {
+            FlxTween.tween(this, { 'scale.x': 0.0 }, 0.25, { ease: FlxEase.backIn });
+            FlxTween.tween(
+                this,
+                { 'scale.y': 2 },
+                0.17,
+                { ease: FlxEase.quintIn, startDelay: 0.08 }
+            );
+        });
     }
 }

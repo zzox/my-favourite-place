@@ -2,6 +2,7 @@ import actors.Enemy;
 import actors.Player;
 import data.Constants;
 import data.Levels;
+import display.Button;
 import display.CrtShader;
 import display.Font;
 import flixel.FlxG;
@@ -49,9 +50,11 @@ typedef PlayerSkills = {
 class PlayState extends FlxState {
     static inline final BULLET_POOL_SIZE:Int = 100;
     static inline final ROOM_HEIGHT:Int = 96;
+    static inline final CAMERA_DIFF:Int = 2000;
+    static inline final CAMERA_START_DIFF:Int = -90;
 
     public var skills:PlayerSkills;
-    var currentRoom:Int = 0;
+    var currentRoom:Int;
     var rooms:Array<Room> = [];
 
     var player:Player;
@@ -67,7 +70,7 @@ class PlayState extends FlxState {
     var cameraYScale:Float = 0;
 
     var numEnemiesKilled:Int = 0;
-    public var transitioning:Bool = false;
+    public var transitioning:Bool = true;
 
     // TEMP:
     final SHOOT_VEL = 250;
@@ -88,12 +91,262 @@ class PlayState extends FlxState {
             dashVel: 250.0
         }
 
-        final world = new LdtkWorld(AssetPaths.world1__ldtk);
-
         final bg = new FlxSprite(0, 0);
         bg.makeGraphic(160, 90, 0xffffe9c5);
         bg.scrollFactor.set(0, 0);
         add(bg);
+
+        crtShader = new CrtShader();
+        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+
+        camera.setScale(0, 0);
+        FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
+        FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
+
+        // MD;
+        camera.scroll.y = CAMERA_START_DIFF;
+        new FlxTimer().start(0.75, (_:FlxTimer) -> {
+            createWorld();
+
+            FlxTween.tween(
+                camera,
+                { 'scroll.x': screenPoint.x, 'scroll.y': screenPoint.y },
+                0.5,
+                { ease: FlxEase.quadInOut,
+                    onComplete: (_:FlxTween) -> {
+                        transitioning = false;
+                    }
+                }
+            );
+            setBounds();
+        });
+    }
+
+    override public function update(elapsed:Float) {
+        positionAimer();
+        super.update(elapsed);
+
+        if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
+            // TODO: this needs to be sized to the game and centered, not scale.
+            camera.setScale(cameraXScale, cameraYScale);
+        }
+
+        if (FlxG.keys.justPressed.P) {
+            if (crtShader == null) {
+                crtShader = new CrtShader();
+                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+            } else {
+                crtShader = null;
+                FlxG.camera.setFilters([]);
+            }
+        }
+
+        if (currentRoom == null) {
+            return;
+        }
+
+        FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].downPlugs, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].upPlugs, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
+        FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
+        FlxG.overlap(enemies, player, enemyHitPlayer);
+
+        if (player.y + player.height > screenPoint.y + 90) {
+            moveRoom();
+        }
+    }
+
+    function updateSkills (skill:Choices) {
+        switch (skill) {
+            case Faster: skills.xVel += 45;
+            case Higher: skills.jumpVel += 45;
+            case LongerDash: skills.dashTime += 0.0625;
+            case FasterDash: skills.dashVel += 125;
+            case PlusOneDash: skills.dashes++;
+            case PlusOneJump: skills.jumps++;
+            case MinusOneDash: skills.dashes--;
+            case MinusOneJump: skills.jumps--;
+        }
+    }
+
+    function playerCollideGround (_:FlxTilemap, player:Player) {
+        if (player.dashing) {
+            FlxG.camera.shake(0.01, 0.05);
+        }
+    }
+
+    function collideSpikes (spikes:NamedMap, player:Player) {
+        if (!player.dead && (
+            (player.isTouching(FlxObject.DOWN) && !player.isTouching(FlxObject.LEFT) &&
+            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
+            // TODO: handle ^^^ for all other directions
+            (player.isTouching(FlxObject.UP) && spikes.name == 'Spikes_down') ||
+            (player.isTouching(FlxObject.LEFT) && spikes.name == 'Spikes_down') ||
+            (player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
+            loseLevel();
+        }
+    }
+
+    function projHitGroud (_:FlxTilemap, proj:Projectile) {
+        final midpoint = proj.getMidpoint();
+        generateExplosion(midpoint.x, midpoint.y, 'pop');
+        proj.kill();
+    }
+
+    function old_projHitEnemy (proj:Projectile, enemy:Enemy) {
+        if (!enemy.dead) {
+            final midpoint = proj.getMidpoint();
+            generateExplosion(midpoint.x, midpoint.y, 'pop');
+            proj.kill();
+            enemy.hit();
+        }
+    }
+
+    function enemyHitPlayer (enemy:Enemy, player:Player) {
+        if (!enemy.dead && !player.dead) {
+            if (player.dashing || player.postDashTime > 0) {
+                enemy.hit();
+                FlxG.camera.shake(0.01, 0.05);
+                if (player.postDashTime > 0) {
+                    trace('here!!!!!!');
+                }
+            } else {
+                loseLevel();
+                FlxG.camera.shake(0.001, 0.5);
+            }
+        }
+    }
+
+    public function enemyDie () {
+        numEnemiesKilled++;
+        if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
+            generateExplosion(48, screenPoint.y + 84, 'warn');
+            generateExplosion(112, screenPoint.y + 84, 'warn');
+            new FlxTimer().start(1, (_:FlxTimer) -> {
+                rooms[currentRoom].downPlugs.destroy();
+            });
+            rooms[currentRoom].choiceItems.visible = true;
+        }
+    }
+
+    function loseLevel () {
+        player.die();
+        final midpoint = player.getMidpoint();
+        generateExplosion(midpoint.x, midpoint.y, 'pop');
+        final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
+        createMenu(yPos);
+        FlxTween.tween(
+            camera,
+            { 'scroll.y': yPos },
+            1,
+            { ease: FlxEase.quadInOut, startDelay: 0.5 }
+        );
+    }
+
+    function moveRoom () {
+        if (player.x < 90) {
+            updateSkills(levels[currentRoom].choices[0]);
+        } else {
+            updateSkills(levels[currentRoom].choices[1]);
+        }
+
+        transitioning = true;
+        player.stopDash();
+
+        screenPoint.y += ROOM_HEIGHT;
+        currentRoom++;
+
+        FlxTween.tween(player, { y: player.y + 32 }, 0.5);
+        FlxTween.tween(
+            camera.scroll,
+            { y: screenPoint.y },
+            0.5,
+            { ease: FlxEase.circInOut, onComplete: (_:FlxTween) -> finishMovingRoom() }
+        );
+    }
+
+    function finishMovingRoom () {
+        transitioning = false;
+        setBounds();
+        numEnemiesKilled = 0;
+        for (enemy in rooms[currentRoom].enemies) {
+            enemy.active = true;
+        }
+        rooms[currentRoom].upPlugs.visible = true;
+    }
+
+    // TODO: remove
+    public function old_generateProjectile (owner:FlxSprite, angle:Float) {
+        final proj = projectiles.getFirstAvailable();
+        final point = owner.getMidpoint();
+        proj.shoot(point.x - 1, point.y - 4, angle, SHOOT_VEL);
+    }
+
+    public function generateExplosion (x:Float, y:Float, anim:String) {
+        final expl = explosions.getFirstAvailable();
+        expl.play(x, y, anim);
+    }
+
+    function positionAimer () {
+        if (aimer != null) {
+            aimer.x = FlxG.camera.scroll.x + FlxG.mouse.screenX;
+            aimer.y = FlxG.camera.scroll.y + FlxG.mouse.screenY;
+        }
+    }
+
+    function createTileLayer (world:LdtkWorld, levelName:String, layerName:String, offset:IntPoint):Null<NamedMap> {
+        final layerData = world.levels[levelName][layerName];
+        if (layerData != null) {
+            final layer = new NamedMap(layerName);
+            layer.loadMapFromArray(layerData.tileArray, layerData.width, layerData.height,
+                AssetPaths.tiles__png, layerData.tileSize, layerData.tileSize, FlxTilemapAutoTiling.OFF, 1, 1, 1)
+                .setPosition(offset.x, offset.y);
+
+            layer.useScaleHack = false;
+            add(layer);
+
+            return layer;
+        }
+        return null;
+    }
+
+    function setBounds () {
+        // TEMP: static
+        FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
+    }
+
+    function createMenu (yPos:Int) {
+        // space for title
+        // fade out if clicked
+        add(new Button(63, yPos + 50, Retry, () -> {
+            fadeOut(() -> {
+                FlxG.switchState(new PlayState());
+            });
+        }));
+        add(new Button(63, yPos + 66, Quit, () -> {
+            fadeOut(() -> {
+                FlxG.switchState(new PlayState());
+            });
+        }));
+    }
+
+    function fadeOut (callback:Void -> Void) {
+        FlxTween.tween(this, { cameraXScale: 0 }, 0.75, { ease: FlxEase.circIn, onComplete:
+            (_:FlxTween) -> {
+                callback();
+            }
+        });
+        FlxTween.tween(this, { cameraYScale: 0 }, 0.5, { ease: FlxEase.quintIn, onComplete:
+            (_:FlxTween) -> {
+                callback();
+            }
+        });
+    }
+
+    function createWorld () {
+        final world = new LdtkWorld(AssetPaths.world1__ldtk);
+        currentRoom = 0;
 
         enemies = new FlxTypedGroup<Enemy>();
 
@@ -205,203 +458,5 @@ class PlayState extends FlxState {
         aimer.setSize(1, 1);
         add(aimer);
         positionAimer();
-
-        camera.scroll.x = screenPoint.x;
-        camera.scroll.y = screenPoint.y;
-        setBounds();
-
-        crtShader = new CrtShader();
-        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
-
-        camera.setScale(0, 0);
-        FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
-        FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
-    }
-
-    override public function update(elapsed:Float) {
-        positionAimer();
-        super.update(elapsed);
-
-        FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
-        FlxG.collide(rooms[currentRoom].downPlugs, player, playerCollideGround);
-        FlxG.collide(rooms[currentRoom].upPlugs, player, playerCollideGround);
-        FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
-        FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
-        FlxG.overlap(enemies, player, enemyHitPlayer);
-        FlxG.overlap(projectiles, enemies, projHitEnemy);
-
-        if (player.y + player.height > screenPoint.y + 90) {
-            moveRoom();
-        }
-
-        if (camera.scaleX != 1.0 || camera.scaleY != 1.0) {
-            // TODO: this needs to be sized to the game and centered, not scale.
-            camera.setScale(cameraXScale, cameraYScale);
-        }
-
-        if (FlxG.keys.justPressed.P) {
-            if (crtShader == null) {
-                crtShader = new CrtShader();
-                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
-            } else {
-                crtShader = null;
-                FlxG.camera.setFilters([]);
-            }
-        }
-    }
-
-    function updateSkills (skill:Choices) {
-        switch (skill) {
-            case Faster: skills.xVel += 45;
-            case Higher: skills.jumpVel += 45;
-            case LongerDash: skills.dashTime += 0.0625;
-            case FasterDash: skills.dashVel += 125;
-            case PlusOneDash: skills.dashes++;
-            case PlusOneJump: skills.jumps++;
-            case MinusOneDash: skills.dashes--;
-            case MinusOneJump: skills.jumps--;
-        }
-    }
-
-    function playerCollideGround (_:FlxTilemap, player:Player) {
-        if (player.dashing) {
-            FlxG.camera.shake(0.01, 0.05);
-        }
-    }
-
-    function collideSpikes (spikes:NamedMap, player:Player) {
-        if (!player.dead && ((player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_up') ||
-            (player.isTouching(FlxObject.UP) && spikes.name == 'Spikes_down') ||
-            (player.isTouching(FlxObject.LEFT) && spikes.name == 'Spikes_down') ||
-            (player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
-            loseLevel();
-        }
-    }
-
-    function projHitGroud (_:FlxTilemap, proj:Projectile) {
-        final midpoint = proj.getMidpoint();
-        generateExplosion(midpoint.x, midpoint.y, 'pop');
-        proj.kill();
-    }
-
-    function projHitEnemy (proj:Projectile, enemy:Enemy) {
-        if (!enemy.dead) {
-            final midpoint = proj.getMidpoint();
-            generateExplosion(midpoint.x, midpoint.y, 'pop');
-            proj.kill();
-            enemy.hit();
-        }
-    }
-
-    function enemyHitPlayer (enemy:Enemy, player:Player) {
-        if (!enemy.dead && !player.dead) {
-            if (player.dashing || player.postDashTime > 0) {
-                enemy.hit();
-                FlxG.camera.shake(0.01, 0.05);
-                if (player.postDashTime > 0) {
-                    trace('here!!!!!!');
-                }
-            } else {
-                loseLevel();
-                FlxG.camera.shake(0.001, 0.5);
-            }
-        }
-    }
-
-    public function enemyDie () {
-        numEnemiesKilled++;
-        if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
-            generateExplosion(48, screenPoint.y + 84, 'warn');
-            generateExplosion(112, screenPoint.y + 84, 'warn');
-            new FlxTimer().start(1, (_:FlxTimer) -> {
-                rooms[currentRoom].downPlugs.destroy();
-            });
-            rooms[currentRoom].choiceItems.visible = true;
-        }
-    }
-
-    function loseLevel () {
-        player.die();
-        // TODO: scroll up all the way and show results.
-        FlxTween.tween(
-            camera,
-            { 'scroll.y': camera.scroll.y - 100 },
-            1,
-            { ease: FlxEase.quintIn, onComplete:
-                (_:FlxTween) -> {
-                    FlxG.switchState(new PlayState());
-                }
-            }
-        );
-    }
-
-    function moveRoom () {
-        if (player.x < 90) {
-            updateSkills(levels[currentRoom].choices[0]);
-        } else {
-            updateSkills(levels[currentRoom].choices[1]);
-        }
-
-        transitioning = true;
-        player.stopDash();
-
-        screenPoint.y += ROOM_HEIGHT;
-        currentRoom++;
-
-        FlxTween.tween(player, { y: player.y + 32 }, 0.5);
-        FlxTween.tween(
-            camera.scroll,
-            { y: screenPoint.y },
-            0.5,
-            { ease: FlxEase.circInOut, onComplete: (_:FlxTween) -> finishMovingRoom() }
-        );
-    }
-
-    function finishMovingRoom () {
-        transitioning = false;
-        setBounds();
-        numEnemiesKilled = 0;
-        for (enemy in rooms[currentRoom].enemies) {
-            enemy.active = true;
-        }
-        rooms[currentRoom].upPlugs.visible = true;
-    }
-
-    // TODO: remove
-    public function old_generateProjectile (owner:FlxSprite, angle:Float) {
-        final proj = projectiles.getFirstAvailable();
-        final point = owner.getMidpoint();
-        proj.shoot(point.x - 1, point.y - 4, angle, SHOOT_VEL);
-    }
-
-    public function generateExplosion (x:Float, y:Float, anim:String) {
-        final expl = explosions.getFirstAvailable();
-        expl.play(x, y, anim);
-    }
-
-    function positionAimer () {
-        aimer.x = FlxG.camera.scroll.x + FlxG.mouse.screenX;
-        aimer.y = FlxG.camera.scroll.y + FlxG.mouse.screenY;
-    }
-
-    function createTileLayer (world:LdtkWorld, levelName:String, layerName:String, offset:IntPoint):Null<NamedMap> {
-        final layerData = world.levels[levelName][layerName];
-        if (layerData != null) {
-            final layer = new NamedMap(layerName);
-            layer.loadMapFromArray(layerData.tileArray, layerData.width, layerData.height,
-                AssetPaths.tiles__png, layerData.tileSize, layerData.tileSize, FlxTilemapAutoTiling.OFF, 1, 1, 1)
-                .setPosition(offset.x, offset.y);
-
-            layer.useScaleHack = false;
-            add(layer);
-
-            return layer;
-        }
-        return null;
-    }
-
-    function setBounds () {
-        // TEMP: static
-        FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
     }
 }

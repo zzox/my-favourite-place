@@ -63,7 +63,7 @@ final levels:Array<LevelData> = [{
         pos: { x: -32, y: 24 },
         vel: { x: 120, y: 0 }
     }],
-    choices: [Faster, Higher]
+    choices: [PlusOneJump, PlusOneDash]
 }, {
     enemies: [{
         type: Saucer,
@@ -74,7 +74,7 @@ final levels:Array<LevelData> = [{
         pos: { x: -32, y: 24 },
         vel: { x: 120, y: 0 }
     }],
-    choices: [Faster, Higher]
+    choices: [LongerDash, FasterDash]
 }, {
     enemies: [{
         type: Saucer,
@@ -85,7 +85,7 @@ final levels:Array<LevelData> = [{
         pos: { x: -32, y: 24 },
         vel: { x: 120, y: 0 }
     }],
-    choices: [Faster, Higher]
+    choices: [PlusOneJump, PlusOneDash]
 }, {
     enemies: [{
         type: Saucer,
@@ -96,5 +96,5 @@ final levels:Array<LevelData> = [{
         pos: { x: -32, y: 24 },
         vel: { x: 120, y: 0 }
     }],
-    choices: [Faster, Higher]
+    choices: [MinusOneJump, MinusOneDash]
 }];
