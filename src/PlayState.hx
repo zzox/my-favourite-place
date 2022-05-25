@@ -1,5 +1,6 @@
 import actors.Enemy;
 import actors.Player;
+import actors.SpritesGroup;
 import data.Constants;
 import data.Levels;
 import display.Button;
@@ -62,12 +63,14 @@ class PlayState extends FlxState {
     var projectiles:FlxTypedGroup<Projectile>;
     var explosions:FlxTypedGroup<Explosion>;
     var aimer:FlxSprite;
+    var spritesGroup:SpritesGroup;
 
     var crtShader:CrtShader;
     var screenPoint:IntPoint;
 
-    var cameraXScale:Float = 0;
-    var cameraYScale:Float = 0;
+    var cameraXScale:Float = 0.0;
+    var cameraYScale:Float = 0.0;
+    var stoppedFrames:Int = 0;
 
     var numEnemiesKilled:Int = 0;
     public var transitioning:Bool = true;
@@ -95,6 +98,8 @@ class PlayState extends FlxState {
         bg.makeGraphic(160, 90, 0xffffe9c5);
         bg.scrollFactor.set(0, 0);
         add(bg);
+
+        spritesGroup = new SpritesGroup();
 
         crtShader = new CrtShader();
         FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
@@ -125,6 +130,11 @@ class PlayState extends FlxState {
     override public function update(elapsed:Float) {
         positionAimer();
         super.update(elapsed);
+
+        // TODO: add other moving Flx items to `spritesGroup`
+        if (--stoppedFrames < 0) {
+            spritesGroup.updateParent(elapsed);
+        }
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
             // TODO: this needs to be sized to the game and centered, not scale.
@@ -173,6 +183,7 @@ class PlayState extends FlxState {
     function playerCollideGround (_:FlxTilemap, player:Player) {
         if (player.dashing) {
             FlxG.camera.shake(0.01, 0.05);
+            stoppedFrames = 3;
         }
     }
 
@@ -207,6 +218,7 @@ class PlayState extends FlxState {
         if (!enemy.dead && !player.dead) {
             if (player.dashing || player.postDashTime > 0) {
                 enemy.hit();
+                stoppedFrames = 10;
                 FlxG.camera.shake(0.01, 0.05);
                 if (player.postDashTime > 0) {
                     trace('here!!!!!!');
@@ -231,6 +243,7 @@ class PlayState extends FlxState {
     }
 
     function loseLevel () {
+        stoppedFrames = 30;
         player.die();
         final midpoint = player.getMidpoint();
         generateExplosion(midpoint.x, midpoint.y, 'pop');
@@ -430,10 +443,10 @@ class PlayState extends FlxState {
             point.y += ROOM_HEIGHT;
         }
 
-        add(enemies);
+        spritesGroup.add(enemies);
 
         player = new Player(25, 25, this);
-        add(player);
+        spritesGroup.add(player);
 
         projectiles = new FlxTypedGroup<Projectile>(BULLET_POOL_SIZE);
         for (_ in 0...BULLET_POOL_SIZE) {
@@ -441,7 +454,7 @@ class PlayState extends FlxState {
             proj.kill();
             projectiles.add(proj);
         }
-        add(projectiles);
+        spritesGroup.add(projectiles);
 
         explosions = new FlxTypedGroup<Explosion>(BULLET_POOL_SIZE);
         for (_ in 0...BULLET_POOL_SIZE) {
@@ -449,7 +462,9 @@ class PlayState extends FlxState {
             expl.kill();
             explosions.add(expl);
         }
-        add(explosions);
+        spritesGroup.add(explosions);
+
+        add(spritesGroup);
 
         screenPoint = { x: 0, y: GLOBAL_Y_OFFSET };
 
