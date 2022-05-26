@@ -25,8 +25,8 @@ class PreState extends FlxState {
         // FlxG.sound.muteKeys = null;
         // FlxG.sound.volumeUpKeys = null;
         // FlxG.sound.volumeDownKeys = null;
+        // camera.pixelPerfectRender = true;
 
-        camera.pixelPerfectRender = true;
         FlxG.scaleMode = new PixelPerfectScaleMode();
 
         bgColor = 0xff000000;

@@ -81,9 +81,6 @@ class PlayState extends FlxState {
     override public function create() {
         super.create();
 
-        // TODO: doesn't look great, turn on later?
-        // camera.pixelPerfectRender = true;
-
         skills = {
             xVel: 90.0,
             yVel: 180.0,
@@ -137,7 +134,6 @@ class PlayState extends FlxState {
         }
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
-            // TODO: this needs to be sized to the game and centered, not scale.
             camera.setScale(cameraXScale, cameraYScale);
         }
 
@@ -289,13 +285,6 @@ class PlayState extends FlxState {
         rooms[currentRoom].upPlugs.visible = true;
     }
 
-    // TODO: remove
-    public function old_generateProjectile (owner:FlxSprite, angle:Float) {
-        final proj = projectiles.getFirstAvailable();
-        final point = owner.getMidpoint();
-        proj.shoot(point.x - 1, point.y - 4, angle, SHOOT_VEL);
-    }
-
     public function generateExplosion (x:Float, y:Float, anim:String) {
         final expl = explosions.getFirstAvailable();
         expl.play(x, y, anim);
@@ -365,7 +354,6 @@ class PlayState extends FlxState {
 
         var point = { x: 0, y: 0 };
         for (i in 0...7) {
-            // TODO: shuffle rooms
             final roomData = levels[i];
 
             final spikes = new FlxTypedGroup<NamedMap>();

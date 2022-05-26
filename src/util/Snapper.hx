@@ -9,9 +9,6 @@ enum SnapperState {
     Pushed;
     Pulled;
 }
-// TODO: better name?
-// tweener?
-// slider?
 
 // used to move tween between two different values without duplicating tweens
 class Snapper {

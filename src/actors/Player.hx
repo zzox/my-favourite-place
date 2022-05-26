@@ -216,17 +216,6 @@ class Player extends FlxSprite {
         super.update(elapsed);
     }
 
-    // TODO: remove
-    // function shoot () {
-    //     // MD: 250
-    //     final knockbackVel = FlxVelocity.velocityFromAngle(aimerDegree + 180, 250);
-    //     scene.generateProjectile(this, aimerDegree);
-    //     // TODO: remove knockback?
-    //     velocity.x += knockbackVel.x;
-    //     velocity.y += knockbackVel.y / 4;
-    //     // shootTime = projMap[projType].reloadTime;
-    // }
-
     function dash () {
         final dashVel = FlxVelocity.velocityFromAngle(aimerDegree, scene.skills.dashVel);
         velocity.set(dashVel.x, dashVel.y);
@@ -298,13 +287,6 @@ class Player extends FlxSprite {
         if (FlxG.mouse.justPressed || FlxG.mouse.justPressedRight) {
             dashPressedTime = 0;
         }
-
-        // disabled for now?
-        // TODO: remove
-        // if (FlxG.mouse.pressed && !dashing && lastShotTime < 0) {
-        //     shoot();
-        //     lastShotTime = reloadTime;
-        // }
 
         // if jump is just pressed, we set the buffer time to 0
         if (FlxG.keys.anyJustPressed([UP, W, SPACE])) {
