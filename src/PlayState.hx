@@ -20,6 +20,7 @@ import objects.Explosion;
 import objects.Projectile;
 import openfl.filters.ShaderFilter;
 import util.LdtkWorld;
+import util.Utils;
 
 class NamedMap extends FlxTilemap {
     public var name:Null<String>;
@@ -30,12 +31,13 @@ class NamedMap extends FlxTilemap {
 }
 
 typedef Room = {
+    var point:IntPoint;
     var collide:FlxTilemap;
-    var downPlugs:FlxTilemap;
-    var upPlugs:FlxTilemap;
+    var inPlugs:FlxTilemap;
+    var outPlugs:FlxTilemap;
     var spikes:FlxTypedGroup<NamedMap>;
     var enemies:Array<Enemy>;
-    var choiceItems:FlxGroup;
+    var ?powerupItems:FlxGroup;
 }
 
 typedef PlayerSkills = {
@@ -55,6 +57,7 @@ class PlayState extends FlxState {
     static inline final CAMERA_START_DIFF:Int = -90;
 
     public var skills:PlayerSkills;
+    var currentWorld:Worlds;
     var currentRoom:Int;
     var rooms:Array<Room> = [];
 
@@ -81,6 +84,9 @@ class PlayState extends FlxState {
     override public function create() {
         super.create();
 
+        currentWorld = LDown;
+
+        // TODO: reduce these to what's necessary
         skills = {
             xVel: 90.0,
             yVel: 180.0,
@@ -92,7 +98,7 @@ class PlayState extends FlxState {
         }
 
         final bg = new FlxSprite(0, 0);
-        bg.makeGraphic(160, 90, 0xffffe9c5);
+        bg.makeGraphic(160, 90, worldData[currentWorld].bgColor);
         bg.scrollFactor.set(0, 0);
         add(bg);
 
@@ -152,18 +158,16 @@ class PlayState extends FlxState {
         }
 
         FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
-        FlxG.collide(rooms[currentRoom].downPlugs, player, playerCollideGround);
-        FlxG.collide(rooms[currentRoom].upPlugs, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].inPlugs, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].outPlugs, player, playerCollideGround);
         FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
         FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
         FlxG.overlap(enemies, player, enemyHitPlayer);
 
-        if (player.y + player.height > screenPoint.y + 90) {
-            moveRoom();
-        }
+        checkRooms();
     }
 
-    function updateSkills (skill:Choices) {
+    function doPowerup (skill:Powerups) {
         switch (skill) {
             case Faster: skills.xVel += 45;
             case Higher: skills.jumpVel += 45;
@@ -232,9 +236,11 @@ class PlayState extends FlxState {
             generateExplosion(48, screenPoint.y + 84, 'warn');
             generateExplosion(112, screenPoint.y + 84, 'warn');
             new FlxTimer().start(1, (_:FlxTimer) -> {
-                rooms[currentRoom].downPlugs.destroy();
+                rooms[currentRoom].outPlugs.destroy();
             });
-            rooms[currentRoom].choiceItems.visible = true;
+            if (rooms[currentRoom].powerupItems != null) {
+                rooms[currentRoom].powerupItems.visible = true;
+            }
         }
     }
 
@@ -247,32 +253,71 @@ class PlayState extends FlxState {
         createMenu(yPos);
         FlxTween.tween(
             camera,
-            { 'scroll.y': yPos },
+            {  'scroll.y': yPos },
             1,
             { ease: FlxEase.quadInOut, startDelay: 0.5 }
         );
     }
 
-    function moveRoom () {
-        if (player.x < 90) {
-            updateSkills(levels[currentRoom].choices[0]);
-        } else {
-            updateSkills(levels[currentRoom].choices[1]);
+    // ugly - returns prevent multiple room moves
+    function checkRooms () {
+        if (transitioning) return;
+
+        if (player.x < screenPoint.x) {
+            moveRoom(Left);
+            return;
         }
+
+        if (player.x + player.width > screenPoint.x + 160) {
+            moveRoom(Right);
+            return;
+        }
+
+        if (player.y < screenPoint.y) {
+            moveRoom(Up);
+            return;
+        }
+
+        if (player.y + player.height > screenPoint.y + 90) {
+            moveRoom(Down);
+        }
+    }
+
+    function moveRoom (dir:Dir) {
+        // if (player.x < 90) {
+        //     updateSkills(levels[currentRoom].choices[0]);
+        // } else {
+        //     updateSkills(levels[currentRoom].choices[1]);
+        // }
 
         transitioning = true;
         player.stopDash();
+        currentRoom = worldData[currentWorld].levels[currentRoom].exits[dir];
+        final newPoint = rooms[currentRoom].point;
 
-        screenPoint.y += ROOM_HEIGHT;
-        currentRoom++;
+        screenPoint = { x: newPoint.x, y: newPoint.y + GLOBAL_Y_OFFSET };
 
-        FlxTween.tween(player, { y: player.y + 32 }, 0.5);
+        movePlayer(dir);
         FlxTween.tween(
             camera.scroll,
-            { y: screenPoint.y },
+            { x: screenPoint.x, y: screenPoint.y },
             0.5,
             { ease: FlxEase.circInOut, onComplete: (_:FlxTween) -> finishMovingRoom() }
         );
+    }
+
+    function movePlayer (dir:Dir) {
+        final newX = player.x;
+        final newY = player.y;
+
+        switch (dir) {
+            case Left: newX -= 16;
+            case Right: newX += 16;
+            case Up: newY -= 32;
+            case Down: newY += 32;
+        }
+
+        FlxTween.tween(player, { x: newX, y: newY }, 0.5);
     }
 
     function finishMovingRoom () {
@@ -282,7 +327,7 @@ class PlayState extends FlxState {
         for (enemy in rooms[currentRoom].enemies) {
             enemy.active = true;
         }
-        rooms[currentRoom].upPlugs.visible = true;
+        rooms[currentRoom].inPlugs.visible = true;
     }
 
     public function generateExplosion (x:Float, y:Float, anim:String) {
@@ -298,7 +343,7 @@ class PlayState extends FlxState {
     }
 
     function createTileLayer (world:LdtkWorld, levelName:String, layerName:String, offset:IntPoint):Null<NamedMap> {
-        final layerData = world.levels[levelName][layerName];
+        final layerData = world.levels[levelName].layers[layerName];
         if (layerData != null) {
             final layer = new NamedMap(layerName);
             layer.loadMapFromArray(layerData.tileArray, layerData.width, layerData.height,
@@ -321,12 +366,13 @@ class PlayState extends FlxState {
     function createMenu (yPos:Int) {
         // space for title
         // fade out if clicked
-        add(new Button(63, yPos + 50, Retry, () -> {
+        // TODO: make right and left?
+        add(new Button(Std.int(camera.scroll.x + 63), yPos + 50, Retry, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
         }));
-        add(new Button(63, yPos + 66, Quit, () -> {
+        add(new Button(Std.int(camera.scroll.x + 63), yPos + 66, Quit, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
@@ -347,37 +393,40 @@ class PlayState extends FlxState {
     }
 
     function createWorld () {
-        final world = new LdtkWorld(AssetPaths.world1__ldtk);
         currentRoom = 0;
+
+        final world = worldData[currentWorld];
+        final map = new LdtkWorld(world.path);
 
         enemies = new FlxTypedGroup<Enemy>();
 
-        var point = { x: 0, y: 0 };
-        for (i in 0...7) {
-            final roomData = levels[i];
+        for (i in 0...world.levels.length) {
+            final roomData = world.levels[i];
 
             final spikes = new FlxTypedGroup<NamedMap>();
 
-            final spikesUp = createTileLayer(world, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 4 });
+            final point = map.levels['Level_$i'].point;
+
+            final spikesUp = createTileLayer(map, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 4 });
             if (spikesUp != null) {
                 spikesUp.offset.set(0, 4);
                 spikes.add(spikesUp);
             }
 
-            final spikesDown = createTileLayer(world, 'Level_$i', 'Spikes_down', { x: point.x, y: point.y - 4 });
+            final spikesDown = createTileLayer(map, 'Level_$i', 'Spikes_down', { x: point.x, y: point.y - 4 });
             if (spikesDown != null) {
-                spikesDown.offset.set(0, 4);
+                spikesDown.offset.set(0, -4);
                 spikes.add(spikesDown);
             }
 
-            final collide = createTileLayer(world, 'Level_$i', 'Ground', point);
-            final downPlugs = createTileLayer(world, 'Level_$i', 'Plugs_down', point);
-            if (i == 0) {
-                downPlugs.destroy();
-            }
+            final collide = createTileLayer(map, 'Level_$i', 'Ground', point);
+            final inPlugs = createTileLayer(map, 'Level_$i', 'Plugs_in', point);
+            inPlugs.visible = false;
 
-            final upPlugs = createTileLayer(world, 'Level_$i', 'Plugs_up', point);
-            upPlugs.visible = false;
+            final outPlugs = createTileLayer(map, 'Level_$i', 'Plugs_out', point);
+            // if (i == 0) {
+                outPlugs.destroy();
+            // }
 
             final roomEnemies = [];
             if (roomData.enemies != null) {
@@ -394,41 +443,40 @@ class PlayState extends FlxState {
                 }
             }
 
-            final choiceItems = new FlxGroup();
+            // final choiceItems = new FlxGroup();
 
-            final textItem1 = makeText(
-                roomData.choices[0],
-                { x: 0, y: point.y + 62 }
-            );
-            textItem1.x = 40 - textItem1.width / 2;
+            // final textItem1 = makeText(
+            //     roomData.choices[0],
+            //     { x: 0, y: point.y + 62 }
+            // );
+            // textItem1.x = 40 - textItem1.width / 2;
 
-            final textItem2 = makeText(
-                roomData.choices[1],
-                { x: 80, y: point.y + 62 }
-            );
-            textItem2.x = 120 - textItem2.width / 2;
+            // final textItem2 = makeText(
+            //     roomData.choices[1],
+            //     { x: 80, y: point.y + 62 }
+            // );
+            // textItem2.x = 120 - textItem2.width / 2;
 
-            final arrowItem1 = new FlxSprite(40, point.y + 72, AssetPaths.down_arrow__png);
-            final arrowItem2 = new FlxSprite(104, point.y + 72, AssetPaths.down_arrow__png);
+            // final arrowItem1 = new FlxSprite(40, point.y + 72, AssetPaths.down_arrow__png);
+            // final arrowItem2 = new FlxSprite(104, point.y + 72, AssetPaths.down_arrow__png);
 
-            choiceItems.add(textItem1);
-            choiceItems.add(textItem2);
-            choiceItems.add(arrowItem1);
-            choiceItems.add(arrowItem2);
+            // choiceItems.add(textItem1);
+            // choiceItems.add(textItem2);
+            // choiceItems.add(arrowItem1);
+            // choiceItems.add(arrowItem2);
 
-            choiceItems.visible = i == 0;
-            add(choiceItems);
+            // choiceItems.visible = i == 0;
+            // add(choiceItems);
 
             rooms[i] = {
+                point: point,
                 collide: collide,
+                inPlugs: inPlugs,
+                outPlugs: outPlugs,
                 spikes: spikes,
                 enemies: roomEnemies,
-                upPlugs: upPlugs,
-                downPlugs: downPlugs,
-                choiceItems: choiceItems
+                // powerupItems: choiceItems
             };
-
-            point.y += ROOM_HEIGHT;
         }
 
         spritesGroup.add(enemies);

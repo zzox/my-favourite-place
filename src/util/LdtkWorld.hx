@@ -1,7 +1,13 @@
 package util;
 
+import data.Constants;
 import haxe.Json;
 import openfl.Assets;
+
+typedef LdtkLevel = {
+    var point:IntPoint;
+    var layers:Map<String, LdtkMap>;
+}
 
 typedef LdtkMap = {
     var tileArray:Array<Int>;
@@ -11,7 +17,7 @@ typedef LdtkMap = {
 }
 
 class LdtkWorld {
-    public var levels:Map<String, Map<String, LdtkMap>> = [];
+    public var levels:Map<String, LdtkLevel> = [];
 
     public function new (mapPath:String) {
         final json:Dynamic = Json.parse(Assets.getText(mapPath));
@@ -22,10 +28,13 @@ class LdtkWorld {
                 final tileArray = parseGridTiles(Std.int(width * height), layer.gridTiles);
 
                 if (levels[level.identifier] == null) {
-                    levels[level.identifier] = new Map(); // because `= [];` doesn't work
+                    levels[level.identifier] = {
+                        point: { x: level.worldX, y: level.worldY },
+                        layers: new Map()
+                    }
                 }
 
-                levels[level.identifier][layer.__identifier] = {
+                levels[level.identifier].layers[layer.__identifier] = {
                     tileArray: tileArray,
                     width: width,
                     height: height,
