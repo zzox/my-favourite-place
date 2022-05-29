@@ -10,7 +10,7 @@
 	},
 	"jsonVersion": "1.1.1",
 	"appBuildId": 458076,
-	"nextUid": 21,
+	"nextUid": 23,
 	"identifierStyle": "Capitalize",
 	"worldLayout": "Free",
 	"worldGridWidth": 256,
@@ -169,7 +169,36 @@
 			"tilePivotX": 0,
 			"tilePivotY": 0
 		}
-	], "entities": [], "tilesets": [
+	], "entities": [
+		{
+			"identifier": "Player_start",
+			"uid": 21,
+			"tags": [],
+			"width": 6,
+			"height": 12,
+			"resizableX": false,
+			"resizableY": false,
+			"keepAspectRatio": false,
+			"tileOpacity": 1,
+			"fillOpacity": 1,
+			"lineOpacity": 1,
+			"hollow": false,
+			"color": "#94D9B3",
+			"renderMode": "Rectangle",
+			"showName": true,
+			"tilesetId": null,
+			"tileId": null,
+			"tileRenderMode": "FitInside",
+			"tileRect": null,
+			"nineSliceBorders": [],
+			"maxCount": 0,
+			"limitScope": "PerLevel",
+			"limitBehavior": "MoveLastOne",
+			"pivotX": 0,
+			"pivotY": 0,
+			"fieldDefs": []
+		}
+	], "tilesets": [
 		{
 			"__cWid": 8,
 			"__cHei": 1,
@@ -385,12 +414,24 @@
 						{ "px": [0,32], "src": [0,0], "f": 0, "t": 0, "d": [80] },
 						{ "px": [152,32], "src": [0,0], "f": 0, "t": 0, "d": [99] },
 						{ "px": [0,40], "src": [0,0], "f": 0, "t": 0, "d": [100] },
+						{ "px": [64,40], "src": [0,0], "f": 0, "t": 0, "d": [108] },
+						{ "px": [72,40], "src": [0,0], "f": 0, "t": 0, "d": [109] },
+						{ "px": [80,40], "src": [0,0], "f": 0, "t": 0, "d": [110] },
+						{ "px": [88,40], "src": [0,0], "f": 0, "t": 0, "d": [111] },
 						{ "px": [152,40], "src": [0,0], "f": 0, "t": 0, "d": [119] },
 						{ "px": [0,48], "src": [0,0], "f": 0, "t": 0, "d": [120] },
 						{ "px": [152,48], "src": [0,0], "f": 0, "t": 0, "d": [139] },
 						{ "px": [0,56], "src": [0,0], "f": 0, "t": 0, "d": [140] },
 						{ "px": [152,56], "src": [0,0], "f": 0, "t": 0, "d": [159] },
 						{ "px": [0,64], "src": [0,0], "f": 0, "t": 0, "d": [160] },
+						{ "px": [16,64], "src": [0,0], "f": 0, "t": 0, "d": [162] },
+						{ "px": [24,64], "src": [0,0], "f": 0, "t": 0, "d": [163] },
+						{ "px": [32,64], "src": [0,0], "f": 0, "t": 0, "d": [164] },
+						{ "px": [40,64], "src": [0,0], "f": 0, "t": 0, "d": [165] },
+						{ "px": [112,64], "src": [0,0], "f": 0, "t": 0, "d": [174] },
+						{ "px": [120,64], "src": [0,0], "f": 0, "t": 0, "d": [175] },
+						{ "px": [128,64], "src": [0,0], "f": 0, "t": 0, "d": [176] },
+						{ "px": [136,64], "src": [0,0], "f": 0, "t": 0, "d": [177] },
 						{ "px": [152,64], "src": [0,0], "f": 0, "t": 0, "d": [179] },
 						{ "px": [0,72], "src": [0,0], "f": 0, "t": 0, "d": [180] },
 						{ "px": [152,72], "src": [0,0], "f": 0, "t": 0, "d": [199] },
@@ -698,6 +739,8 @@
 					"seed": 5129244,
 					"overrideTilesetUid": null,
 					"gridTiles": [
+						{ "px": [152,32], "src": [0,0], "f": 0, "t": 0, "d": [99] },
+						{ "px": [152,40], "src": [0,0], "f": 0, "t": 0, "d": [119] },
 						{ "px": [72,88], "src": [0,0], "f": 0, "t": 0, "d": [229] },
 						{ "px": [80,88], "src": [0,0], "f": 0, "t": 0, "d": [230] }
 					],
@@ -725,7 +768,12 @@
 					"autoLayerTiles": [],
 					"seed": 6636497,
 					"overrideTilesetUid": null,
-					"gridTiles": [],
+					"gridTiles": [
+						{ "px": [72,0], "src": [0,0], "f": 0, "t": 0, "d": [9] },
+						{ "px": [80,0], "src": [0,0], "f": 0, "t": 0, "d": [10] },
+						{ "px": [72,8], "src": [0,0], "f": 0, "t": 0, "d": [29] },
+						{ "px": [80,8], "src": [0,0], "f": 0, "t": 0, "d": [30] }
+					],
 					"entityInstances": []
 				},
 				{
