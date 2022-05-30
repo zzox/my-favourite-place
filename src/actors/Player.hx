@@ -26,10 +26,10 @@ class Player extends FlxSprite {
     static inline final JUMP_START_TIME:Float = 0.15;
     static inline final JUMP_BUFFER:Float = 0.075;
     static inline final HANG_START_TIME:Float = 0.08;
-    static inline final AIR_TIME_BUFFER:Float = 0.05;
+    static inline final AIR_TIME_BUFFER:Float = 0.1;
     static inline final POST_DASH_TIME:Float = 0.05;
 
-    static inline final DASH_BUFFER:Float = 0.05;
+    static inline final DASH_BUFFER:Float = 0.1;
 
     var scene:PlayState;
     var holds:HoldsObj = {
@@ -51,8 +51,8 @@ class Player extends FlxSprite {
     var reloadTime:Float = 0.5;
     var lastShotTime:Float = 0.0;
 
-    var dashes:Int = 0;
     var dashPressedTime:Float = DASH_BUFFER;
+    public var dashes:Int = 0;
     public var dashing:Bool = false;
     public var dashTime:Float = 0.0;
     public var postDashTime:Float = 0.0;

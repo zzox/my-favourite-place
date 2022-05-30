@@ -6,7 +6,7 @@ import flixel.math.FlxVelocity;
 class Projectile extends FlxSprite {
     public function new () {
         super(0, 0);
-        loadGraphic(AssetPaths.bullets__png, true, 16, 16);
+        // loadGraphic(AssetPaths.bullets__png, true, 16, 16);
         animation.add('small', [0]);
     }
 

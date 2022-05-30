@@ -39,14 +39,17 @@ typedef WorldData = {
 typedef LevelData = {
     var isOpen:Bool;
     var exits:Map<Dir, Int>;
+    var roomNumber:String;
     var ?enemies:Array<EnemyPlacement>;
     var ?powerup:Array<Powerups>;
 }
 
 final downLevels = [{
+    roomNumber: '0',
     isOpen: true,
     exits: [Down => 1]
 }, {
+    roomNumber: '1',
     isOpen: false,
     exits: [Down => 2],
     enemies: [{
@@ -59,36 +62,48 @@ final downLevels = [{
         vel: { x: 120, y: 0 }
     }]
 }, {
+    roomNumber: '2',
     isOpen: false,
     exits: [Down => 4, Right => 3],
     enemies: [{
         type: Gremlin,
-        pos: { x: 168, y: 64 },
+        pos: { x: 232, y: 24 },
         vel: { x: -120, y: 0 }
     }, {
         type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
+        pos: { x: 200, y: 48 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Gremlin,
+        pos: { x: 168, y: 72 },
+        vel: { x: -120, y: 0 }
     }]
 }, {
+    roomNumber: 'Bonus - 1',
     isOpen: true,
     exits: [Left => 2]
 }, {
-    isOpen: false,
+    roomNumber: '3',
+    isOpen: true,
     exits: [Down => 5]
 }, {
+    roomNumber: '4',
     isOpen: false,
     exits: [Down => 6]
 }, {
+    roomNumber: '5',
     isOpen: false,
     exits: [Down => 8, Right => 7]
 }, {
+    roomNumber: 'Bonus - 2',
     isOpen: false,
     exits: [Left => 6]
 }, {
+    roomNumber: '6',
     isOpen: false,
     exits: [Down => 9]
 }, {
+    roomNumber: '7',
     isOpen: false,
     exits: new Map()
 }];

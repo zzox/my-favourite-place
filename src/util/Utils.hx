@@ -16,3 +16,10 @@ function angleBetweenMouse(point:FlxPoint, offset:Float = 0, asDegrees:Bool = fa
 
     return val;
 }
+
+function toFixed (places:Int, num:Float):String {
+    final str = (num + '');
+    final i = str.indexOf('.');
+    if (i == -1) return str;
+    return str.substring(0, i + places + 1);
+}

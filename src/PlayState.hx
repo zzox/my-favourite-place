@@ -11,6 +11,9 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
+import flixel.text.FlxBitmapText;
+import flixel.text.FlxText.FlxTextAlign;
+import flixel.text.FlxText.FlxTextBorderStyle;
 import flixel.tile.FlxBaseTilemap.FlxTilemapAutoTiling;
 import flixel.tile.FlxTilemap;
 import flixel.tweens.FlxEase;
@@ -55,6 +58,7 @@ class PlayState extends FlxState {
     static inline final ROOM_HEIGHT:Int = 96;
     static inline final CAMERA_DIFF:Int = 2000;
     static inline final CAMERA_START_DIFF:Int = -90;
+    static inline final MAX_DASHES:Int = 5; // can be changed, fine to go way over
 
     public var skills:PlayerSkills;
     var currentWorld:Worlds;
@@ -68,6 +72,7 @@ class PlayState extends FlxState {
     var aimer:FlxSprite;
     var spritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
+    var dashCounters:Array<FlxSprite>;
 
     var crtShader:CrtShader;
     var screenPoint:IntPoint;
@@ -75,9 +80,13 @@ class PlayState extends FlxState {
     var cameraXScale:Float = 0.0;
     var cameraYScale:Float = 0.0;
     var stoppedTime:Float = 0.0;
+    var levelTime:Float = 0.0;
 
     var numEnemiesKilled:Int = 0;
     public var transitioning:Bool = true;
+
+    var timer:FlxBitmapText;
+    var roomNumber:FlxBitmapText;
 
     // TEMP:
     final SHOOT_VEL = 250;
@@ -102,9 +111,6 @@ class PlayState extends FlxState {
         bg.makeGraphic(160, 90, worldData[currentWorld].bgColor);
         bg.scrollFactor.set(0, 0);
         add(bg);
-
-        menuGroup = new FlxGroup();
-        add(menuGroup);
 
         spritesGroup = new SpritesGroup();
 
@@ -146,6 +152,12 @@ class PlayState extends FlxState {
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
             camera.setScale(cameraXScale, cameraYScale);
+        }
+
+        if (!transitioning && !player.dead) {
+            levelTime += elapsed;
+            timer.text = toFixed(2, levelTime);
+            updateDashCounter();
         }
 
         if (FlxG.keys.justPressed.P) {
@@ -226,7 +238,6 @@ class PlayState extends FlxState {
     function enemyHitPlayer (enemy:Enemy, player:Player) {
         if (!enemy.dead && !player.dead) {
             if (player.dashing || player.postDashTime > 0) {
-                trace(player.postDashTime);
                 hitStop(0.2, () -> {
                     enemy.hit();
                     FlxG.camera.shake(0.01, 0.05);
@@ -248,7 +259,7 @@ class PlayState extends FlxState {
     public function enemyDie () {
         numEnemiesKilled++;
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
-            generateExplosion(72, screenPoint.y + 84, 'warn');
+            generateExplosion(80, screenPoint.y + 84, 'warn');
             new FlxTimer().start(1, (_:FlxTimer) -> {
                 rooms[currentRoom].outPlugs.destroy();
             });
@@ -272,6 +283,19 @@ class PlayState extends FlxState {
                 { ease: FlxEase.quadInOut, startDelay: 0.5 }
             );
         });
+    }
+
+    function updateDashCounter () {
+        for (i in 0...dashCounters.length) {
+            final dashItem = dashCounters[i];
+            dashItem.visible = i < skills.dashes;
+
+            if (i < skills.dashes - player.dashes) {
+                dashItem.animation.play('solid');
+            } else if (dashItem.animation.curAnim.name == 'solid') {
+                dashItem.animation.play('pop');
+            }
+        }
     }
 
     // ugly - returns prevent multiple room moves
@@ -343,6 +367,7 @@ class PlayState extends FlxState {
             enemy.active = true;
         }
         rooms[currentRoom].inPlugs.visible = true;
+        roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
     }
 
     public function generateExplosion (x:Float, y:Float, anim:String) {
@@ -518,10 +543,48 @@ class PlayState extends FlxState {
 
         screenPoint = { x: 0, y: GLOBAL_Y_OFFSET };
 
+        createHud();
+
         aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
         aimer.offset.set(4, 4);
         aimer.setSize(1, 1);
         add(aimer);
         positionAimer();
+    }
+
+    function createHud () {
+        menuGroup = new FlxGroup();
+        add(menuGroup);
+
+        timer = makeText('0.00', { x: 80, y: -1 });
+        timer.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xff0d2030);
+        timer.scrollFactor.set(0, 0);
+        timer.autoSize = false;
+        timer.width = timer.fieldWidth = 71;
+        timer.alignment = FlxTextAlign.RIGHT;
+        timer.letterSpacing = -1;
+        timer.color = 0xffa8a8a8;
+        menuGroup.add(timer);
+
+        roomNumber = makeText('Room 0', { x: 9, y: -1 });
+        roomNumber.setBorderStyle(FlxTextBorderStyle.OUTLINE, 0xff0d2030);
+        roomNumber.scrollFactor.set(0, 0);
+        roomNumber.letterSpacing = -1;
+        roomNumber.color = 0xffa8a8a8;
+
+        dashCounters = [];
+        for (i in 0...MAX_DASHES) {
+            final counter = new FlxSprite(i * 10 + 2, 82);
+            counter.scrollFactor.set(0, 0);
+            counter.loadGraphic(AssetPaths.dash_counter__png, true, 8, 8);
+            counter.animation.add('solid', [0]);
+            counter.animation.add('pop', [1, 2, 3], 24, false);
+            counter.animation.play('solid');
+            counter.visible = false;
+            menuGroup.add(counter);
+            dashCounters.push(counter);
+        }
+
+        menuGroup.add(roomNumber);
     }
 }
