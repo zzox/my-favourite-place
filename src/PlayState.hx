@@ -67,6 +67,7 @@ class PlayState extends FlxState {
     var explosions:FlxTypedGroup<Explosion>;
     var aimer:FlxSprite;
     var spritesGroup:SpritesGroup;
+    var menuGroup:FlxGroup;
 
     var crtShader:CrtShader;
     var screenPoint:IntPoint;
@@ -101,6 +102,9 @@ class PlayState extends FlxState {
         bg.makeGraphic(160, 90, worldData[currentWorld].bgColor);
         bg.scrollFactor.set(0, 0);
         add(bg);
+
+        menuGroup = new FlxGroup();
+        add(menuGroup);
 
         spritesGroup = new SpritesGroup();
 
@@ -377,13 +381,12 @@ class PlayState extends FlxState {
     function createMenu (yPos:Int) {
         // space for title
         // fade out if clicked
-        // TODO: make right and left?
-        add(new Button(Std.int(camera.scroll.x + 63), yPos + 50, Retry, () -> {
+        menuGroup.add(new Button(Std.int(camera.scroll.x + 45), yPos + 56, Retry, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
         }));
-        add(new Button(Std.int(camera.scroll.x + 63), yPos + 66, Quit, () -> {
+        menuGroup.add(new Button(Std.int(camera.scroll.x + 82), yPos + 56, Quit, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PreState());
             });
