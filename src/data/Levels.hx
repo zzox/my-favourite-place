@@ -18,17 +18,6 @@ typedef EnemyPlacement = {
     var vel:IntPoint;
 }
 
-enum abstract Powerups(String) to String {
-    var Faster = 'Faster';
-    var Higher = 'Higher';
-    var LongerDash = 'Long Dash';
-    var FasterDash = 'Fast Dash';
-    var PlusOneJump = '+1 Jump';
-    var PlusOneDash = '+1 Dash';
-    var MinusOneJump = '-1 Jump';
-    var MinusOneDash = '-1 Dash';
-}
-
 typedef WorldData = {
     var bgColor:Int;
     var path:String;
@@ -41,7 +30,18 @@ typedef LevelData = {
     var exits:Map<Dir, Int>;
     var roomNumber:String;
     var ?enemies:Array<EnemyPlacement>;
-    var ?powerup:Array<Powerups>;
+    var ?powerups:Array<PowerupData>;
+}
+
+enum abstract Powerups(String) to String {
+    var FasterDash = 'Fast Dash';
+    var PlusOneJump = '+1 Jump';
+    var PlusOneDash = '+1 Dash';
+}
+
+typedef PowerupData = {
+    var type:Powerups;
+    var pos:IntPoint;
 }
 
 final downLevels = [{
@@ -81,7 +81,11 @@ final downLevels = [{
 }, {
     roomNumber: 'Bonus - 1',
     isOpen: true,
-    exits: [Left => 2]
+    exits: [Left => 2],
+    powerups: [{
+        type: PlusOneJump,
+        pos: { x: 120, y: 24 }
+    }]
 }, {
     roomNumber: '3',
     isOpen: true,
@@ -116,74 +120,3 @@ final worldData:Map<Worlds, WorldData> = [
         levels: downLevels
     }
 ];
-
-final downLevelsOld = [{
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 64 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
-    }]
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 16 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: 200, y: 40 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: 232, y: 64 },
-        vel: { x: -120, y: 0 }
-    }],
-    powerup: [LongerDash, FasterDash]
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 64 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
-    }],
-    powerup: [PlusOneJump, PlusOneDash]
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 64 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
-    }],
-    powerup: [LongerDash, FasterDash]
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 64 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
-    }]
-}, {
-    enemies: [{
-        type: Gremlin,
-        pos: { x: 168, y: 64 },
-        vel: { x: -120, y: 0 }
-    }, {
-        type: Gremlin,
-        pos: { x: -32, y: 24 },
-        vel: { x: 120, y: 0 }
-    }],
-    powerup: [MinusOneJump, MinusOneDash]
-}];

@@ -20,6 +20,7 @@ import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import objects.Explosion;
+import objects.Powerup;
 import objects.Projectile;
 import openfl.filters.ShaderFilter;
 import util.LdtkWorld;
@@ -44,12 +45,8 @@ typedef Room = {
 }
 
 typedef PlayerSkills = {
-    var xVel:Float;
-    var yVel:Float;
     var jumps:Int;
-    var jumpVel:Float;
     var dashes:Int;
-    var dashTime:Float;
     var dashVel:Float;
 }
 
@@ -69,6 +66,7 @@ class PlayState extends FlxState {
     var enemies:FlxTypedGroup<Enemy>;
     var projectiles:FlxTypedGroup<Projectile>;
     var explosions:FlxTypedGroup<Explosion>;
+    var powerups:FlxTypedGroup<Powerup>;
     var aimer:FlxSprite;
     var spritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
@@ -96,14 +94,9 @@ class PlayState extends FlxState {
 
         currentWorld = LDown;
 
-        // TODO: reduce these to what's necessary
         skills = {
-            xVel: 90.0,
-            yVel: 180.0,
             jumps: 1,
-            jumpVel: 90.0,
             dashes: 1,
-            dashTime: 0.125,
             dashVel: 250.0
         }
 
@@ -182,21 +175,9 @@ class PlayState extends FlxState {
             FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
             FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
             FlxG.overlap(enemies, player, enemyHitPlayer);
+            FlxG.overlap(powerups, player, playerGetPowerup);
 
             checkRooms();
-        }
-    }
-
-    function doPowerup (skill:Powerups) {
-        switch (skill) {
-            case Faster: skills.xVel += 45;
-            case Higher: skills.jumpVel += 45;
-            case LongerDash: skills.dashTime += 0.0625;
-            case FasterDash: skills.dashVel += 125;
-            case PlusOneDash: skills.dashes++;
-            case PlusOneJump: skills.jumps++;
-            case MinusOneDash: skills.dashes--;
-            case MinusOneJump: skills.jumps--;
         }
     }
 
@@ -240,12 +221,31 @@ class PlayState extends FlxState {
             if (player.dashing || player.postDashTime > 0) {
                 hitStop(0.2, () -> {
                     enemy.hit();
+                    final midpoint = enemy.getMidpoint();
+                    generateExplosion(midpoint.x, midpoint.y, 'pop-aqua');
                     FlxG.camera.shake(0.01, 0.05);
                 });
             } else {
                 loseLevel();
                 FlxG.camera.shake(0.001, 0.5);
             }
+        }
+    }
+
+    function playerGetPowerup (powerup:Powerup, _:Player) {
+        final midpoint = powerup.getMidpoint();
+        generateExplosion(midpoint.x, midpoint.y, 'pop-blue');
+        doPowerup(powerup.type);
+        powerups.remove(powerup);
+        remove(powerup);
+        powerup.destroy();
+    }
+
+    function doPowerup (skill:Powerups) {
+        switch (skill) {
+            case FasterDash: skills.dashVel += 125;
+            case PlusOneDash: skills.dashes++;
+            case PlusOneJump: skills.jumps++;
         }
     }
 
@@ -273,7 +273,7 @@ class PlayState extends FlxState {
         hitStop(0.5, () -> {
             player.die();
             final midpoint = player.getMidpoint();
-            generateExplosion(midpoint.x, midpoint.y, 'pop');
+            generateExplosion(midpoint.x, midpoint.y, 'pop-grey');
             final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
             createMenu(yPos);
             FlxTween.tween(
@@ -437,6 +437,7 @@ class PlayState extends FlxState {
         final world = worldData[currentWorld];
         final map = new LdtkWorld(world.path);
 
+        powerups = new FlxTypedGroup<Powerup>();
         enemies = new FlxTypedGroup<Enemy>();
 
         for (i in 0...world.levels.length) {
@@ -482,30 +483,11 @@ class PlayState extends FlxState {
                 }
             }
 
-            // final choiceItems = new FlxGroup();
-
-            // final textItem1 = makeText(
-            //     roomData.choices[0],
-            //     { x: 0, y: point.y + 62 }
-            // );
-            // textItem1.x = 40 - textItem1.width / 2;
-
-            // final textItem2 = makeText(
-            //     roomData.choices[1],
-            //     { x: 80, y: point.y + 62 }
-            // );
-            // textItem2.x = 120 - textItem2.width / 2;
-
-            // final arrowItem1 = new FlxSprite(40, point.y + 72, AssetPaths.down_arrow__png);
-            // final arrowItem2 = new FlxSprite(104, point.y + 72, AssetPaths.down_arrow__png);
-
-            // choiceItems.add(textItem1);
-            // choiceItems.add(textItem2);
-            // choiceItems.add(arrowItem1);
-            // choiceItems.add(arrowItem2);
-
-            // choiceItems.visible = i == 0;
-            // add(choiceItems);
+            if (roomData.powerups != null) {
+                for (p in roomData.powerups) {
+                    powerups.add(new Powerup(point.x + p.pos.x, point.y + p.pos.y, p.type));
+                }
+            }
 
             rooms[i] = {
                 point: point,
@@ -514,10 +496,10 @@ class PlayState extends FlxState {
                 outPlugs: outPlugs,
                 spikes: spikes,
                 enemies: roomEnemies,
-                // powerupItems: choiceItems
             };
         }
 
+        spritesGroup.add(powerups);
         spritesGroup.add(enemies);
 
         player = new Player(world.start.x, world.start.y, this);

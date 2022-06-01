@@ -5,7 +5,6 @@ import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.addons.effects.FlxTrail;
-import flixel.math.FlxPoint;
 import flixel.math.FlxVelocity;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -26,8 +25,12 @@ class Player extends FlxSprite {
     static inline final JUMP_START_TIME:Float = 0.15;
     static inline final JUMP_BUFFER:Float = 0.075;
     static inline final HANG_START_TIME:Float = 0.08;
-    static inline final AIR_TIME_BUFFER:Float = 0.1;
+    static inline final AIR_TIME_BUFFER:Float = 0.05;
     static inline final POST_DASH_TIME:Float = 0.05;
+    static inline final MAX_X_VEL:Int = 90;
+    static inline final MAX_Y_VEL:Int = 180;
+    static inline final JUMP_VELOCITY:Int = 90;
+    static inline final DASH_TIME:Float = 0.125;
 
     static inline final DASH_BUFFER:Float = 0.1;
 
@@ -84,7 +87,7 @@ class Player extends FlxSprite {
             0.025
         );
 
-        maxVelocity.set(scene.skills.xVel, scene.skills.yVel);
+        maxVelocity.set(MAX_X_VEL, MAX_Y_VEL);
         highDrag();
     }
 
@@ -149,17 +152,17 @@ class Player extends FlxSprite {
             // if we are pressing down, we double max velocity and double gravity
             if (downPressed && !touchingFloor) {
                 downAcc *= 2;
-                maxVelocity.y = scene.skills.yVel * 2;
+                maxVelocity.y = MAX_Y_VEL * 2;
                 // only strech if we are heading downwards
                 if (velocity.y > 0) {
                     stretchDownSnapper.push();
                 }
             } else {
-                maxVelocity.y = scene.skills.yVel;
+                maxVelocity.y = MAX_Y_VEL;
                 stretchDownSnapper.pull();
             }
 
-            acceleration.set(lrAcc * scene.skills.xVel * 10, downAcc);
+            acceleration.set(lrAcc * MAX_X_VEL * 10, downAcc);
 
             // we hang in y=0 velocity space.  Used to make jumps feel more floaty,
             // but also at the end of a dash.
@@ -195,7 +198,7 @@ class Player extends FlxSprite {
 
             // if the jumping flag is set, we add the jump velocity
             if (jumping) {
-                velocity.y = -scene.skills.jumpVel;
+                velocity.y = -JUMP_VELOCITY;
 
                 // if we let go of jump, run out of jump time, or are touching the ground,
                 // (and haven't just immediately set the flag) we end the jump
@@ -222,7 +225,7 @@ class Player extends FlxSprite {
         acceleration.set(0, 0);
         drag.set(0, 0);
         maxVelocity.set(0, 0);
-        dashTime = scene.skills.dashTime;
+        dashTime = DASH_TIME;
         dashing = true;
         trail = new FlxTrail(this, null, 10, 2, 0.5);
         scene.add(trail);
@@ -233,7 +236,7 @@ class Player extends FlxSprite {
     public function stopDash () {
         dashing = false;
         velocity.set(velocity.x, velocity.y / 4);
-        maxVelocity.set(scene.skills.xVel, scene.skills.yVel);
+        maxVelocity.set(MAX_X_VEL, MAX_Y_VEL);
         colorTransform = new ColorTransform();
         if (trail != null) {
             scene.remove(trail);
