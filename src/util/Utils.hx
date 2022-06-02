@@ -17,9 +17,24 @@ function angleBetweenMouse(point:FlxPoint, offset:Float = 0, asDegrees:Bool = fa
     return val;
 }
 
-function toFixed (places:Int, num:Float):String {
-    final str = (num + '');
-    final i = str.indexOf('.');
-    if (i == -1) return str;
-    return str.substring(0, i + places + 1);
+function displaySeconds (seconds:Int):String {
+    return seconds < 10 ? '0' + seconds : '' + seconds;
+}
+
+function toDecimal (time:Float):String {
+    return (time + '').split('.')[1].substring(0, 2);
+}
+
+function secondsToMinutes (time:Float):String {
+    final seconds = Std.int(time);
+    final minutes = Math.floor(seconds / 60);
+    if (minutes == 0) {
+        return displaySeconds(seconds % 60);
+    }
+
+    return minutes + ':' + displaySeconds(seconds % 60);
+}
+
+function timeToString (time:Float):String {
+    return secondsToMinutes(time) + '.' + toDecimal(time);
 }

@@ -16,7 +16,7 @@ class Powerup extends FlxSprite {
         animation.add(PlusOneJump, [1]);
         animation.play(type);
 
-        FlxTween.tween(this, { y: y + 2 }, 2, { type: FlxTweenType.PINGPONG, ease: FlxEase.quadInOut });
+        FlxTween.tween(this, { y: y + 2 }, 0.5, { type: FlxTweenType.PINGPONG, ease: FlxEase.quadInOut });
 
         this.type = type;
     }

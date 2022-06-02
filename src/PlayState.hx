@@ -147,9 +147,9 @@ class PlayState extends FlxState {
             camera.setScale(cameraXScale, cameraYScale);
         }
 
-        if (!transitioning && !player.dead) {
+        if (player != null && !player.dead) {
             levelTime += elapsed;
-            timer.text = toFixed(2, levelTime);
+            timer.text = timeToString(levelTime);
             updateDashCounter();
         }
 
@@ -191,12 +191,17 @@ class PlayState extends FlxState {
 
     function collideSpikes (spikes:NamedMap, player:Player) {
         if (!player.dead && (
+            (player.isTouching(FlxObject.LEFT) && !player.isTouching(FlxObject.UP) &&
+            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
+
+            (player.isTouching(FlxObject.RIGHT) && !player.isTouching(FlxObject.UP) &&
+            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
+
             (player.isTouching(FlxObject.DOWN) && !player.isTouching(FlxObject.LEFT) &&
             !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
-            // TODO: handle ^^^ for all other directions
-            (player.isTouching(FlxObject.UP) && spikes.name == 'Spikes_down') ||
-            (player.isTouching(FlxObject.LEFT) && spikes.name == 'Spikes_down') ||
-            (player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
+
+            (player.isTouching(FlxObject.UP) && !player.isTouching(FlxObject.LEFT) &&
+            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
             loseLevel();
         }
     }
@@ -219,8 +224,12 @@ class PlayState extends FlxState {
     function enemyHitPlayer (enemy:Enemy, player:Player) {
         if (!enemy.dead && !player.dead) {
             if (player.dashing || player.postDashTime > 0) {
+                enemy.hit();
                 hitStop(0.2, () -> {
-                    enemy.hit();
+                    player.dashes--;
+                    if (player.dashes < 0) {
+                        player.dashes = 0;
+                    }
                     final midpoint = enemy.getMidpoint();
                     generateExplosion(midpoint.x, midpoint.y, 'pop-aqua');
                     FlxG.camera.shake(0.01, 0.05);
@@ -270,11 +279,14 @@ class PlayState extends FlxState {
     }
 
     function loseLevel () {
+        player.die();
         hitStop(0.5, () -> {
-            player.die();
             final midpoint = player.getMidpoint();
             generateExplosion(midpoint.x, midpoint.y, 'pop-grey');
             final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
+            for (c in dashCounters) {
+                c.destroy();
+            }
             createMenu(yPos);
             FlxTween.tween(
                 camera,
@@ -446,6 +458,18 @@ class PlayState extends FlxState {
             final spikes = new FlxTypedGroup<NamedMap>();
 
             final point = map.levels['Level_$i'].point;
+
+            final spikesLeft = createTileLayer(map, 'Level_$i', 'Spikes_left', { x: point.x + 4, y: point.y });
+            if (spikesLeft != null) {
+                spikesLeft.offset.set(4, 0);
+                spikes.add(spikesLeft);
+            }
+
+            final spikesRight = createTileLayer(map, 'Level_$i', 'Spikes_right', { x: point.x - 4, y: point.y });
+            if (spikesRight != null) {
+                spikesRight.offset.set(-4, 0);
+                spikes.add(spikesRight);
+            }
 
             final spikesUp = createTileLayer(map, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 4 });
             if (spikesUp != null) {

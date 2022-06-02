@@ -93,19 +93,50 @@ final downLevels = [{
 }, {
     roomNumber: '4',
     isOpen: false,
-    exits: [Down => 6]
+    exits: [Down => 6],
+    enemies: [{
+        type: Gremlin,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Gremlin,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
+    }]
 }, {
     roomNumber: '5',
     isOpen: false,
-    exits: [Down => 8, Right => 7]
+    exits: [Down => 8, Right => 7],
+    enemies: [{
+        type: Gremlin,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Gremlin,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
+    }]
 }, {
     roomNumber: 'Bonus - 2',
-    isOpen: false,
-    exits: [Left => 6]
+    isOpen: true,
+    exits: [Left => 6],
+    powerups: [{
+        type: PlusOneDash,
+        pos: { x: 108, y: 40 }
+    }]
 }, {
     roomNumber: '6',
     isOpen: false,
-    exits: [Down => 9]
+    exits: [Down => 9],
+    enemies: [{
+        type: Gremlin,
+        pos: { x: 168, y: 64 },
+        vel: { x: -120, y: 0 }
+    }, {
+        type: Gremlin,
+        pos: { x: -32, y: 24 },
+        vel: { x: 120, y: 0 }
+    }]
 }, {
     roomNumber: '7',
     isOpen: false,
@@ -116,7 +147,7 @@ final worldData:Map<Worlds, WorldData> = [
     LDown => {
         bgColor: 0xffffe9c5,
         path: AssetPaths.down__ldtk,
-        start: { x: 24, y: 50 },
+        start: { x: 30, y: 50 },
         levels: downLevels
     }
 ];
