@@ -12,41 +12,33 @@ typedef EnemyData = {
 
 enum abstract EnemyType(String) to String {
     var Gremlin;
+    var FastGremlin;
 }
-final enemyData:Map<EnemyType, EnemyData> = [
-    Gremlin => {
-        path: AssetPaths.enemies__png,
-        hp: 1,
-    }
-];
 
 class Enemy extends FlxSprite {
     static inline final HURT_FRAMES:Float = 3;
 
     var scene:PlayState;
     var type:EnemyType;
-    var hp:Int;
     var hurtFrame:Int;
     var hurtTime:Float = 0.0;
     public var dead:Bool = false;
+    var startingPoint:Point;
 
-    public function new (x:Float, y:Float, scene:PlayState, type:EnemyType, ?vel:IntPoint) {
+    public function new (x:Float, y:Float, scene:PlayState, type:EnemyType, vel:IntPoint) {
         super(x, y);
+        startingPoint = { x: x, y: y };
 
-        final enemyData = enemyData[type];
-        loadGraphic(enemyData.path, true, 16, 16);
-        offset.set(2, 2);
-        setSize(12, 12);
+        loadGraphic(AssetPaths.enemies__png, true, 16, 16);
+        offset.set(1, 1);
+        setSize(14, 14);
 
         animation.add(Gremlin, [0, 1], 2);
+        animation.add(FastGremlin, [2, 3], 4);
 
-        if (vel != null) {
-            velocity.set(vel.x, vel.y);
-            flipX = vel.x > 0;
-        }
+        velocity.set(vel.x, vel.y);
 
         active = false;
-        hp = enemyData.hp;
         this.type = type;
         this.scene = scene;
         animation.play(type);
@@ -66,6 +58,21 @@ class Enemy extends FlxSprite {
                         x -= 196;
                     }
                 }
+            case FastGremlin:
+                if (velocity.x < 0) {
+                    if (x < -160) {
+                        velocity.x = -velocity.x;
+                    }
+                } else if (velocity.x > 0) {
+                    if (x > 320) {
+                        velocity.x = -velocity.x;
+                    }
+                }
+        }
+
+        flipX = velocity.x > 0;
+        if (y > startingPoint.y + 90) {
+            y = startingPoint.y;
         }
 
         hurtTime -= elapsed;
@@ -78,12 +85,9 @@ class Enemy extends FlxSprite {
     }
 
     public function hit () {
-        hp--;
         hurtTime = 1.0;
         hurtFrame = 0;
-        if (hp == 0) {
-            die();
-        }
+        die();
     }
 
     function die () {

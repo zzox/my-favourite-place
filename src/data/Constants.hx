@@ -9,10 +9,10 @@ enum Dir {
     Down;
 }
 
-// typedef Point = {
-//     var x:Float;
-//     var y:Float;
-// }
+typedef Point = {
+    var x:Float;
+    var y:Float;
+}
 
 typedef IntPoint = {
     var x:Int;
