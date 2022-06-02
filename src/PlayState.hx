@@ -172,10 +172,10 @@ class PlayState extends FlxState {
             FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
             FlxG.collide(rooms[currentRoom].inPlugs, player, playerCollideGround);
             FlxG.collide(rooms[currentRoom].outPlugs, player, playerCollideGround);
-            FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
-            FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
-            FlxG.overlap(enemies, player, enemyHitPlayer);
-            FlxG.overlap(powerups, player, playerGetPowerup);
+            FlxG.collide(rooms[currentRoom].spikes, player.body, collideSpikes);
+            // FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
+            FlxG.overlap(enemies, player.body, enemyHitPlayer);
+            FlxG.overlap(powerups, player.body, playerGetPowerup);
 
             checkRooms();
         }
@@ -189,19 +189,19 @@ class PlayState extends FlxState {
         }
     }
 
-    function collideSpikes (spikes:NamedMap, player:Player) {
+    function collideSpikes (spikes:NamedMap, playerBody:Player) {
         if (!player.dead && (
-            (player.isTouching(FlxObject.LEFT) && !player.isTouching(FlxObject.UP) &&
-            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
+            (playerBody.isTouching(FlxObject.LEFT) && !playerBody.isTouching(FlxObject.UP) &&
+            !playerBody.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
 
-            (player.isTouching(FlxObject.RIGHT) && !player.isTouching(FlxObject.UP) &&
-            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
+            (playerBody.isTouching(FlxObject.RIGHT) && !playerBody.isTouching(FlxObject.UP) &&
+            !playerBody.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
 
-            (player.isTouching(FlxObject.DOWN) && !player.isTouching(FlxObject.LEFT) &&
-            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
+            (playerBody.isTouching(FlxObject.DOWN) && !playerBody.isTouching(FlxObject.LEFT) &&
+            !playerBody.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
 
-            (player.isTouching(FlxObject.UP) && !player.isTouching(FlxObject.LEFT) &&
-            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
+            (playerBody.isTouching(FlxObject.UP) && !playerBody.isTouching(FlxObject.LEFT) &&
+            !playerBody.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
             loseLevel();
         }
     }
@@ -221,7 +221,7 @@ class PlayState extends FlxState {
         }
     }
 
-    function enemyHitPlayer (enemy:Enemy, player:Player) {
+    function enemyHitPlayer (enemy:Enemy, playerBody:Player) {
         if (!enemy.dead && !player.dead) {
             if (player.dashing || player.postDashTime > 0) {
                 enemy.hit();
@@ -528,6 +528,7 @@ class PlayState extends FlxState {
 
         player = new Player(world.start.x, world.start.y, this);
         spritesGroup.add(player);
+        spritesGroup.add(player.body);
 
         projectiles = new FlxTypedGroup<Projectile>(BULLET_POOL_SIZE);
         for (_ in 0...BULLET_POOL_SIZE) {

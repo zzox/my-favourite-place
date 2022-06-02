@@ -66,6 +66,8 @@ class Player extends FlxSprite {
 
     var trail:FlxTrail;
 
+    public var body:FlxSprite;
+
     public function new (x:Float, y:Float, scene:PlayState) {
         super(x, y);
         this.scene = scene;
@@ -73,6 +75,10 @@ class Player extends FlxSprite {
         loadGraphic(AssetPaths.player__png, true, 16, 16);
         offset.set(5, 3);
         setSize(6, 12);
+
+        body = new FlxSprite();
+        body.makeGraphic(6, 7, 0xffff00ff);
+        body.visible = false;
 
         animation.add('stand', [0]);
         animation.add('stand-shoot', [1]);
@@ -217,6 +223,7 @@ class Player extends FlxSprite {
         handleAnimation(touchingFloor);
 
         super.update(elapsed);
+        body.setPosition(x, y);
     }
 
     function dash () {
