@@ -1,3 +1,4 @@
+import actors.Boss;
 import actors.Enemy;
 import actors.Player;
 import actors.SpritesGroup;
@@ -63,10 +64,11 @@ class PlayState extends FlxState {
     var rooms:Array<Room> = [];
 
     var player:Player;
-    var enemies:FlxTypedGroup<Enemy>;
+    var enemies:FlxTypedGroup<FlxSprite>;
     var projectiles:FlxTypedGroup<Projectile>;
     var explosions:FlxTypedGroup<Explosion>;
     var powerups:FlxTypedGroup<Powerup>;
+    var boss:Boss;
     var aimer:FlxSprite;
     var spritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
@@ -175,9 +177,17 @@ class PlayState extends FlxState {
             FlxG.collide(rooms[currentRoom].spikes, player.body, collideSpikes);
             // FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
             FlxG.overlap(enemies, player.body, enemyHitPlayer);
+            FlxG.overlap(boss, player.body, bossHitPlayer);
             FlxG.overlap(powerups, player.body, playerGetPowerup);
 
             checkRooms();
+        }
+
+        // HACK: delete this!
+        if (FlxG.keys.justPressed.G) {
+            player.setPosition(72, 688);
+            currentRoom = 8;
+            moveRoom(Down);
         }
     }
 
@@ -206,7 +216,7 @@ class PlayState extends FlxState {
         }
     }
 
-    function projHitGroud (_:FlxTilemap, proj:Projectile) {
+    function old_projHitGroud (_:FlxTilemap, proj:Projectile) {
         final midpoint = proj.getMidpoint();
         generateExplosion(midpoint.x, midpoint.y, 'pop');
         proj.kill();
@@ -232,6 +242,24 @@ class PlayState extends FlxState {
                     }
                     final midpoint = enemy.getMidpoint();
                     generateExplosion(midpoint.x, midpoint.y, 'pop-aqua');
+                    FlxG.camera.shake(0.01, 0.05);
+                });
+            } else {
+                loseLevel();
+                FlxG.camera.shake(0.001, 0.5);
+            }
+        }
+    }
+
+    function bossHitPlayer (boss:Boss, playerBody:Player) {
+        if (!boss.dead && !player.dead && boss.hurtTime < 0) {
+            if (player.dashing || player.postDashTime > 0) {
+                boss.hit();
+                hitStop(0.2, () -> {
+                    player.dashes--;
+                    if (player.dashes < 0) {
+                        player.dashes = 0;
+                    }
                     FlxG.camera.shake(0.01, 0.05);
                 });
             } else {
@@ -276,6 +304,13 @@ class PlayState extends FlxState {
                 rooms[currentRoom].powerupItems.visible = true;
             }
         }
+    }
+
+    public function bossDie () {
+        generateExplosion(80, screenPoint.y + 84, 'warn');
+        new FlxTimer().start(1, (_:FlxTimer) -> {
+            rooms[currentRoom].outPlugs.destroy();
+        });
     }
 
     function loseLevel () {
@@ -335,11 +370,10 @@ class PlayState extends FlxState {
     }
 
     function moveRoom (dir:Dir) {
-        // if (player.x < 90) {
-        //     updateSkills(levels[currentRoom].choices[0]);
-        // } else {
-        //     updateSkills(levels[currentRoom].choices[1]);
-        // }
+        if (currentRoom == rooms.length - 1) {
+            trace('victory!!!');
+            return;
+        }
 
         transitioning = true;
         player.stopDash();
@@ -380,6 +414,9 @@ class PlayState extends FlxState {
         }
         rooms[currentRoom].inPlugs.visible = true;
         roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
+        if (currentRoom == rooms.length - 1) {
+            boss.active = true;
+        }
     }
 
     public function generateExplosion (x:Float, y:Float, anim:String) {
@@ -450,7 +487,7 @@ class PlayState extends FlxState {
         final map = new LdtkWorld(world.path);
 
         powerups = new FlxTypedGroup<Powerup>();
-        enemies = new FlxTypedGroup<Enemy>();
+        enemies = new FlxTypedGroup<FlxSprite>();
 
         for (i in 0...world.levels.length) {
             final roomData = world.levels[i];
@@ -523,8 +560,11 @@ class PlayState extends FlxState {
             };
         }
 
+        boss = new Boss(this);
+
         spritesGroup.add(powerups);
         spritesGroup.add(enemies);
+        spritesGroup.add(boss);
 
         player = new Player(world.start.x, world.start.y, this);
         spritesGroup.add(player);

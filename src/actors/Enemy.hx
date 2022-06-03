@@ -5,11 +5,6 @@ import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 
-typedef EnemyData = {
-    var path:String;
-    var hp:Int;
-}
-
 enum abstract EnemyType(String) to String {
     var Gremlin;
     var FastGremlin;
@@ -45,8 +40,6 @@ class Enemy extends FlxSprite {
     }
 
     override public function update (elapsed:Float) {
-        super.update(elapsed);
-
         switch (type) {
             case Gremlin:
                 if (velocity.x < 0) {
@@ -82,6 +75,8 @@ class Enemy extends FlxSprite {
         } else {
             visible = true;
         }
+
+        super.update(elapsed);
     }
 
     public function hit () {

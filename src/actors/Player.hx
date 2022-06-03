@@ -77,7 +77,7 @@ class Player extends FlxSprite {
         setSize(6, 12);
 
         body = new FlxSprite();
-        body.makeGraphic(6, 7, 0xffff00ff);
+        body.makeGraphic(6, 8, 0xffff00ff);
         body.visible = false;
 
         animation.add('stand', [0]);
@@ -236,7 +236,7 @@ class Player extends FlxSprite {
         dashing = true;
         trail = new FlxTrail(this, null, 10, 2, 0.5);
         scene.add(trail);
-        elasticity = 1;
+        elasticity = 0.8;
         dashes++;
     }
 

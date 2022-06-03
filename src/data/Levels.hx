@@ -1,5 +1,6 @@
 package data;
 
+import actors.Boss;
 import actors.Enemy;
 import data.Constants;
 
@@ -134,7 +135,7 @@ final downLevels = [{
         vel: { x: 180, y: 0 }
     }, {
         type: FastGremlin,
-        pos: { x: 400, y: 48 },
+        pos: { x: 240, y: 48 },
         vel: { x: -180, y: 0 }
     }]
 }, {
@@ -147,7 +148,7 @@ final worldData:Map<Worlds, WorldData> = [
     LDown => {
         bgColor: 0xffffe9c5,
         path: AssetPaths.down__ldtk,
-        start: { x: 28, y: 52 },
+        start: { x: 24, y: 24 },
         levels: downLevels
     }
 ];
