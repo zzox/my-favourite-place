@@ -78,6 +78,7 @@ class Player extends FlxSprite {
 
         body = new FlxSprite();
         body.makeGraphic(6, 8, 0xffff00ff);
+        // body.alpha = 0.7;
         body.visible = false;
 
         animation.add('stand', [0]);

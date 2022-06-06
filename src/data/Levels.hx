@@ -1,6 +1,5 @@
 package data;
 
-import actors.Boss;
 import actors.Enemy;
 import data.Constants;
 
@@ -44,6 +43,28 @@ typedef PowerupData = {
     var type:Powerups;
     var pos:IntPoint;
 }
+
+final outLevels = [{
+    roomNumber: '0',
+    isOpen: true,
+    exits: [Right => 1]
+}, {
+    roomNumber: '1',
+    isOpen: false,
+    exits: [Down => 2],
+    powerups: [{
+        type: PlusOneDash,
+        pos: { x: 12, y: 68 }
+    }]
+}, {
+    roomNumber: '2',
+    isOpen: true,
+    exits: [Left => 3]
+}, {
+    roomNumber: '3',
+    isOpen: true,
+    exits: new Map()
+}];
 
 final downLevels = [{
     roomNumber: '0',
@@ -110,7 +131,7 @@ final downLevels = [{
     exits: [Down => 8, Right => 7],
     enemies: [{
         type: FastGremlin,
-        pos: { x: 168, y: 64 },
+        pos: { x: 168, y: 72 },
         vel: { x: -180, y: 0 }
     }, {
         type: Gremlin,
@@ -131,7 +152,7 @@ final downLevels = [{
     exits: [Down => 9],
     enemies: [{
         type: FastGremlin,
-        pos: { x: -144, y: 24 },
+        pos: { x: -144, y: 32 },
         vel: { x: 180, y: 0 }
     }, {
         type: FastGremlin,
@@ -145,6 +166,12 @@ final downLevels = [{
 }];
 
 final worldData:Map<Worlds, WorldData> = [
+    LOut => {
+        bgColor: 0xffd7d7d7,
+        path: AssetPaths.out__ldtk,
+        start: { x: 24, y: 24 },
+        levels: outLevels
+    },
     LDown => {
         bgColor: 0xffffe9c5,
         path: AssetPaths.down__ldtk,

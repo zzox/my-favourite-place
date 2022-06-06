@@ -98,7 +98,7 @@ class PlayState extends FlxState {
 
         skills = {
             jumps: 1,
-            dashes: 1,
+            dashes: currentWorld == LOut ? 0 : 1,
             dashVel: 250.0
         }
 
@@ -174,7 +174,15 @@ class PlayState extends FlxState {
             FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
             FlxG.collide(rooms[currentRoom].inPlugs, player, playerCollideGround);
             FlxG.collide(rooms[currentRoom].outPlugs, player, playerCollideGround);
-            FlxG.collide(rooms[currentRoom].spikes, player.body, collideSpikes);
+
+            rooms[currentRoom].spikes.forEach((m:NamedMap) -> {
+                if (m.overlaps(player.body) && !player.dead) {
+                    loseLevel();
+                    // TODO: remove following collide method and definition?
+                    // FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
+                }
+            });
+
             // FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
             FlxG.overlap(enemies, player.body, enemyHitPlayer);
             FlxG.overlap(boss, player.body, bossHitPlayer);
@@ -199,19 +207,19 @@ class PlayState extends FlxState {
         }
     }
 
-    function collideSpikes (spikes:NamedMap, playerBody:Player) {
+    function collideSpikes (spikes:NamedMap, player:Player) {
         if (!player.dead && (
-            (playerBody.isTouching(FlxObject.LEFT) && !playerBody.isTouching(FlxObject.UP) &&
-            !playerBody.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
+            (player.isTouching(FlxObject.LEFT) && !player.isTouching(FlxObject.UP) &&
+            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
 
-            (playerBody.isTouching(FlxObject.RIGHT) && !playerBody.isTouching(FlxObject.UP) &&
-            !playerBody.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
+            (player.isTouching(FlxObject.RIGHT) && !player.isTouching(FlxObject.UP) &&
+            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
 
-            (playerBody.isTouching(FlxObject.DOWN) && !playerBody.isTouching(FlxObject.LEFT) &&
-            !playerBody.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
+            (player.isTouching(FlxObject.DOWN) && !player.isTouching(FlxObject.LEFT) &&
+            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
 
-            (playerBody.isTouching(FlxObject.UP) && !playerBody.isTouching(FlxObject.LEFT) &&
-            !playerBody.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
+            (player.isTouching(FlxObject.UP) && !player.isTouching(FlxObject.LEFT) &&
+            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
             loseLevel();
         }
     }
@@ -414,7 +422,7 @@ class PlayState extends FlxState {
         }
         rooms[currentRoom].inPlugs.visible = true;
         roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
-        if (currentRoom == rooms.length - 1) {
+        if (currentWorld != LOut && currentRoom == rooms.length - 1) {
             boss.active = true;
         }
     }
@@ -560,7 +568,9 @@ class PlayState extends FlxState {
             };
         }
 
-        boss = new Boss(this);
+        if (currentWorld != LOut) {
+            boss = new Boss(this);
+        }
 
         spritesGroup.add(powerups);
         spritesGroup.add(enemies);
