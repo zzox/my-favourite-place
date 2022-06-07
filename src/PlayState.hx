@@ -57,6 +57,7 @@ class PlayState extends FlxState {
     static inline final CAMERA_DIFF:Int = 2000;
     static inline final CAMERA_START_DIFF:Int = -90;
     static inline final MAX_DASHES:Int = 5; // can be changed, fine to go way over
+    static inline final OVERLAP_CHECK_DISTANCE:Int = 5;
 
     public var skills:PlayerSkills;
     var currentWorld:Worlds;
@@ -171,9 +172,11 @@ class PlayState extends FlxState {
 
         // don't do checks during a hitstop
         if (stoppedTime < 0) {
-            FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
-            FlxG.collide(rooms[currentRoom].inPlugs, player, playerCollideGround);
-            FlxG.collide(rooms[currentRoom].outPlugs, player, playerCollideGround);
+            if (player.dashing) {
+                dashOverlapCheck();
+            } else {
+                collideCheck();
+            }
 
             rooms[currentRoom].spikes.forEach((m:NamedMap) -> {
                 if (m.overlaps(player.body) && !player.dead) {
@@ -207,7 +210,7 @@ class PlayState extends FlxState {
         }
     }
 
-    function collideSpikes (spikes:NamedMap, player:Player) {
+    function old_collideSpikes (spikes:NamedMap, player:Player) {
         if (!player.dead && (
             (player.isTouching(FlxObject.LEFT) && !player.isTouching(FlxObject.UP) &&
             !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
@@ -301,12 +304,74 @@ class PlayState extends FlxState {
         });
     }
 
+    /**
+        When dashing, we fan out from 0 on the opposite axis that we are going
+        in order to slide around corners.  This may need some tweaking to feel right.
+    **/
+    function dashOverlapCheck () {
+        // TODO: if this doesn't work, collideCheck() works ok
+        if (overlapCheck()) {
+            final origPlayerPos = { x: player.x, y: player.y };
+            // xMajor is moving more on the x axis than the y
+            final xMajor = Math.abs(player.velocity.x) > Math.abs(player.velocity.y);
+
+            if (
+                Math.abs(player.velocity.x) / Math.abs(player.velocity.y) < 3 ||
+                Math.abs(player.velocity.y) / Math.abs(player.velocity.x) < 3
+            ) {
+                // trace('\n\nchecking!!!', xMajor ? 'on y' : 'on x');
+                for (i in 1...OVERLAP_CHECK_DISTANCE) {
+                    if (xMajor) {
+                        player.y = origPlayerPos.y + i;
+                    } else if (i <= 3) {
+                        player.x = origPlayerPos.x + i;
+                    }
+
+                    if (!overlapCheck()) {
+                        // trace('overlaps plus', i, xMajor ? 'on y' : 'on x');
+                        return;
+                    }
+
+                    if (xMajor) {
+                        player.y = origPlayerPos.y - i;
+                    } else if (i <= 3) {
+                        player.x = origPlayerPos.x - i;
+                    }
+
+                    if (!overlapCheck()) {
+                        // trace('overlaps minus ', i, xMajor ? 'on y' : 'on x');
+                        return;
+                    }
+                }
+
+                player.setPosition(origPlayerPos.x, origPlayerPos.y);
+            } else {
+                // trace('not checking!!', Math.abs(player.velocity.x) / Math.abs(player.velocity.y), Math.abs(player.velocity.y) / Math.abs(player.velocity.x));
+            }
+
+            collideCheck();
+        }
+    }
+
+    function overlapCheck ():Bool {
+        return rooms[currentRoom].collide.overlaps(player) ||
+        (rooms[currentRoom].inPlugs.alive && rooms[currentRoom].inPlugs.overlaps(player)) ||
+        (rooms[currentRoom].outPlugs.alive && rooms[currentRoom].outPlugs.overlaps(player));
+    }
+
+    function collideCheck () {
+        FlxG.collide(rooms[currentRoom].collide, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].inPlugs, player, playerCollideGround);
+        FlxG.collide(rooms[currentRoom].outPlugs, player, playerCollideGround);
+    }
+
     public function enemyDie () {
         numEnemiesKilled++;
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
             generateExplosion(80, screenPoint.y + 84, 'warn');
             new FlxTimer().start(1, (_:FlxTimer) -> {
                 rooms[currentRoom].outPlugs.destroy();
+                rooms[currentRoom].outPlugs.alive = false;
             });
             if (rooms[currentRoom].powerupItems != null) {
                 rooms[currentRoom].powerupItems.visible = true;
@@ -535,6 +600,7 @@ class PlayState extends FlxState {
             final outPlugs = createTileLayer(map, 'Level_$i', 'Plugs_out', point);
             if (roomData.isOpen) {
                 outPlugs.destroy();
+                outPlugs.alive = false;
             }
 
             final roomEnemies = [];
