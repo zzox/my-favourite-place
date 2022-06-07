@@ -569,27 +569,27 @@ class PlayState extends FlxState {
 
             final point = map.levels['Level_$i'].point;
 
-            final spikesLeft = createTileLayer(map, 'Level_$i', 'Spikes_left', { x: point.x + 4, y: point.y });
+            final spikesLeft = createTileLayer(map, 'Level_$i', 'Spikes_left', { x: point.x + 3, y: point.y });
             if (spikesLeft != null) {
-                spikesLeft.offset.set(4, 0);
+                spikesLeft.offset.set(3, 0);
                 spikes.add(spikesLeft);
             }
 
-            final spikesRight = createTileLayer(map, 'Level_$i', 'Spikes_right', { x: point.x - 4, y: point.y });
+            final spikesRight = createTileLayer(map, 'Level_$i', 'Spikes_right', { x: point.x - 3, y: point.y });
             if (spikesRight != null) {
-                spikesRight.offset.set(-4, 0);
+                spikesRight.offset.set(-3, 0);
                 spikes.add(spikesRight);
             }
 
-            final spikesUp = createTileLayer(map, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 4 });
+            final spikesUp = createTileLayer(map, 'Level_$i', 'Spikes_up', { x: point.x, y: point.y + 3 });
             if (spikesUp != null) {
-                spikesUp.offset.set(0, 4);
+                spikesUp.offset.set(0, 3);
                 spikes.add(spikesUp);
             }
 
-            final spikesDown = createTileLayer(map, 'Level_$i', 'Spikes_down', { x: point.x, y: point.y - 4 });
+            final spikesDown = createTileLayer(map, 'Level_$i', 'Spikes_down', { x: point.x, y: point.y - 3 });
             if (spikesDown != null) {
-                spikesDown.offset.set(0, -4);
+                spikesDown.offset.set(0, -3);
                 spikes.add(spikesDown);
             }
 
