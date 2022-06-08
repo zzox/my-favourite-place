@@ -22,6 +22,10 @@ typedef WorldData = {
     var bgColor:Int;
     var path:String;
     var start:IntPoint;
+    var playerPath:String;
+    var deathDirs:Array<Dir>;
+    var winDir:Dir;
+    // var hudColors:Array<Int>;
     var levels:Array<LevelData>;
 }
 
@@ -165,17 +169,67 @@ final downLevels = [{
     exits: new Map()
 }];
 
+final rightLevels = [{
+    roomNumber: '0',
+    isOpen: true,
+    exits: [Right => 1]
+}, {
+    roomNumber: '1',
+    isOpen: true,
+    exits: [Right => 2]
+}, {
+    roomNumber: '2',
+    isOpen: true,
+    exits: [Right => 3]
+}, {
+    roomNumber: '3',
+    isOpen: true,
+    exits: [Right => 4]
+}, {
+    roomNumber: '4',
+    isOpen: true,
+    exits: [Right => 5]
+}, {
+    roomNumber: '5',
+    isOpen: true,
+    exits: [Right => 6]
+}, {
+    roomNumber: '6',
+    isOpen: true,
+    exits: [Right => 7]
+}, {
+    roomNumber: '7',
+    isOpen: true,
+    exits: new Map()
+}];
+
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
         path: AssetPaths.out__ldtk,
-        start: { x: 24, y: 24 },
-        levels: outLevels
+        start: { x: 48, y: 24 },
+        levels: outLevels,
+        playerPath: AssetPaths.player__png,
+        deathDirs: [],
+        winDir: Down
     },
     LDown => {
         bgColor: 0xffffe9c5,
         path: AssetPaths.down__ldtk,
         start: { x: 24, y: 24 },
-        levels: downLevels
+        levels: downLevels,
+        playerPath: AssetPaths.player__png,
+        deathDirs: [],
+        winDir: Down
+    },
+    LRight => {
+        bgColor: 0xff343434,
+        // bgColor: 0xff7b7b7b,
+        path: AssetPaths.right__ldtk,
+        start: { x: 24, y: 24 },
+        levels: rightLevels,
+        playerPath: AssetPaths.player_light__png,
+        deathDirs: [Down],
+        winDir: Right
     }
 ];

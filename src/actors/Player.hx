@@ -68,11 +68,11 @@ class Player extends FlxSprite {
 
     public var body:FlxSprite;
 
-    public function new (x:Float, y:Float, scene:PlayState) {
+    public function new (x:Float, y:Float, scene:PlayState, spritePath:String) {
         super(x, y);
         this.scene = scene;
 
-        loadGraphic(AssetPaths.player__png, true, 16, 16);
+        loadGraphic(spritePath, true, 16, 16);
         offset.set(5, 3);
         setSize(6, 12);
 

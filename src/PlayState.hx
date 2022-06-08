@@ -58,6 +58,7 @@ class PlayState extends FlxState {
     static inline final CAMERA_START_DIFF:Int = -90;
     static inline final MAX_DASHES:Int = 5; // can be changed, fine to go way over
     static inline final OVERLAP_CHECK_DISTANCE:Int = 5;
+    static inline final BOUNDS_DISTANCE:Int = 4;
 
     public var skills:PlayerSkills;
     var currentWorld:Worlds;
@@ -95,7 +96,7 @@ class PlayState extends FlxState {
     override public function create() {
         super.create();
 
-        currentWorld = LDown;
+        currentWorld = LRight;
 
         skills = {
             jumps: 1,
@@ -307,6 +308,7 @@ class PlayState extends FlxState {
     /**
         When dashing, we fan out from 0 on the opposite axis that we are going
         in order to slide around corners.  This may need some tweaking to feel right.
+        We slide around corners on the y axis more aggressively, hence the `i <= 3` check for x vals.
     **/
     function dashOverlapCheck () {
         // TODO: if this doesn't work, collideCheck() works ok
@@ -316,8 +318,8 @@ class PlayState extends FlxState {
             final xMajor = Math.abs(player.velocity.x) > Math.abs(player.velocity.y);
 
             if (
-                Math.abs(player.velocity.x) / Math.abs(player.velocity.y) < 3 ||
-                Math.abs(player.velocity.y) / Math.abs(player.velocity.x) < 3
+                Math.abs(player.velocity.x) / Math.abs(player.velocity.y) < 0.75 ||
+                Math.abs(player.velocity.y) / Math.abs(player.velocity.x) < 0.75
             ) {
                 // trace('\n\nchecking!!!', xMajor ? 'on y' : 'on x');
                 for (i in 1...OVERLAP_CHECK_DISTANCE) {
@@ -346,7 +348,7 @@ class PlayState extends FlxState {
 
                 player.setPosition(origPlayerPos.x, origPlayerPos.y);
             } else {
-                // trace('not checking!!', Math.abs(player.velocity.x) / Math.abs(player.velocity.y), Math.abs(player.velocity.y) / Math.abs(player.velocity.x));
+                trace('not checking!!', Math.abs(player.velocity.x) / Math.abs(player.velocity.y), Math.abs(player.velocity.y) / Math.abs(player.velocity.x));
             }
 
             collideCheck();
@@ -387,6 +389,7 @@ class PlayState extends FlxState {
     }
 
     function loseLevel () {
+        transitioning = true;
         player.die();
         hitStop(0.5, () -> {
             final midpoint = player.getMidpoint();
@@ -398,11 +401,28 @@ class PlayState extends FlxState {
             createMenu(yPos);
             FlxTween.tween(
                 camera,
-                {  'scroll.y': yPos },
+                { 'scroll.y': yPos },
                 1,
                 { ease: FlxEase.quadInOut, startDelay: 0.5 }
             );
         });
+    }
+
+    function winLevel () {
+        trace('won!');
+        player.die();
+        transitioning = true;
+        final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
+        for (c in dashCounters) {
+            c.destroy();
+        }
+        createMenu(yPos);
+        FlxTween.tween(
+            camera,
+            { 'scroll.y': yPos },
+            1,
+            { ease: FlxEase.quadInOut, startDelay: 0.5 }
+        );
     }
 
     function updateDashCounter () {
@@ -418,9 +438,10 @@ class PlayState extends FlxState {
         }
     }
 
-    // ugly - returns prevent multiple room moves
     function checkRooms () {
-        if (transitioning) return;
+        if (transitioning) {
+            return;
+        }
 
         if (player.x < screenPoint.x) {
             moveRoom(Left);
@@ -442,9 +463,39 @@ class PlayState extends FlxState {
         }
     }
 
+    function checkBounds (dir:Dir):Bool {
+        switch (dir) {
+            case Left:
+                if (player.x + player.width + BOUNDS_DISTANCE < screenPoint.x) {
+                    return true;
+                }
+            case Right:
+                if (player.x > screenPoint.x + 160 + BOUNDS_DISTANCE) {
+                    return true;
+                }
+            case Up:
+                if (player.y + player.height + BOUNDS_DISTANCE < screenPoint.y) {
+                    return true;
+                }
+            case Down:
+                if (player.y > screenPoint.y + 90 + BOUNDS_DISTANCE) {
+                    return true;
+                }
+        }
+
+        return false;
+    }
+
     function moveRoom (dir:Dir) {
-        if (currentRoom == rooms.length - 1) {
-            trace('victory!!!');
+        final isFinalRoom = worldData[currentWorld].winDir == dir && currentRoom == rooms.length - 1;
+        if (worldData[currentWorld].deathDirs.contains(dir) || isFinalRoom) {
+            if (checkBounds(dir)) {
+                if (isFinalRoom) {
+                    winLevel();
+                } else {
+                    loseLevel();
+                }
+            }
             return;
         }
 
@@ -642,7 +693,7 @@ class PlayState extends FlxState {
         spritesGroup.add(enemies);
         spritesGroup.add(boss);
 
-        player = new Player(world.start.x, world.start.y, this);
+        player = new Player(world.start.x, world.start.y, this, worldData[currentWorld].playerPath);
         spritesGroup.add(player);
         spritesGroup.add(player.body);
 
