@@ -1,6 +1,7 @@
 import actors.Boss;
 import actors.Enemy;
 import actors.Player;
+import actors.Shooter;
 import actors.SpritesGroup;
 import data.Constants;
 import data.Levels;
@@ -42,6 +43,7 @@ typedef Room = {
     var outPlugs:FlxTilemap;
     var spikes:FlxTypedGroup<NamedMap>;
     var enemies:Array<Enemy>;
+    var shooters:Array<Shooter>;
     var ?powerupItems:FlxGroup;
 }
 
@@ -52,7 +54,7 @@ typedef PlayerSkills = {
 }
 
 class PlayState extends FlxState {
-    static inline final BULLET_POOL_SIZE:Int = 100;
+    static inline final BULLET_POOL_SIZE:Int = 3;
     static inline final ROOM_HEIGHT:Int = 96;
     static inline final CAMERA_DIFF:Int = 2000;
     static inline final CAMERA_START_DIFF:Int = -90;
@@ -187,7 +189,11 @@ class PlayState extends FlxState {
                 }
             });
 
-            // FlxG.collide(rooms[currentRoom].collide, projectiles, projHitGroud);
+            for (s in rooms[currentRoom].shooters) {
+                s.update(elapsed);
+            }
+
+            FlxG.collide(projectiles, player.body, projHitPlayer);
             FlxG.overlap(enemies, player.body, enemyHitPlayer);
             FlxG.overlap(boss, player.body, bossHitPlayer);
             FlxG.overlap(powerups, player.body, playerGetPowerup);
@@ -201,6 +207,11 @@ class PlayState extends FlxState {
             currentRoom = 8;
             moveRoom(Down);
         }
+    }
+
+    public function shoot (x:Float, y:Float, vel:IntPoint, acc:IntPoint) {
+        final proj = projectiles.getFirstAvailable();
+        proj.shoot(x, y, vel, acc);
     }
 
     function playerCollideGround (_:FlxTilemap, player:Player) {
@@ -228,18 +239,9 @@ class PlayState extends FlxState {
         }
     }
 
-    function old_projHitGroud (_:FlxTilemap, proj:Projectile) {
-        final midpoint = proj.getMidpoint();
-        generateExplosion(midpoint.x, midpoint.y, 'pop');
-        proj.kill();
-    }
-
-    function old_projHitEnemy (proj:Projectile, enemy:Enemy) {
-        if (!enemy.dead) {
-            final midpoint = proj.getMidpoint();
-            generateExplosion(midpoint.x, midpoint.y, 'pop');
-            proj.kill();
-            enemy.hit();
+    function projHitPlayer (proj:Projectile, playerBody:FlxSprite) {
+        if (!player.dead) {
+            player.die();
         }
     }
 
@@ -499,6 +501,10 @@ class PlayState extends FlxState {
             return;
         }
 
+        for (shooter in rooms[currentRoom].shooters) {
+            shooter.active = false;
+        }
+
         transitioning = true;
         player.stopDash();
         currentRoom = worldData[currentWorld].levels[currentRoom].exits[dir];
@@ -535,6 +541,9 @@ class PlayState extends FlxState {
         numEnemiesKilled = 0;
         for (enemy in rooms[currentRoom].enemies) {
             enemy.active = true;
+        }
+        for (shooter in rooms[currentRoom].shooters) {
+            shooter.active = true;
         }
         rooms[currentRoom].inPlugs.visible = true;
         roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
@@ -675,6 +684,22 @@ class PlayState extends FlxState {
                 }
             }
 
+            final shooters = [];
+            if (roomData.shooters != null) {
+                for (s in roomData.shooters) {
+                    shooters.push(
+                        new Shooter(
+                            s.time,
+                            s.offset,
+                            { x: point.x + s.position.x, y: point.y + s.position.y },
+                            s.velocity,
+                            s.acceleration,
+                            this
+                        )
+                    );
+                }
+            }
+
             rooms[i] = {
                 point: point,
                 collide: collide,
@@ -682,6 +707,7 @@ class PlayState extends FlxState {
                 outPlugs: outPlugs,
                 spikes: spikes,
                 enemies: roomEnemies,
+                shooters: shooters
             };
         }
 

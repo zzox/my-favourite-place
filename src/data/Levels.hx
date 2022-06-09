@@ -18,6 +18,14 @@ typedef EnemyPlacement = {
     var vel:IntPoint;
 }
 
+typedef ShooterPlacement = {
+    var time:Float;
+    var offset:Float;
+    var position:IntPoint;
+    var velocity:IntPoint;
+    var acceleration:IntPoint;
+}
+
 typedef WorldData = {
     var bgColor:Int;
     var path:String;
@@ -35,6 +43,7 @@ typedef LevelData = {
     var roomNumber:String;
     var ?enemies:Array<EnemyPlacement>;
     var ?powerups:Array<PowerupData>;
+    var ?shooters:Array<ShooterPlacement>;
 }
 
 enum abstract Powerups(String) to String {
@@ -184,7 +193,20 @@ final rightLevels = [{
 }, {
     roomNumber: '3',
     isOpen: true,
-    exits: [Right => 4]
+    exits: [Right => 4],
+    shooters: [{
+        time: 1.5,
+        offset: 0.5,
+        position: { x: 100, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 1.25,
+        position: { x: 60, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }]
 }, {
     roomNumber: '4',
     isOpen: true,
@@ -223,7 +245,7 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Down
     },
     LRight => {
-        bgColor: 0xff343434,
+        bgColor: 0xff0d2030,
         // bgColor: 0xff7b7b7b,
         path: AssetPaths.right__ldtk,
         start: { x: 24, y: 24 },
