@@ -1,16 +1,12 @@
-package;
-
 import display.CrtShader;
 import display.Font;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.system.scaleModes.PixelPerfectScaleMode;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import openfl.filters.ShaderFilter;
 
-class PreState extends GameState {
+class TitleState extends GameState {
     var starting:Bool = false;
 
     override public function create () {
