@@ -3,12 +3,16 @@ package;
 import display.CrtShader;
 import display.Font;
 import flixel.FlxG;
-import flixel.FlxState;
+import flixel.FlxSprite;
 import flixel.system.scaleModes.PixelPerfectScaleMode;
-import flixel.text.FlxBitmapText;
+import flixel.tweens.FlxEase;
+import flixel.tweens.FlxTween;
+import flixel.util.FlxTimer;
 import openfl.filters.ShaderFilter;
 
-class PreState extends FlxState {
+class PreState extends GameState {
+    var starting:Bool = false;
+
     override public function create () {
         super.create();
 
@@ -29,16 +33,18 @@ class PreState extends FlxState {
 
         FlxG.scaleMode = new PixelPerfectScaleMode();
 
-        bgColor = 0xff000000;
+        final bg = new FlxSprite(0, 0);
+        bg.makeGraphic(160, 90, 0xffffe9c5);
+        bg.scrollFactor.set(0, 0);
+        add(bg);
 
-        final fontAngelCode = getFont();
+        add(new FlxSprite(0, 0, AssetPaths.title__png));
 
-        var text = new FlxBitmapText(fontAngelCode);
-        text.color = 0xffffffff;
-        text.text = 'Click to focus window';
-        text.letterSpacing = -1;
-        text.setPosition((FlxG.width - text.width) / 2, 40);
-        add(text);
+        new FlxTimer().start(1.0, (_:FlxTimer) -> {
+            add(makeText('click', { x: 12, y: 54 }));
+            add(makeText('to', { x: 12, y: 60 }));
+            add(makeText('start', { x: 12, y: 66 }));
+        });
 
         final crtShader = new CrtShader();
         FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
@@ -46,8 +52,11 @@ class PreState extends FlxState {
 
     override public function update (elapsed:Float) {
         super.update(elapsed);
-        if (FlxG.mouse.justPressed) {
-            FlxG.switchState(new PlayState());
+
+        if (FlxG.mouse.justPressed && !starting) {
+            fadeOut(() -> {
+                FlxG.switchState(new PlayState());
+            });
         }
     }
 }
