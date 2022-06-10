@@ -8,6 +8,7 @@ import flixel.tweens.FlxTween;
 enum abstract EnemyType(String) to String {
     var Gremlin;
     var FastGremlin;
+    var Bird;
 }
 
 class Enemy extends FlxSprite {
@@ -19,10 +20,13 @@ class Enemy extends FlxSprite {
     var hurtTime:Float = 0.0;
     public var dead:Bool = false;
     var startingPoint:Point;
+    var startingVel:Point;
+    var attacking:Bool = false;
 
     public function new (x:Float, y:Float, scene:PlayState, type:EnemyType, vel:IntPoint) {
         super(x, y);
         startingPoint = { x: x, y: y };
+        startingVel = { x: vel.x, y: vel.y };
 
         loadGraphic(AssetPaths.enemies__png, true, 16, 16);
         offset.set(1, 1);
@@ -30,6 +34,8 @@ class Enemy extends FlxSprite {
 
         animation.add(Gremlin, [0, 1], 2);
         animation.add(FastGremlin, [2, 3], 4);
+        animation.add(Bird, [4, 4, 5], 4);
+        animation.add('$Bird-attack', [6]);
 
         velocity.set(vel.x, vel.y);
 
@@ -61,11 +67,40 @@ class Enemy extends FlxSprite {
                         velocity.x = -velocity.x;
                     }
                 }
+            case Bird:
+                if (Math.abs(y - scene.player.y) < 16 && !attacking) {
+                    velocity.x = 2 * velocity.x;
+                    velocity.y = 0;
+                    attacking = true;
+                }
+                if (velocity.x < 0) {
+                    if (x < startingPoint.x - 200) {
+                        if (attacking) {
+                            setPosition(startingPoint.x, startingPoint.y);
+                            attacking = false;
+                        } else {
+                            x = startingPoint.x;
+                        }
+                        velocity.set(startingVel.x, startingVel.y);
+                    }
+                } else if (velocity.x > 0) {
+                    if (x > startingPoint.x + 200) {
+                        if (attacking) {
+                            setPosition(startingPoint.x, startingPoint.y);
+                            attacking = false;
+                        } else {
+                            x = startingPoint.x;
+                        }
+                        velocity.set(startingVel.x, startingVel.y);
+                    }
+                }
         }
 
         flipX = velocity.x > 0;
         if (y > startingPoint.y + 90) {
-            y = startingPoint.y;
+            setPosition(startingPoint.x, startingPoint.y);
+            velocity.set(startingVel.x, startingVel.y);
+            attacking = false;
         }
 
         hurtTime -= elapsed;
@@ -74,6 +109,12 @@ class Enemy extends FlxSprite {
             visible = Math.floor(hurtFrame / HURT_FRAMES) % 2 != 0;
         } else {
             visible = true;
+        }
+
+        if (attacking) {
+            animation.play(type + '-attack');
+        } else {
+            animation.play(type);
         }
 
         super.update(elapsed);

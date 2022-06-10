@@ -53,7 +53,7 @@ typedef PlayerSkills = {
     var dashVel:Float;
 }
 
-class PlayState extends FlxState {
+class PlayState extends GameState {
     static inline final BULLET_POOL_SIZE:Int = 3;
     static inline final ROOM_HEIGHT:Int = 96;
     static inline final CAMERA_DIFF:Int = 2000;
@@ -64,10 +64,10 @@ class PlayState extends FlxState {
 
     public var skills:PlayerSkills;
     var currentWorld:Worlds;
-    var currentRoom:Int;
+    var currentRoom:Null<Int>;
     var rooms:Array<Room> = [];
 
-    var player:Player;
+    public var player:Player;
     var enemies:FlxTypedGroup<FlxSprite>;
     var projectiles:FlxTypedGroup<Projectile>;
     var explosions:FlxTypedGroup<Explosion>;
@@ -81,8 +81,6 @@ class PlayState extends FlxState {
     var crtShader:CrtShader;
     var screenPoint:IntPoint;
 
-    var cameraXScale:Float = 0.0;
-    var cameraYScale:Float = 0.0;
     var stoppedTime:Float = 0.0;
     var levelTime:Float = 0.0;
 
@@ -116,10 +114,6 @@ class PlayState extends FlxState {
         crtShader = new CrtShader();
         FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
 
-        camera.setScale(0, 0);
-        FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
-        FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
-
         // MD;
         camera.scroll.y = CAMERA_START_DIFF;
         new FlxTimer().start(0.75, (_:FlxTimer) -> {
@@ -147,10 +141,6 @@ class PlayState extends FlxState {
         stoppedTime -= elapsed;
         if (stoppedTime < 0) {
             spritesGroup.updateParent(elapsed);
-        }
-
-        if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
-            camera.setScale(cameraXScale, cameraYScale);
         }
 
         if (player != null && !player.dead) {
@@ -241,7 +231,7 @@ class PlayState extends FlxState {
 
     function projHitPlayer (proj:Projectile, playerBody:FlxSprite) {
         if (!player.dead) {
-            player.die();
+            loseLevel();
         }
     }
 
@@ -598,19 +588,6 @@ class PlayState extends FlxState {
                 FlxG.switchState(new PreState());
             });
         }));
-    }
-
-    function fadeOut (callback:Void -> Void) {
-        FlxTween.tween(this, { cameraXScale: 0 }, 0.75, { ease: FlxEase.circIn, onComplete:
-            (_:FlxTween) -> {
-                callback();
-            }
-        });
-        FlxTween.tween(this, { cameraYScale: 0 }, 0.5, { ease: FlxEase.quintIn, onComplete:
-            (_:FlxTween) -> {
-                callback();
-            }
-        });
     }
 
     function createWorld () {

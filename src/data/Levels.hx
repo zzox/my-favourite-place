@@ -185,11 +185,23 @@ final rightLevels = [{
 }, {
     roomNumber: '1',
     isOpen: true,
-    exits: [Right => 2]
+    exits: [Right => 2],
+    shooters: [{
+        time: 2.0,
+        offset: 0.5,
+        position: { x: 77, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }]
 }, {
     roomNumber: '2',
-    isOpen: true,
-    exits: [Right => 3]
+    isOpen: false,
+    exits: [Right => 3],
+    enemies: [{
+        type: Bird,
+        pos: { x: 168, y: 0 },
+        vel: { x: -120, y: 30 }
+    }]
 }, {
     roomNumber: '3',
     isOpen: true,
