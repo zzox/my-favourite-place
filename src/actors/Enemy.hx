@@ -68,7 +68,7 @@ class Enemy extends FlxSprite {
                     }
                 }
             case Bird:
-                if (Math.abs(y - scene.player.y) < 16 && !attacking) {
+                if (Math.abs(y - scene.player.y) < 12 && !attacking) {
                     velocity.x = 2 * velocity.x;
                     velocity.y = 0;
                     attacking = true;

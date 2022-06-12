@@ -28,6 +28,7 @@ typedef ShooterPlacement = {
 
 typedef WorldData = {
     var bgColor:Int;
+    var titleColor:Int;
     var path:String;
     var start:IntPoint;
     var playerPath:String;
@@ -240,6 +241,7 @@ final rightLevels = [{
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
+        titleColor: 0xff0d2030,
         path: AssetPaths.out__ldtk,
         start: { x: 48, y: 24 },
         levels: outLevels,
@@ -249,6 +251,7 @@ final worldData:Map<Worlds, WorldData> = [
     },
     LDown => {
         bgColor: 0xffffe9c5,
+        titleColor: 0xff0d2030,
         path: AssetPaths.down__ldtk,
         start: { x: 24, y: 24 },
         levels: downLevels,
@@ -258,6 +261,7 @@ final worldData:Map<Worlds, WorldData> = [
     },
     LRight => {
         bgColor: 0xff0d2030,
+        titleColor: 0xffd7d7d7,
         // bgColor: 0xff7b7b7b,
         path: AssetPaths.right__ldtk,
         start: { x: 24, y: 24 },

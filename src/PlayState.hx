@@ -54,7 +54,7 @@ typedef PlayerSkills = {
 }
 
 class PlayState extends GameState {
-    static inline final BULLET_POOL_SIZE:Int = 3;
+    static inline final BULLET_POOL_SIZE:Int = 100;
     static inline final ROOM_HEIGHT:Int = 96;
     static inline final CAMERA_DIFF:Int = 2000;
     static inline final CAMERA_START_DIFF:Int = -90;
@@ -96,7 +96,7 @@ class PlayState extends GameState {
     override public function create() {
         super.create();
 
-        currentWorld = LRight;
+        currentWorld = LDown;
 
         skills = {
             jumps: 1,
@@ -576,8 +576,10 @@ class PlayState extends GameState {
     }
 
     function createMenu (yPos:Int) {
-        // space for title
-        // fade out if clicked
+        final defeatTitle = new FlxSprite(camera.scroll.x, yPos + 8, AssetPaths.defeat_title__png);
+        defeatTitle.color = worldData[currentWorld].titleColor;
+        menuGroup.add(defeatTitle);
+
         menuGroup.add(new Button(Std.int(camera.scroll.x + 45), yPos + 56, Retry, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
@@ -585,7 +587,7 @@ class PlayState extends GameState {
         }));
         menuGroup.add(new Button(Std.int(camera.scroll.x + 82), yPos + 56, Quit, () -> {
             fadeOut(() -> {
-                FlxG.switchState(new PreState());
+                FlxG.switchState(new TitleState());
             });
         }));
     }

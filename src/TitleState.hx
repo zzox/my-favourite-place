@@ -7,7 +7,9 @@ import flixel.util.FlxTimer;
 import openfl.filters.ShaderFilter;
 
 class TitleState extends GameState {
-    var starting:Bool = false;
+    var started:Bool = false;
+    var leaving:Bool = false;
+    var aimer:FlxSprite;
 
     override public function create () {
         super.create();
@@ -34,22 +36,35 @@ class TitleState extends GameState {
         bg.scrollFactor.set(0, 0);
         add(bg);
 
-        add(new FlxSprite(0, 0, AssetPaths.title__png));
+        final title = new FlxSprite(0, 0, AssetPaths.title__png);
+        title.color = 0xff0d2030;
+        add(title);
 
-        new FlxTimer().start(1.0, (_:FlxTimer) -> {
+        new FlxTimer().start(1.5, (_:FlxTimer) -> {
             add(makeText('click', { x: 12, y: 54 }));
             add(makeText('to', { x: 12, y: 60 }));
             add(makeText('start', { x: 12, y: 66 }));
+            started = true;
         });
 
         final crtShader = new CrtShader();
         FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+
+        aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
+        aimer.offset.set(4, 4);
+        aimer.setSize(1, 1);
+        add(aimer);
     }
 
     override public function update (elapsed:Float) {
+        aimer.setPosition(
+            FlxG.camera.scroll.x + FlxG.mouse.screenX,
+            FlxG.camera.scroll.y + FlxG.mouse.screenY
+        );
+
         super.update(elapsed);
 
-        if (FlxG.mouse.justPressed && !starting) {
+        if (FlxG.mouse.justPressed && started && !leaving) {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
