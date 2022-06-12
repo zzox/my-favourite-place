@@ -56,8 +56,6 @@ typedef PlayerSkills = {
 class PlayState extends GameState {
     static inline final BULLET_POOL_SIZE:Int = 100;
     static inline final ROOM_HEIGHT:Int = 96;
-    static inline final CAMERA_DIFF:Int = 2000;
-    static inline final CAMERA_START_DIFF:Int = -90;
     static inline final MAX_DASHES:Int = 5; // can be changed, fine to go way over
     static inline final OVERLAP_CHECK_DISTANCE:Int = 5;
     static inline final BOUNDS_DISTANCE:Int = 4;
@@ -90,13 +88,12 @@ class PlayState extends GameState {
     var timer:FlxBitmapText;
     var roomNumber:FlxBitmapText;
 
-    // TEMP:
-    final SHOOT_VEL = 250;
-
     override public function create() {
         super.create();
 
         currentWorld = LDown;
+
+        final levelData = worldData[currentWorld];
 
         skills = {
             jumps: 1,
@@ -105,7 +102,7 @@ class PlayState extends GameState {
         }
 
         final bg = new FlxSprite(0, 0);
-        bg.makeGraphic(160, 90, worldData[currentWorld].bgColor);
+        bg.makeGraphic(160, 90, levelData.bgColor);
         bg.scrollFactor.set(0, 0);
         add(bg);
 
@@ -114,8 +111,9 @@ class PlayState extends GameState {
         crtShader = new CrtShader();
         FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
 
-        // MD;
-        camera.scroll.y = CAMERA_START_DIFF;
+        final cameraDiff = getScrollFromDir(levelData.fromStartDir);
+        camera.scroll.set(cameraDiff.x, cameraDiff.y);
+
         new FlxTimer().start(0.75, (_:FlxTimer) -> {
             createWorld();
 
@@ -386,14 +384,18 @@ class PlayState extends GameState {
         hitStop(0.5, () -> {
             final midpoint = player.getMidpoint();
             generateExplosion(midpoint.x, midpoint.y, 'pop-grey');
-            final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
+            final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
+            toPos.x *= 10;
+            toPos.y *= 10;
+            toPos.x += Std.int(camera.scroll.x);
+            toPos.y += Std.int(camera.scroll.y);
             for (c in dashCounters) {
                 c.destroy();
             }
-            createMenu(yPos);
+            createMenu(toPos);
             FlxTween.tween(
                 camera,
-                { 'scroll.y': yPos },
+                { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
                 1,
                 { ease: FlxEase.quadInOut, startDelay: 0.5 }
             );
@@ -401,17 +403,18 @@ class PlayState extends GameState {
     }
 
     function winLevel () {
-        trace('won!');
         player.die();
         transitioning = true;
-        final yPos = Std.int(FlxG.camera.y - CAMERA_DIFF);
+        final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
+        toPos.x += Std.int(camera.scroll.x);
+        toPos.y += Std.int(camera.scroll.y);
         for (c in dashCounters) {
             c.destroy();
         }
-        createMenu(yPos);
+        createMenu(toPos);
         FlxTween.tween(
             camera,
-            { 'scroll.y': yPos },
+            { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
             1,
             { ease: FlxEase.quadInOut, startDelay: 0.5 }
         );
@@ -575,18 +578,22 @@ class PlayState extends GameState {
         FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
     }
 
-    function createMenu (yPos:Int) {
-        final defeatTitle = new FlxSprite(camera.scroll.x, yPos + 8, AssetPaths.defeat_title__png);
+    function createMenu (point:IntPoint) {
+        final defeatTitle = new FlxSprite(point.x, point.y, AssetPaths.defeat_title__png);
         defeatTitle.color = worldData[currentWorld].titleColor;
         menuGroup.add(defeatTitle);
 
-        menuGroup.add(new Button(Std.int(camera.scroll.x + 45), yPos + 56, Retry, () -> {
+        FlxTween.tween(roomNumber, { x: 56, y: 44 });
+        FlxTween.tween(timer, { x: 12, y: 52 });
+
+        menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, Retry, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
         }));
-        menuGroup.add(new Button(Std.int(camera.scroll.x + 82), yPos + 56, Quit, () -> {
+        menuGroup.add(new Button(Std.int(point.x + 82), point.y + 68, Quit, () -> {
             fadeOut(() -> {
+                // TODO: menustats not titlestate
                 FlxG.switchState(new TitleState());
             });
         }));

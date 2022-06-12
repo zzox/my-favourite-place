@@ -76,7 +76,7 @@ class Boss extends FlxSprite {
         flipX = attackChoice.dir == Right;
         setPosition(attackChoice.startPos.x, attackChoice.startPos.y);
 
-        final chargeDelay = hp > 4 ? 1.0 : Math.random() < 0.5 ? 0.5 : 2.0;
+        final chargeDelay = hp > 4 ? 1.0 : hp % 2 == 0 ? 2.0 : 0.5;
 
         state = Attacking;
         FlxTween.tween(

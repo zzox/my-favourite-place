@@ -11,9 +11,15 @@ class Shooter {
     var shootAcc:IntPoint;
     var scene:PlayState;
 
-    public function new (shootTime:Float, offset:Float, pos:IntPoint, shootVel:IntPoint, shootAcc:IntPoint, scene:PlayState) {
+    public function new (
+        shootTime:Float,
+        offset:Float,
+        pos:IntPoint,
+        shootVel:IntPoint,
+        shootAcc:IntPoint,
+        scene:PlayState
+    ) {
         this.shootTime = shootTime;
-        // TODO: add a default or dynamic value?
         this.nextShootTime = offset;
         this.shootVel = shootVel;
         this.shootAcc = shootAcc;

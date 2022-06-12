@@ -1,5 +1,6 @@
 package util;
 
+import data.Constants;
 import flixel.FlxG;
 import flixel.math.FlxPoint;
 
@@ -37,4 +38,13 @@ function secondsToMinutes (time:Float):String {
 
 function timeToString (time:Float):String {
     return secondsToMinutes(time) + '.' + toDecimal(time);
+}
+
+function getScrollFromDir (dir:Dir):IntPoint {
+    return switch (dir) {
+        case Left: { x: -160, y: 0 };
+        case Right: { x: 160, y: 0 };
+        case Up: { x: 0, y: -90 };
+        case Down: { x: 0, y: 90 };
+    }
 }

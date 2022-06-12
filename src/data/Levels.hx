@@ -34,6 +34,9 @@ typedef WorldData = {
     var playerPath:String;
     var deathDirs:Array<Dir>;
     var winDir:Dir;
+    var fromStartDir:Dir;
+    var postWinDir:Dir;
+    var postLoseDir:Dir;
     // var hudColors:Array<Int>;
     var levels:Array<LevelData>;
 }
@@ -247,7 +250,10 @@ final worldData:Map<Worlds, WorldData> = [
         levels: outLevels,
         playerPath: AssetPaths.player__png,
         deathDirs: [],
-        winDir: Down
+        winDir: Down,
+        fromStartDir: Up,
+        postWinDir: Right,
+        postLoseDir: Up
     },
     LDown => {
         bgColor: 0xffffe9c5,
@@ -257,7 +263,10 @@ final worldData:Map<Worlds, WorldData> = [
         levels: downLevels,
         playerPath: AssetPaths.player__png,
         deathDirs: [],
-        winDir: Down
+        winDir: Down,
+        fromStartDir: Up,
+        postWinDir: Right,
+        postLoseDir: Up
     },
     LRight => {
         bgColor: 0xff0d2030,
@@ -268,6 +277,9 @@ final worldData:Map<Worlds, WorldData> = [
         levels: rightLevels,
         playerPath: AssetPaths.player_light__png,
         deathDirs: [Down],
-        winDir: Right
+        winDir: Right,
+        fromStartDir: Up,
+        postWinDir: Right,
+        postLoseDir: Up
     }
 ];
