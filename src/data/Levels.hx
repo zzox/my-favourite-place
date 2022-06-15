@@ -3,14 +3,15 @@ package data;
 import actors.Enemy;
 import data.Constants;
 
-enum Worlds {
-    LOut;
-    LDown;
-    LRight;
-    LUp;
-    LThrough;
-    LOver;
+enum abstract Worlds(String) to String {
+    var LOut = 'Out';
+    var LDown = 'Down';
+    var LRight = 'Right';
+    var LUp = 'Up';
+    var LThrough = 'Through';
+    var LOver = 'Over';
 }
+final levelList = [LOut, LDown, LRight, LUp, LThrough, LOver];
 
 typedef EnemyPlacement = {
     var type:EnemyType;
@@ -252,7 +253,7 @@ final worldData:Map<Worlds, WorldData> = [
         deathDirs: [],
         winDir: Down,
         fromStartDir: Up,
-        postWinDir: Right,
+        postWinDir: Down,
         postLoseDir: Up
     },
     LDown => {

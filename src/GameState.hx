@@ -1,25 +1,60 @@
+import display.CrtShader;
+import flixel.FlxG;
+import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
+import openfl.filters.ShaderFilter;
 
 class GameState extends FlxState {
     var cameraXScale:Float = 0.0;
     var cameraYScale:Float = 0.0;
+    var aimer:FlxSprite;
+    var crtShader:CrtShader;
 
     override public function create () {
         super.create();
 
+        // FlxG.mouse.visible = false;
+        // FlxG.mouse.useSystemCursor = true;
+
         camera.setScale(0, 0);
         FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
         FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
+
+        final crtShader = new CrtShader();
+        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
     }
 
     override public function update (elapsed:Float) {
+        aimer.setPosition(
+            FlxG.camera.scroll.x + FlxG.mouse.screenX,
+            FlxG.camera.scroll.y + FlxG.mouse.screenY
+        );
+
         super.update(elapsed);
+
+        if (FlxG.keys.justPressed.P) {
+            if (crtShader == null) {
+                crtShader = new CrtShader();
+                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+            } else {
+                crtShader = null;
+                FlxG.camera.setFilters([]);
+            }
+        }
 
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
             camera.setScale(cameraXScale, cameraYScale);
         }
+    }
+
+    // so the child classes can add the aimer after other items
+    function addAimer () {
+        aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
+        aimer.offset.set(4, 4);
+        aimer.setSize(1, 1);
+        add(aimer);
     }
 
     function fadeOut (callback:Void -> Void) {

@@ -4,9 +4,9 @@ import actors.Player;
 import actors.Shooter;
 import actors.SpritesGroup;
 import data.Constants;
+import data.Game;
 import data.Levels;
 import display.Button;
-import display.CrtShader;
 import display.Font;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -71,12 +71,10 @@ class PlayState extends GameState {
     var explosions:FlxTypedGroup<Explosion>;
     var powerups:FlxTypedGroup<Powerup>;
     var boss:Boss;
-    var aimer:FlxSprite;
     var spritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
     var dashCounters:Array<FlxSprite>;
 
-    var crtShader:CrtShader;
     var screenPoint:IntPoint;
 
     var stoppedTime:Float = 0.0;
@@ -91,7 +89,7 @@ class PlayState extends GameState {
     override public function create() {
         super.create();
 
-        currentWorld = LDown;
+        currentWorld = Game.inst.currentWorld;
 
         final levelData = worldData[currentWorld];
 
@@ -107,9 +105,6 @@ class PlayState extends GameState {
         add(bg);
 
         spritesGroup = new SpritesGroup();
-
-        crtShader = new CrtShader();
-        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
 
         final cameraDiff = getScrollFromDir(levelData.fromStartDir);
         camera.scroll.set(cameraDiff.x, cameraDiff.y);
@@ -132,7 +127,7 @@ class PlayState extends GameState {
     }
 
     override public function update(elapsed:Float) {
-        positionAimer();
+        // positionAimer();
         super.update(elapsed);
 
         // TODO: add other moving Flx items to `spritesGroup`
@@ -145,16 +140,6 @@ class PlayState extends GameState {
             levelTime += elapsed;
             timer.text = timeToString(levelTime);
             updateDashCounter();
-        }
-
-        if (FlxG.keys.justPressed.P) {
-            if (crtShader == null) {
-                crtShader = new CrtShader();
-                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
-            } else {
-                crtShader = null;
-                FlxG.camera.setFilters([]);
-            }
         }
 
         if (currentRoom == null) {
@@ -392,7 +377,7 @@ class PlayState extends GameState {
             for (c in dashCounters) {
                 c.destroy();
             }
-            createMenu(toPos);
+            createMenu(toPos, false);
             FlxTween.tween(
                 camera,
                 { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
@@ -411,7 +396,8 @@ class PlayState extends GameState {
         for (c in dashCounters) {
             c.destroy();
         }
-        createMenu(toPos);
+        roomNumber.visible = false;
+        createMenu(toPos, true);
         FlxTween.tween(
             camera,
             { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
@@ -550,13 +536,6 @@ class PlayState extends GameState {
         expl.play(x, y, anim);
     }
 
-    function positionAimer () {
-        if (aimer != null) {
-            aimer.x = FlxG.camera.scroll.x + FlxG.mouse.screenX;
-            aimer.y = FlxG.camera.scroll.y + FlxG.mouse.screenY;
-        }
-    }
-
     function createTileLayer (world:LdtkWorld, levelName:String, layerName:String, offset:IntPoint):Null<NamedMap> {
         final layerData = world.levels[levelName].layers[layerName];
         if (layerData != null) {
@@ -578,13 +557,17 @@ class PlayState extends GameState {
         FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
     }
 
-    function createMenu (point:IntPoint) {
-        final defeatTitle = new FlxSprite(point.x, point.y, AssetPaths.defeat_title__png);
-        defeatTitle.color = worldData[currentWorld].titleColor;
-        menuGroup.add(defeatTitle);
+    function createMenu (point:IntPoint, win:Bool) {
+        final resultTitle = new FlxSprite(
+            point.x,
+            point.y,
+            win ? AssetPaths.escape_title__png : AssetPaths.defeat_title__png
+        );
+        resultTitle.color = worldData[currentWorld].titleColor;
+        menuGroup.add(resultTitle);
 
-        FlxTween.tween(roomNumber, { x: 56, y: 44 });
-        FlxTween.tween(timer, { x: 12, y: 52 });
+        FlxTween.tween(roomNumber, { x: 64, y: 44 });
+        FlxTween.tween(timer, { x: 20, y: 52 });
 
         menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, Retry, () -> {
             fadeOut(() -> {
@@ -731,11 +714,7 @@ class PlayState extends GameState {
 
         createHud();
 
-        aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
-        aimer.offset.set(4, 4);
-        aimer.setSize(1, 1);
-        add(aimer);
-        positionAimer();
+        addAimer();
     }
 
     function createHud () {

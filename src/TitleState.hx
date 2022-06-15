@@ -9,7 +9,6 @@ import openfl.filters.ShaderFilter;
 class TitleState extends GameState {
     var started:Bool = false;
     var leaving:Bool = false;
-    var aimer:FlxSprite;
 
     override public function create () {
         super.create();
@@ -47,26 +46,15 @@ class TitleState extends GameState {
             started = true;
         });
 
-        final crtShader = new CrtShader();
-        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
-
-        aimer = new FlxSprite(0, 0, AssetPaths.aimer__png);
-        aimer.offset.set(4, 4);
-        aimer.setSize(1, 1);
-        add(aimer);
+        addAimer();
     }
 
     override public function update (elapsed:Float) {
-        aimer.setPosition(
-            FlxG.camera.scroll.x + FlxG.mouse.screenX,
-            FlxG.camera.scroll.y + FlxG.mouse.screenY
-        );
-
         super.update(elapsed);
 
         if (FlxG.mouse.justPressed && started && !leaving) {
             fadeOut(() -> {
-                FlxG.switchState(new PlayState());
+                FlxG.switchState(new MenuState());
             });
         }
     }
