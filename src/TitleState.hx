@@ -53,6 +53,7 @@ class TitleState extends GameState {
         super.update(elapsed);
 
         if (FlxG.mouse.justPressed && started && !leaving) {
+            leaving = true;
             fadeOut(() -> {
                 FlxG.switchState(new MenuState());
             });

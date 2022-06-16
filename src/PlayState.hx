@@ -364,12 +364,13 @@ class PlayState extends GameState {
     }
 
     function loseLevel () {
-        transitioning = true;
         player.die();
+        transitioning = true;
+        Game.inst.loseLevel(currentWorld, levelTime);
         hitStop(0.5, () -> {
             final midpoint = player.getMidpoint();
             generateExplosion(midpoint.x, midpoint.y, 'pop-grey');
-            final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
+            final toPos = getScrollFromDir(worldData[currentWorld].postLoseDir);
             toPos.x *= 10;
             toPos.y *= 10;
             toPos.x += Std.int(camera.scroll.x);
@@ -390,6 +391,8 @@ class PlayState extends GameState {
     function winLevel () {
         player.die();
         transitioning = true;
+        // TODO: show star for new best?
+        Game.inst.winLevel(currentWorld, levelTime);
         final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
         toPos.x += Std.int(camera.scroll.x);
         toPos.y += Std.int(camera.scroll.y);
@@ -520,6 +523,7 @@ class PlayState extends GameState {
         numEnemiesKilled = 0;
         for (enemy in rooms[currentRoom].enemies) {
             enemy.active = true;
+            enemy.visible = true;
         }
         for (shooter in rooms[currentRoom].shooters) {
             shooter.active = true;
@@ -569,15 +573,14 @@ class PlayState extends GameState {
         FlxTween.tween(roomNumber, { x: 64, y: 44 });
         FlxTween.tween(timer, { x: 20, y: 52 });
 
-        menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, Retry, () -> {
+        menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, win ? Next : Retry, () -> {
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
         }));
         menuGroup.add(new Button(Std.int(point.x + 82), point.y + 68, Quit, () -> {
             fadeOut(() -> {
-                // TODO: menustats not titlestate
-                FlxG.switchState(new TitleState());
+                FlxG.switchState(new MenuState());
             });
         }));
     }

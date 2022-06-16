@@ -28,7 +28,7 @@ class MenuButton extends FlxSprite {
         animation.add('hover', [1]);
         animation.add('down', [2]);
 
-        text = makeText('$num: $world', { x: x, y: y });
+        text = makeText('$num: $world', { x: x, y: y + 1 });
         text.autoSize = false;
         text.width = text.fieldWidth = 60;
         text.alignment = FlxTextAlign.CENTER;

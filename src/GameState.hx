@@ -27,10 +27,12 @@ class GameState extends FlxState {
     }
 
     override public function update (elapsed:Float) {
-        aimer.setPosition(
-            FlxG.camera.scroll.x + FlxG.mouse.screenX,
-            FlxG.camera.scroll.y + FlxG.mouse.screenY
-        );
+        if (aimer != null) {
+            aimer.setPosition(
+                FlxG.camera.scroll.x + FlxG.mouse.screenX,
+                FlxG.camera.scroll.y + FlxG.mouse.screenY
+            );
+        }
 
         super.update(elapsed);
 

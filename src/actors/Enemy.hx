@@ -40,6 +40,7 @@ class Enemy extends FlxSprite {
         velocity.set(vel.x, vel.y);
 
         active = false;
+        visible = false;
         this.type = type;
         this.scene = scene;
         animation.play(type);
@@ -75,23 +76,25 @@ class Enemy extends FlxSprite {
                 }
                 if (velocity.x < 0) {
                     if (x < startingPoint.x - 200) {
-                        if (attacking) {
-                            setPosition(startingPoint.x, startingPoint.y);
-                            attacking = false;
-                        } else {
-                            x = startingPoint.x;
-                        }
-                        velocity.set(startingVel.x, startingVel.y);
+                        // if (attacking) {
+                        //     setPosition(startingPoint.x, startingPoint.y);
+                        //     attacking = false;
+                        // } else {
+                            // x = startingPoint.x;
+                        // }
+                        animation.play(Bird);
+                        velocity.set(-startingVel.x, startingVel.y);
                     }
                 } else if (velocity.x > 0) {
                     if (x > startingPoint.x + 200) {
-                        if (attacking) {
-                            setPosition(startingPoint.x, startingPoint.y);
-                            attacking = false;
-                        } else {
-                            x = startingPoint.x;
-                        }
-                        velocity.set(startingVel.x, startingVel.y);
+                        // if (attacking) {
+                        //     setPosition(startingPoint.x, startingPoint.y);
+                        //     attacking = false;
+                        // } else {
+                            // x = startingPoint.x;
+                        // }
+                        animation.play(Bird);
+                        velocity.set(-startingVel.x, startingVel.y);
                     }
                 }
         }

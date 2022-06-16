@@ -18,7 +18,9 @@ class MenuState extends GameState {
         for (i in 0...levelList.length) {
             final item = levelList[i];
 
+            // TODO:
             // check if the level before is complete,
+            // move buttons down?
             final button = new MenuButton(
                 i % 2 == 0 ? 16 : 82,
                 Math.floor(i / 2) * 20 + 8,

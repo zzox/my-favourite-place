@@ -192,9 +192,15 @@ final rightLevels = [{
     isOpen: true,
     exits: [Right => 2],
     shooters: [{
-        time: 2.0,
+        time: 1.5,
         offset: 0.5,
-        position: { x: 77, y: 96 },
+        position: { x: 100, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 1.25,
+        position: { x: 60, y: 96 },
         velocity: { x: 0, y: -240 },
         acceleration: { x: 0, y: 480 },
     }]
@@ -213,6 +219,67 @@ final rightLevels = [{
     exits: [Right => 4],
     shooters: [{
         time: 1.5,
+        offset: 0.0,
+        position: { x: 48, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 0.25,
+        position: { x: 64, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 0.5,
+        position: { x: 80, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 0.75,
+        position: { x: 96, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 1.5,
+        offset: 1.0,
+        position: { x: 112, y: 96 },
+        velocity: { x: 0, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }]
+}, {
+    roomNumber: '4',
+    isOpen: false,
+    exits: [Right => 5],
+    enemies: [{
+        // type: Bird,
+        // pos: { x: 168, y: 0 },
+        // vel: { x: -120, y: 30 }
+    // }, {
+        type: Bird,
+        pos: { x: -24, y: 0 },
+        vel: { x: 120, y: 30 }
+    }]
+}, {
+    roomNumber: '5',
+    isOpen: true,
+    exits: [Right => 6]
+}, {
+    roomNumber: '6',
+    isOpen: false,
+    exits: [Right => 7],
+    enemies: [{
+        type: Bird,
+        pos: { x: 168, y: 0 },
+        vel: { x: -120, y: 30 }
+    }, {
+        type: Bird,
+        pos: { x: -24, y: 0 },
+        vel: { x: 120, y: 30 }
+    }],
+    shooters: [{
+        time: 1.5,
         offset: 0.5,
         position: { x: 100, y: 96 },
         velocity: { x: 0, y: -240 },
@@ -225,20 +292,8 @@ final rightLevels = [{
         acceleration: { x: 0, y: 480 },
     }]
 }, {
-    roomNumber: '4',
-    isOpen: true,
-    exits: [Right => 5]
-}, {
-    roomNumber: '5',
-    isOpen: true,
-    exits: [Right => 6]
-}, {
-    roomNumber: '6',
-    isOpen: true,
-    exits: [Right => 7]
-}, {
     roomNumber: '7',
-    isOpen: true,
+    isOpen: false,
     exits: new Map()
 }];
 
@@ -281,6 +336,6 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Right,
         fromStartDir: Up,
         postWinDir: Right,
-        postLoseDir: Up
+        postLoseDir: Left
     }
 ];

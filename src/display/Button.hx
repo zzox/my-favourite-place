@@ -6,6 +6,7 @@ import haxe.Constraints.Function;
 
 enum ButtonType {
     Retry;
+    Next;
     Quit;
 }
 
@@ -19,14 +20,19 @@ class Button extends FlxSprite {
         super(x, y);
 
         loadGraphic(AssetPaths.buttons__png, true, 33, 13);
+        // yeah, these could be better made like the menu buttons
         if (type == Retry) {
             animation.add('normal', [0]);
             animation.add('hover', [1]);
             animation.add('down', [2]);
-        } else {
+        } else if (type == Next) {
             animation.add('normal', [3]);
             animation.add('hover', [4]);
             animation.add('down', [5]);
+        } else {
+            animation.add('normal', [6]);
+            animation.add('hover', [7]);
+            animation.add('down', [8]);
         }
 
         this.callback = callback;

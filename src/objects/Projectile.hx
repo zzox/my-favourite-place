@@ -25,7 +25,7 @@ class Projectile extends FlxSprite {
 
     public function shoot (x:Float, y:Float, vel:IntPoint, acc:IntPoint) {
         // MD: ???
-        final size = { x: 6, y: 6 };
+        final size = { x: 8, y: 8 };
 
         exists = true;
         alive = true; // needed?
