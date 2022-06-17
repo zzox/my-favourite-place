@@ -82,7 +82,7 @@ class Enemy extends FlxSprite {
                         // } else {
                             // x = startingPoint.x;
                         // }
-                        animation.play(Bird);
+                        attacking = false;
                         velocity.set(-startingVel.x, startingVel.y);
                     }
                 } else if (velocity.x > 0) {
@@ -93,7 +93,7 @@ class Enemy extends FlxSprite {
                         // } else {
                             // x = startingPoint.x;
                         // }
-                        animation.play(Bird);
+                        attacking = false;
                         velocity.set(-startingVel.x, startingVel.y);
                     }
                 }

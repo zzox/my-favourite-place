@@ -1,4 +1,6 @@
 import actors.Boss;
+import actors.BossOne;
+import actors.BossTwo;
 import actors.Enemy;
 import actors.Player;
 import actors.Shooter;
@@ -176,9 +178,15 @@ class PlayState extends GameState {
 
         // HACK: delete this!
         if (FlxG.keys.justPressed.G) {
-            player.setPosition(72, 688);
-            currentRoom = 8;
-            moveRoom(Down);
+            if (currentWorld == LDown) {
+                player.setPosition(72, 688);
+                currentRoom = 8;
+                moveRoom(Down);
+            } else if (currentWorld == LRight) {
+                player.setPosition(1120, 72);
+                currentRoom = 6;
+                moveRoom(Right);
+            }
         }
     }
 
@@ -532,6 +540,7 @@ class PlayState extends GameState {
         roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
         if (currentWorld != LOut && currentRoom == rooms.length - 1) {
             boss.active = true;
+            boss.visible = true;
         }
     }
 
@@ -683,8 +692,11 @@ class PlayState extends GameState {
             };
         }
 
-        if (currentWorld != LOut) {
-            boss = new Boss(this);
+        if (currentWorld == LDown) {
+            boss = new BossOne(this);
+        } else if (currentWorld == LRight) {
+            // new boss here
+            boss = new BossTwo(this);
         }
 
         spritesGroup.add(powerups);
