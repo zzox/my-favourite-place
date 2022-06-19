@@ -117,7 +117,7 @@ class BossTwo extends Boss {
         reversing = true;
         velocity.x = -velocity.x;
         if (state == Scanning) {
-            currentScanPosition = --currentScanPosition % 2;
+            currentScanPosition = Std.int(Math.abs(--currentScanPosition % 2));
         }
     }
 }

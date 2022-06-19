@@ -169,6 +169,9 @@ class PlayState extends GameState {
             }
 
             FlxG.collide(projectiles, player.body, projHitPlayer);
+            player.leftFootColliding = overlapCheck(player.leftFoot);
+            player.rightFootColliding = overlapCheck(player.rightFoot);
+            FlxG.collide(projectiles, player.body, projHitPlayer);
             FlxG.overlap(enemies, player.body, enemyHitPlayer);
             FlxG.overlap(boss, player.body, bossHitPlayer);
             FlxG.overlap(powerups, player.body, playerGetPowerup);
@@ -295,7 +298,7 @@ class PlayState extends GameState {
     **/
     function dashOverlapCheck () {
         // TODO: if this doesn't work, collideCheck() works ok
-        if (overlapCheck()) {
+        if (overlapCheck(player)) {
             final origPlayerPos = { x: player.x, y: player.y };
             // xMajor is moving more on the x axis than the y
             final xMajor = Math.abs(player.velocity.x) > Math.abs(player.velocity.y);
@@ -312,7 +315,7 @@ class PlayState extends GameState {
                         player.x = origPlayerPos.x + i;
                     }
 
-                    if (!overlapCheck()) {
+                    if (!overlapCheck(player)) {
                         // trace('overlaps plus', i, xMajor ? 'on y' : 'on x');
                         return;
                     }
@@ -323,7 +326,7 @@ class PlayState extends GameState {
                         player.x = origPlayerPos.x - i;
                     }
 
-                    if (!overlapCheck()) {
+                    if (!overlapCheck(player)) {
                         // trace('overlaps minus ', i, xMajor ? 'on y' : 'on x');
                         return;
                     }
@@ -338,10 +341,10 @@ class PlayState extends GameState {
         }
     }
 
-    function overlapCheck ():Bool {
-        return rooms[currentRoom].collide.overlaps(player) ||
-        (rooms[currentRoom].inPlugs.alive && rooms[currentRoom].inPlugs.overlaps(player)) ||
-        (rooms[currentRoom].outPlugs.alive && rooms[currentRoom].outPlugs.overlaps(player));
+    function overlapCheck (sprite:FlxSprite):Bool {
+        return sprite != null && (rooms[currentRoom].collide.overlaps(sprite) ||
+        (rooms[currentRoom].inPlugs.alive && rooms[currentRoom].inPlugs.overlaps(sprite)) ||
+        (rooms[currentRoom].outPlugs.alive && rooms[currentRoom].outPlugs.overlaps(sprite)));
     }
 
     function collideCheck () {
@@ -706,6 +709,8 @@ class PlayState extends GameState {
         player = new Player(world.start.x, world.start.y, this, worldData[currentWorld].playerPath);
         spritesGroup.add(player);
         spritesGroup.add(player.body);
+        spritesGroup.add(player.leftFoot);
+        spritesGroup.add(player.rightFoot);
 
         projectiles = new FlxTypedGroup<Projectile>(BULLET_POOL_SIZE);
         for (_ in 0...BULLET_POOL_SIZE) {

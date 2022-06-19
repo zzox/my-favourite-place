@@ -67,6 +67,11 @@ class Player extends FlxSprite {
     var trail:FlxTrail;
 
     public var body:FlxSprite;
+    public var leftFoot:FlxSprite;
+    public var rightFoot:FlxSprite;
+
+    public var leftFootColliding:Bool = false;
+    public var rightFootColliding:Bool = false;
 
     public function new (x:Float, y:Float, scene:PlayState, spritePath:String) {
         super(x, y);
@@ -81,11 +86,20 @@ class Player extends FlxSprite {
         // body.alpha = 0.7;
         body.visible = false;
 
+        leftFoot = new FlxSprite();
+        leftFoot.makeGraphic(3, 12, 0xff0000ff);
+        // leftFoot.alpha = 0.7;
+        leftFoot.visible = false;
+
+        rightFoot = new FlxSprite();
+        rightFoot.makeGraphic(3, 12, 0xffff0000);
+        // rightFoot.alpha = 0.7;
+        rightFoot.visible = false;
+
         animation.add('stand', [0]);
-        animation.add('stand-shoot', [1]);
-        animation.add('run', [0, 2, 2, 3, 3], 24);
-        animation.add('in-air', [2, 2, 3, 3, 3], 12);
-        animation.add('in-air-shoot', [4]);
+        animation.add('run', [0, 1, 1, 2, 2], 24);
+        animation.add('in-air', [1, 1, 2, 2, 2], 12);
+        animation.add('teetering', [3, 4], 4);
 
         stretchDownSnapper = new Snapper(
             this,
@@ -225,6 +239,8 @@ class Player extends FlxSprite {
 
         super.update(elapsed);
         body.setPosition(x, y);
+        leftFoot.setPosition(x, y + 1);
+        rightFoot.setPosition(x + 3, y + 1);
     }
 
     function dash () {
@@ -316,6 +332,20 @@ class Player extends FlxSprite {
     }
 
     function handleAnimation (touchingFloor:Bool) {
+        if (velocity.x == 0 && velocity.y == 0) {
+            if (leftFootColliding && !rightFootColliding) {
+                flipX = false;
+                animation.play('teetering');
+                return;
+            }
+
+            if (!leftFootColliding && rightFootColliding) {
+                flipX = true;
+                animation.play('teetering');
+                return;
+            }
+        }
+
         if (touchingFloor) {
             if (acceleration.x != 0) {
                 animation.play('run');
