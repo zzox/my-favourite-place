@@ -77,7 +77,7 @@ class PlayState extends GameState {
     var menuGroup:FlxGroup;
     var dashCounters:Array<FlxSprite>;
 
-    var screenPoint:IntPoint;
+    public var screenPoint:IntPoint;
 
     var stoppedTime:Float = 0.0;
     var levelTime:Float = 0.0;

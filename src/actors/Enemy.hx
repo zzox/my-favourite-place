@@ -75,24 +75,12 @@ class Enemy extends FlxSprite {
                     attacking = true;
                 }
                 if (velocity.x < 0) {
-                    if (x < startingPoint.x - 200) {
-                        // if (attacking) {
-                        //     setPosition(startingPoint.x, startingPoint.y);
-                        //     attacking = false;
-                        // } else {
-                            // x = startingPoint.x;
-                        // }
+                    if (x < scene.screenPoint.x - 32) {
                         attacking = false;
                         velocity.set(-startingVel.x, startingVel.y);
                     }
                 } else if (velocity.x > 0) {
-                    if (x > startingPoint.x + 200) {
-                        // if (attacking) {
-                        //     setPosition(startingPoint.x, startingPoint.y);
-                        //     attacking = false;
-                        // } else {
-                            // x = startingPoint.x;
-                        // }
+                    if (x > scene.screenPoint.x + 192) {
                         attacking = false;
                         velocity.set(-startingVel.x, startingVel.y);
                     }

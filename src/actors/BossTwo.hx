@@ -61,6 +61,7 @@ class BossTwo extends Boss {
                 if ((x < 1088 && currentAttackDirection == Left) ||
                     (x > 1280 && currentAttackDirection == Right)
                 ) {
+                    currentScanPosition = ++currentScanPosition % 2;
                     startScan();
                 } else if ((x < 1088 && currentAttackDirection == Right) ||
                     (x > 1280 && currentAttackDirection == Left)
