@@ -253,10 +253,6 @@ final rightLevels = [{
     isOpen: false,
     exits: [Right => 5],
     enemies: [{
-        // type: Bird,
-        // pos: { x: 168, y: 0 },
-        // vel: { x: -120, y: 30 }
-    // }, {
         type: Bird,
         pos: { x: -24, y: 0 },
         vel: { x: 120, y: 30 }
@@ -297,12 +293,116 @@ final rightLevels = [{
     exits: new Map()
 }];
 
+final upLevels = [{
+    roomNumber: '0',
+    isOpen: true,
+    exits: [Up => 1],
+    powerups: [{
+        type: PlusOneDash,
+        pos: { x: 136, y: 66 }
+    }]
+}, {
+    roomNumber: '1',
+    isOpen: false,
+    exits: [Up => 2],
+    powerups: [], // this is needed for some insane haxe reason
+    enemies: [{
+        type: OutdoorGremlin,
+        pos: { x: -32, y: 0 },
+        vel: { x: 240, y: 15 }
+    }, {
+        type: OutdoorGremlin,
+        pos: { x: 240, y: 0 },
+        vel: { x: -240, y: 15 }
+    }]
+}, {
+    roomNumber: '2',
+    isOpen: true,
+    exits: [Up => 3]
+}, {
+    roomNumber: '3',
+    isOpen: true,
+    exits: [Up => 4],
+    shooters: [{
+        time: 2.0,
+        offset: 1.0,
+        position: { x: 192, y: 72 },
+        velocity: { x: -120, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 2.0,
+        offset: 2.0,
+        position: { x: -32, y: 72 },
+        velocity: { x: 120, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }]
+}, {
+    roomNumber: '4',
+    isOpen: false,
+    exits: [Up => 5],
+    enemies: [{
+        type: OutdoorGremlin,
+        pos: { x: -32, y: -16 },
+        vel: { x: 240, y: 120 }
+    }, {
+        type: OutdoorGremlin,
+        pos: { x: 216, y: -36 },
+        vel: { x: -240, y: 120 }
+    }]
+}, {
+    roomNumber: '5',
+    isOpen: true,
+    exits: [Up => 6],
+    shooters: [{
+        time: 2.0,
+        offset: 1.0,
+        position: { x: 192, y: 80 },
+        velocity: { x: -90, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    }, {
+        time: 2.0,
+        offset: 2.0,
+        position: { x: -32, y: 80 },
+        velocity: { x: 90, y: -240 },
+        acceleration: { x: 0, y: 480 },
+    // }, {
+    //     time: 2.0,
+    //     offset: 1.0,
+    //     position: { x: 192, y: 64 },
+    //     velocity: { x: -180, y: -240 },
+    //     acceleration: { x: 0, y: 480 },
+    // }, {
+    //     time: 2.0,
+    //     offset: 2.0,
+    //     position: { x: -32, y: 64 },
+    //     velocity: { x: 180, y: -240 },
+    //     acceleration: { x: 0, y: 480 },
+    }]
+}, {
+    roomNumber: '6',
+    isOpen: false,
+    exits: [Up => 7],
+    enemies: [{
+        type: OutdoorGremlin,
+        pos: { x: -32, y: 0 },
+        vel: { x: 240, y: 15 }
+    }, {
+        type: OutdoorGremlin,
+        pos: { x: 240, y: 0 },
+        vel: { x: -240, y: 15 }
+    }]
+}, {
+    roomNumber: '7',
+    isOpen: false,
+    exits: new Map()
+}];
+
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
         titleColor: 0xff0d2030,
         path: AssetPaths.out__ldtk,
-        start: { x: 48, y: 24 },
+        start: { x: 16, y: 80 },
         levels: outLevels,
         playerPath: AssetPaths.player__png,
         deathDirs: [],
@@ -337,5 +437,18 @@ final worldData:Map<Worlds, WorldData> = [
         fromStartDir: Up,
         postWinDir: Right,
         postLoseDir: Left
+    },
+    LUp => {
+        bgColor: 0xff9ba0ef,
+        titleColor: 0xff0d2030,
+        path: AssetPaths.up__ldtk,
+        start: { x: 24, y: 66 },
+        levels: upLevels,
+        playerPath: AssetPaths.player__png,
+        deathDirs: [],
+        winDir: Right,
+        fromStartDir: Left,
+        postWinDir: Right,
+        postLoseDir: Down
     }
 ];

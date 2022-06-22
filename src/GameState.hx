@@ -1,3 +1,4 @@
+import data.Game;
 import display.CrtShader;
 import flixel.FlxG;
 import flixel.FlxSprite;
@@ -22,8 +23,10 @@ class GameState extends FlxState {
         FlxTween.tween(this, { cameraXScale: 1.0 }, 0.5, { ease: FlxEase.circIn });
         FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
 
-        final crtShader = new CrtShader();
-        FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+        if (Game.inst.options.crtFilter) {
+            final crtShader = new CrtShader();
+            FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+        }
     }
 
     override public function update (elapsed:Float) {
@@ -37,12 +40,14 @@ class GameState extends FlxState {
         super.update(elapsed);
 
         if (FlxG.keys.justPressed.P) {
-            if (crtShader == null) {
-                crtShader = new CrtShader();
-                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
-            } else {
+            if (crtShader != null) {
                 crtShader = null;
                 FlxG.camera.setFilters([]);
+                Game.inst.options.crtFilter = false;
+            } else {
+                crtShader = new CrtShader();
+                FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
+                Game.inst.options.crtFilter = true;
             }
         }
 

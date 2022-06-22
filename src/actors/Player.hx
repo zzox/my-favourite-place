@@ -51,9 +51,6 @@ class Player extends FlxSprite {
     var airTime:Float = 0.0;
     var stretchDownSnapper:Snapper;
 
-    var reloadTime:Float = 0.5;
-    var lastShotTime:Float = 0.0;
-
     var dashPressedTime:Float = DASH_BUFFER;
     public var dashes:Int = 0;
     public var dashing:Bool = false;
@@ -87,13 +84,13 @@ class Player extends FlxSprite {
         body.visible = false;
 
         leftFoot = new FlxSprite();
-        leftFoot.makeGraphic(3, 12, 0xff0000ff);
-        // leftFoot.alpha = 0.7;
+        leftFoot.makeGraphic(3, 6, 0xff0000ff);
+        // leftFoot.alpha = 0.5;
         leftFoot.visible = false;
 
         rightFoot = new FlxSprite();
-        rightFoot.makeGraphic(3, 12, 0xffff0000);
-        // rightFoot.alpha = 0.7;
+        rightFoot.makeGraphic(3, 6, 0xffff0000);
+        // rightFoot.alpha = 0.5;
         rightFoot.visible = false;
 
         animation.add('stand', [0]);
@@ -131,9 +128,6 @@ class Player extends FlxSprite {
         jumpPressedTime += elapsed;
         // time into the jump, how long have we been jumping
         jumpTime -= elapsed;
-
-        // time until we can shoot again.
-        lastShotTime -= elapsed;
 
         dashPressedTime += elapsed;
         dashTime -= elapsed;
@@ -239,8 +233,8 @@ class Player extends FlxSprite {
 
         super.update(elapsed);
         body.setPosition(x, y);
-        leftFoot.setPosition(x, y + 1);
-        rightFoot.setPosition(x + 3, y + 1);
+        leftFoot.setPosition(x, y + 7);
+        rightFoot.setPosition(x + 3, y + 7);
     }
 
     function dash () {
@@ -269,6 +263,10 @@ class Player extends FlxSprite {
         }
         postDashTime = POST_DASH_TIME;
         elasticity = 0;
+    }
+
+    public function cancelDash () {
+        dashPressedTime = DASH_BUFFER;
     }
 
     // checks inputs and updates state.

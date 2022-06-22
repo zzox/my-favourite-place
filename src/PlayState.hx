@@ -1,5 +1,6 @@
 import actors.Boss;
 import actors.BossOne;
+import actors.BossThree;
 import actors.BossTwo;
 import actors.Enemy;
 import actors.Player;
@@ -84,6 +85,7 @@ class PlayState extends GameState {
 
     var numEnemiesKilled:Int = 0;
     public var transitioning:Bool = true;
+    var over:Bool = false;
 
     var timer:FlxBitmapText;
     var roomNumber:FlxBitmapText;
@@ -190,6 +192,10 @@ class PlayState extends GameState {
                 currentRoom = 6;
                 moveRoom(Right);
             }
+        }
+
+        if (FlxG.keys.justPressed.ESCAPE && !over) {
+            loseLevel();
         }
     }
 
@@ -356,7 +362,12 @@ class PlayState extends GameState {
     public function enemyDie () {
         numEnemiesKilled++;
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
-            generateExplosion(80, screenPoint.y + 84, 'warn');
+            if (currentWorld == LUp) {
+                generateExplosion(80, screenPoint.y + 10, 'warn', 180);
+            } else {
+                generateExplosion(80, screenPoint.y + 84, 'warn');
+            }
+
             new FlxTimer().start(1, (_:FlxTimer) -> {
                 rooms[currentRoom].outPlugs.destroy();
                 rooms[currentRoom].outPlugs.alive = false;
@@ -368,7 +379,8 @@ class PlayState extends GameState {
     }
 
     public function bossDie () {
-        generateExplosion(80, screenPoint.y + 84, 'warn');
+        // TODO: bunch of explosions with hitstop
+        // generateExplosion(80, screenPoint.y + 84, 'warn');
         new FlxTimer().start(1, (_:FlxTimer) -> {
             rooms[currentRoom].outPlugs.destroy();
         });
@@ -376,6 +388,7 @@ class PlayState extends GameState {
 
     function loseLevel () {
         player.die();
+        over = true;
         transitioning = true;
         Game.inst.loseLevel(currentWorld, levelTime);
         hitStop(0.5, () -> {
@@ -401,6 +414,7 @@ class PlayState extends GameState {
 
     function winLevel () {
         player.die();
+        over = true;
         transitioning = true;
         // TODO: show star for new best?
         Game.inst.winLevel(currentWorld, levelTime);
@@ -440,11 +454,13 @@ class PlayState extends GameState {
 
         if (player.x < screenPoint.x) {
             moveRoom(Left);
+            player.flipX = false;
             return;
         }
 
         if (player.x + player.width > screenPoint.x + 160) {
             moveRoom(Right);
+            player.flipX = true;
             return;
         }
 
@@ -531,6 +547,7 @@ class PlayState extends GameState {
     function finishMovingRoom () {
         transitioning = false;
         setBounds();
+        player.cancelDash();
         numEnemiesKilled = 0;
         for (enemy in rooms[currentRoom].enemies) {
             enemy.active = true;
@@ -547,9 +564,9 @@ class PlayState extends GameState {
         }
     }
 
-    public function generateExplosion (x:Float, y:Float, anim:String) {
+    public function generateExplosion (x:Float, y:Float, anim:String, ?angle = 0.0) {
         final expl = explosions.getFirstAvailable();
-        expl.play(x, y, anim);
+        expl.play(x, y, anim, angle);
     }
 
     function createTileLayer (world:LdtkWorld, levelName:String, layerName:String, offset:IntPoint):Null<NamedMap> {
@@ -700,6 +717,8 @@ class PlayState extends GameState {
         } else if (currentWorld == LRight) {
             // new boss here
             boss = new BossTwo(this);
+        } else if (currentWorld == LUp) {
+            boss = new BossThree(this);
         }
 
         spritesGroup.add(powerups);

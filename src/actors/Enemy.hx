@@ -9,6 +9,7 @@ enum abstract EnemyType(String) to String {
     var Gremlin;
     var FastGremlin;
     var Bird;
+    var OutdoorGremlin;
 }
 
 class Enemy extends FlxSprite {
@@ -36,6 +37,7 @@ class Enemy extends FlxSprite {
         animation.add(FastGremlin, [2, 3], 4);
         animation.add(Bird, [4, 4, 5], 4);
         animation.add('$Bird-attack', [6]);
+        animation.add(OutdoorGremlin, [7, 8], 6);
 
         velocity.set(vel.x, vel.y);
 
@@ -49,22 +51,41 @@ class Enemy extends FlxSprite {
     override public function update (elapsed:Float) {
         switch (type) {
             case Gremlin:
+                // if (velocity.x < 0) {
+                //     if (x < -32) {
+                //         x += 196;
+                //     }
+                // } else if (velocity.x > 0) {
+                //     if (x > 176) {
+                //         x -= 196;
+                //     }
+                // }
                 if (velocity.x < 0) {
                     if (x < -32) {
-                        x += 196;
+                        velocity.x = -velocity.x;
                     }
                 } else if (velocity.x > 0) {
-                    if (x > 176) {
-                        x -= 196;
+                    if (x > 192) {
+                        velocity.x = -velocity.x;
                     }
                 }
             case FastGremlin:
                 if (velocity.x < 0) {
-                    if (x < -160) {
+                    if (x < -112) {
                         velocity.x = -velocity.x;
                     }
                 } else if (velocity.x > 0) {
-                    if (x > 320) {
+                    if (x > 272) {
+                        velocity.x = -velocity.x;
+                    }
+                }
+            case OutdoorGremlin:
+                if (velocity.x < 0) {
+                    if (x < -32) {
+                        velocity.x = -velocity.x;
+                    }
+                } else if (velocity.x > 0) {
+                    if (x > 192) {
                         velocity.x = -velocity.x;
                     }
                 }
@@ -88,7 +109,7 @@ class Enemy extends FlxSprite {
         }
 
         flipX = velocity.x > 0;
-        if (y > startingPoint.y + 90) {
+        if (y > scene.screenPoint.y + 90) {
             setPosition(startingPoint.x, startingPoint.y);
             velocity.set(startingVel.x, startingVel.y);
             attacking = false;

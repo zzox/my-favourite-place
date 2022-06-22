@@ -51,6 +51,7 @@ class BossOne extends Boss {
     }
 
     function startAttack () {
+        animation.play('grin');
         hurtTime = 0;
         velocity.set(0, 0);
         final attackChoice = attackPositions[Math.floor(Math.random() * attackPositions.length)];

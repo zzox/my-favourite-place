@@ -18,10 +18,10 @@ class Explosion extends FlxSprite {
         }
     }
 
-    public function play (x:Float, y:Float, anim:String) {
+    public function play (x:Float, y:Float, anim:String, angle:Float) {
         exists = true;
         alive = true;
-        angle = 0;
+        this.angle = angle;
         this.x = x - 8;
         this.y = y - 8;
         animation.play(anim);

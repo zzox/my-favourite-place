@@ -155,7 +155,7 @@
         {
             "type": "NestedControlFlow",
             "props": {
-                "max": 4
+                "max": 5
             }
         },
         {
