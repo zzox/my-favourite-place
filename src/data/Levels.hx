@@ -19,6 +19,11 @@ typedef EnemyPlacement = {
     var vel:IntPoint;
 }
 
+typedef TextPlacement = {
+    var text:String;
+    var pos:IntPoint;
+}
+
 typedef ShooterPlacement = {
     var time:Float;
     var offset:Float;
@@ -45,10 +50,10 @@ typedef WorldData = {
 typedef LevelData = {
     var isOpen:Bool;
     var exits:Map<Dir, Int>;
-    var roomNumber:String;
     var ?enemies:Array<EnemyPlacement>;
     var ?powerups:Array<PowerupData>;
     var ?shooters:Array<ShooterPlacement>;
+    var ?text:Array<TextPlacement>;
 }
 
 // TODO: remove unused
@@ -64,33 +69,42 @@ typedef PowerupData = {
 }
 
 final outLevels = [{
-    roomNumber: '0',
     isOpen: true,
-    exits: [Right => 1]
+    exits: [Right => 1],
+    text: [{
+        text: 'A/D or LEFT/RIGHT to move',
+        pos: { x: 12, y: 16 }
+    }, {
+        text: 'W or Up or SPACE to jump',
+        pos: { x: 18, y: 28 }
+    }]
 }, {
-    roomNumber: '1',
     isOpen: false,
     exits: [Down => 2],
     powerups: [{
         type: PlusOneDash,
         pos: { x: 12, y: 68 }
+    }],
+    text: [{
+        text: 'Click to dash',
+        pos: { x: 36, y: 72 }
     }]
 }, {
-    roomNumber: '2',
     isOpen: true,
-    exits: [Left => 3]
+    exits: [Left => 3],
+    text: [{
+        text: 'S or DOWN to fall',
+        pos: { x: 24, y: 16 }
+    }]
 }, {
-    roomNumber: '3',
     isOpen: true,
     exits: new Map()
 }];
 
 final downLevels = [{
-    roomNumber: '0',
     isOpen: true,
     exits: [Down => 1]
 }, {
-    roomNumber: '1',
     isOpen: false,
     exits: [Down => 2],
     enemies: [{
@@ -103,9 +117,8 @@ final downLevels = [{
         vel: { x: 120, y: 0 }
     }]
 }, {
-    roomNumber: '2',
     isOpen: false,
-    exits: [Down => 4, Right => 3],
+    exits: [Down => 3],
     enemies: [{
         type: Gremlin,
         pos: { x: 232, y: 24 },
@@ -120,21 +133,11 @@ final downLevels = [{
         vel: { x: -120, y: 0 }
     }]
 }, {
-    roomNumber: 'Bonus - 1',
     isOpen: true,
-    exits: [Left => 2],
-    powerups: [{
-        type: PlusOneJump,
-        pos: { x: 120, y: 24 }
-    }]
+    exits: [Down => 4]
 }, {
-    roomNumber: '3',
-    isOpen: true,
-    exits: [Down => 5]
-}, {
-    roomNumber: '4',
     isOpen: false,
-    exits: [Down => 6],
+    exits: [Down => 5],
     enemies: [{
         type: Gremlin,
         pos: { x: 168, y: 24 },
@@ -145,9 +148,8 @@ final downLevels = [{
         vel: { x: 120, y: 15 }
     }]
 }, {
-    roomNumber: '5',
     isOpen: false,
-    exits: [Down => 8, Right => 7],
+    exits: [Down => 6],
     enemies: [{
         type: FastGremlin,
         pos: { x: 168, y: 72 },
@@ -158,17 +160,8 @@ final downLevels = [{
         vel: { x: 120, y: 0 }
     }]
 }, {
-    roomNumber: 'Bonus - 2',
-    isOpen: true,
-    exits: [Left => 6],
-    powerups: [{
-        type: PlusOneDash,
-        pos: { x: 108, y: 40 }
-    }]
-}, {
-    roomNumber: '6',
     isOpen: false,
-    exits: [Down => 9],
+    exits: [Down => 7],
     enemies: [{
         type: FastGremlin,
         pos: { x: -144, y: 32 },
@@ -179,17 +172,14 @@ final downLevels = [{
         vel: { x: -180, y: 0 }
     }]
 }, {
-    roomNumber: '7',
     isOpen: false,
     exits: new Map()
 }];
 
 final rightLevels = [{
-    roomNumber: '0',
     isOpen: true,
     exits: [Right => 1]
 }, {
-    roomNumber: '1',
     isOpen: true,
     exits: [Right => 2],
     shooters: [{
@@ -206,7 +196,6 @@ final rightLevels = [{
         acceleration: { x: 0, y: 480 },
     }]
 }, {
-    roomNumber: '2',
     isOpen: false,
     exits: [Right => 3],
     enemies: [{
@@ -215,7 +204,6 @@ final rightLevels = [{
         vel: { x: -120, y: 30 }
     }]
 }, {
-    roomNumber: '3',
     isOpen: true,
     exits: [Right => 4],
     shooters: [{
@@ -250,7 +238,6 @@ final rightLevels = [{
         acceleration: { x: 0, y: 480 },
     }]
 }, {
-    roomNumber: '4',
     isOpen: false,
     exits: [Right => 5],
     enemies: [{
@@ -259,11 +246,9 @@ final rightLevels = [{
         vel: { x: 120, y: 30 }
     }]
 }, {
-    roomNumber: '5',
     isOpen: true,
     exits: [Right => 6]
 }, {
-    roomNumber: '6',
     isOpen: false,
     exits: [Right => 7],
     enemies: [{
@@ -289,13 +274,11 @@ final rightLevels = [{
         acceleration: { x: 0, y: 480 },
     }]
 }, {
-    roomNumber: '7',
     isOpen: false,
     exits: new Map()
 }];
 
 final upLevels = [{
-    roomNumber: '0',
     isOpen: true,
     exits: [Up => 1],
     powerups: [{
@@ -303,7 +286,6 @@ final upLevels = [{
         pos: { x: 136, y: 66 }
     }]
 }, {
-    roomNumber: '1',
     isOpen: false,
     exits: [Up => 2],
     powerups: [], // this is needed for some insane haxe reason
@@ -317,11 +299,9 @@ final upLevels = [{
         vel: { x: -240, y: 15 }
     }]
 }, {
-    roomNumber: '2',
     isOpen: true,
     exits: [Up => 3]
 }, {
-    roomNumber: '3',
     isOpen: true,
     exits: [Up => 4],
     shooters: [{
@@ -338,7 +318,6 @@ final upLevels = [{
         acceleration: { x: 0, y: 480 },
     }]
 }, {
-    roomNumber: '4',
     isOpen: false,
     exits: [Up => 5],
     enemies: [{
@@ -351,7 +330,6 @@ final upLevels = [{
         vel: { x: -240, y: 120 }
     }]
 }, {
-    roomNumber: '5',
     isOpen: true,
     exits: [Up => 6],
     shooters: [{
@@ -368,7 +346,6 @@ final upLevels = [{
         acceleration: { x: 0, y: 480 }
     }]
 }, {
-    roomNumber: '6',
     isOpen: false,
     exits: [Up => 7],
     enemies: [{
@@ -381,7 +358,6 @@ final upLevels = [{
         vel: { x: -240, y: 15 }
     }]
 }, {
-    roomNumber: '7',
     isOpen: false,
     exits: new Map()
 }];

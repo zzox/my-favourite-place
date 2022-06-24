@@ -47,6 +47,7 @@ typedef Room = {
     var spikes:FlxTypedGroup<NamedMap>;
     var enemies:Array<Enemy>;
     var shooters:Array<Shooter>;
+    var textItems:Array<FlxBitmapText>;
     var ?powerupItems:FlxGroup;
 }
 
@@ -287,13 +288,13 @@ class PlayState extends GameState {
         modal.scrollFactor.set(0, 0);
         add(modal);
 
-        FlxTween.tween(modal, { x: -80, y: 44 }, 0.5, { ease: FlxEase.cubeInOut }).then(
+        FlxTween.tween(modal, { x: -80, y: 32 }, 0.75, { ease: FlxEase.quartInOut }).then(
             FlxTween.tween(
                 modal,
                 { x: 0, y: -16 },
-                0.5,
+                0.6,
                 {
-                    ease: FlxEase.cubeInOut,
+                    ease: FlxEase.quartInOut,
                     onComplete: (_:FlxTween) -> {
                         modal.destroy();
                     }
@@ -602,7 +603,7 @@ class PlayState extends GameState {
             shooter.active = true;
         }
         rooms[currentRoom].inPlugs.visible = true;
-        roomNumber.text = 'Room ' + worldData[currentWorld].levels[currentRoom].roomNumber;
+        roomNumber.text = 'Room ' + currentRoom;
         if (currentWorld != LOut && currentRoom == rooms.length - 1) {
             boss.active = true;
             boss.visible = true;
@@ -716,6 +717,16 @@ class PlayState extends GameState {
                 outPlugs.alive = false;
             }
 
+            final textItems = [];
+            if (roomData.text != null) {
+                for (t in roomData.text) {
+                    final text = makeText(t.text, { x: point.x + t.pos.x, y: point.y + t.pos.y });
+                    text.color = 0xff7b7b7b;
+                    add(text);
+                    textItems.push(text);
+                }
+            }
+
             final roomEnemies = [];
             if (roomData.enemies != null) {
                 for (e in roomData.enemies) {
@@ -760,7 +771,8 @@ class PlayState extends GameState {
                 outPlugs: outPlugs,
                 spikes: spikes,
                 enemies: roomEnemies,
-                shooters: shooters
+                shooters: shooters,
+                textItems: textItems
             };
         }
 

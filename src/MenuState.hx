@@ -62,7 +62,7 @@ class MenuState extends GameState {
                 totalTimeText.text = 'total: ' + timeToString(world.totalTime);
 
                 if (world.complete) {
-                    timeText.text = 'best:' + timeToString(world.bestTime);
+                    timeText.text = 'best: ' + timeToString(world.bestTime);
                 }
             }
         }
