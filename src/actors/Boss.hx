@@ -46,14 +46,6 @@ class Boss extends FlxSprite {
     function die () {
         dead = true;
         velocity.set(0, 0);
-        // TODO: generate explosions
-        FlxTween.tween(this, { 'scale.x': 0.0 }, 0.2, { ease: FlxEase.backIn });
-        FlxTween.tween(
-            this,
-            { 'scale.y': 2 },
-            0.14,
-            { ease: FlxEase.quintIn, startDelay: 0.06 }
-        );
         scene.bossDie();
     }
 }

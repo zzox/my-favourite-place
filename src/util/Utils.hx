@@ -48,3 +48,14 @@ function getScrollFromDir (dir:Dir):IntPoint {
         case Down: { x: 0, y: 90 };
     }
 }
+
+function shuffle<T> (items:Array<T>): Array<T> {
+    for (i in 0...items.length) {
+        final index = Math.floor(Math.random() * items.length);
+        final temp = items[i];
+        items[i] = items[index];
+        items[index] = temp;
+    }
+
+    return items;
+}

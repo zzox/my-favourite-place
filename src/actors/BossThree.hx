@@ -1,28 +1,31 @@
 package actors;
 
 import data.Constants;
+import flixel.math.FlxPoint;
+import flixel.math.FlxVelocity;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
+import util.Utils;
 
 enum BossThreeState {
     Attacking;
     Reversing;
 }
-// final attackPositions = [
-//     { startPos: { x: -32, y: 728 }, dir: Right },
-//     { startPos: { x: 160, y: 728 }, dir: Left },
-//     { startPos: { x: -32, y: 696 }, dir: Right },
-//     { startPos: { x: 160, y: 696 }, dir: Left },
-// ];
-//
-
-// quick appear and attack.
-// six different positions.
-// timer differs throughout the hit process.
+final attackPositions = shuffle([
+    { startPos: { x: -52, y: -616 }, attackPos: { x: -20, y: -616 }, dir: Right },
+    { startPos: { x: -52, y: -648 }, attackPos: { x: -20, y: -648 }, dir: Right },
+    { startPos: { x: 188, y: -648 }, attackPos: { x: 156, y: -648 }, dir: Left },
+    { startPos: { x: 188, y: -616 }, attackPos: { x: 156, y: -616 }, dir: Left },
+    { startPos: { x: 16, y: -720 }, attackPos: { x: 16, y: -688 }, dir: Right },
+    { startPos: { x: 112, y: -720 }, attackPos: { x: 112, y: -688 }, dir: Left },
+    { startPos: { x: 48, y: -720 }, attackPos: { x: 48, y: -688 }, dir: Right },
+    { startPos: { x: 80, y: -720 }, attackPos: { x: 80, y: -688 }, dir: Left },
+]);
 
 class BossThree extends Boss {
     static inline final HURT_FRAMES:Float = 3;
 
+    var currentAttackPos:Int = 0;
     var currentChargeDirection:Dir;
     var state:BossThreeState;
 
@@ -30,8 +33,8 @@ class BossThree extends Boss {
         super(scene);
 
         loadGraphic(AssetPaths.king_boss_blue__png, true, 32, 32);
-        offset.set(4, 1);
-        setSize(24, 28);
+        offset.set(4, 2);
+        setSize(24, 29);
 
         animation.add('normal', [0]);
         animation.add('mad', [1]);
@@ -48,38 +51,46 @@ class BossThree extends Boss {
             }
         }
 
-        // if (x < -160 || x > 320) {
-        //     startAttack();
-        // }
+        if (x < -160 || x > 320 || y < -832 || y > -400) {
+            startAttack();
+        }
 
         super.update(elapsed);
     }
 
     function startAttack () {
-        // animation.play('grin');
-        // hurtTime = 0;
-        // velocity.set(0, 0);
-        // final attackChoice = attackPositions[Math.floor(Math.random() * attackPositions.length)];
-
-        // flipX = attackChoice.dir == Right;
-        // setPosition(attackChoice.startPos.x, attackChoice.startPos.y);
-
-        // final chargeDelay = hp > 4 ? 1.0 : hp % 2 == 0 ? 2.0 : 0.5;
+        hurtTime = 0;
+        velocity.set(0, 0);
+        final attackChoice = attackPositions[currentAttackPos];
+        flipX = attackChoice.dir == Right;
+        animation.play('normal');
 
         state = Attacking;
-        // FlxTween.tween(
-        //     this,
-        //     { x: x + (flipX ? 12 : -12) },
-        //     hp > 4 ? 1.0 : 0.5,
-        //     { onComplete:
-        //         (_:FlxTween) -> {
-        //             new FlxTimer().start(chargeDelay, (_:FlxTimer) -> {
-        //                 animation.play('chomp');
-        //                 velocity.set(attackChoice.vel.x, attackChoice.vel.y);
-        //             });
-        //         }
-        //     }
-        // );
+        setPosition(attackChoice.startPos.x, attackChoice.startPos.y);
+
+        final startDelay = (hp / 8) * 1;
+
+        FlxTween.tween(
+            this,
+            { x: attackChoice.attackPos.x, y: attackChoice.attackPos.y },
+            hp > 4 ? 1.0 : 0.5,
+            { onComplete:
+                (_:FlxTween) -> {
+                    new FlxTimer().start(startDelay - 0.25, (_:FlxTimer) -> {
+                        animation.play('mad');
+                    });
+                    new FlxTimer().start(startDelay, (_:FlxTimer) -> {
+                        FlxVelocity.moveTowardsPoint(
+                            this,
+                            new FlxPoint(scene.player.x, scene.player.y),
+                            240
+                        );
+                    });
+                }
+            }
+        );
+
+        currentAttackPos = ++currentAttackPos % 8;
     }
 
     override public function hit () {

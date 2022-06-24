@@ -100,7 +100,7 @@ class PlayState extends GameState {
         skills = {
             jumps: 1,
             dashes: currentWorld == LOut ? 0 : 1,
-            dashVel: 250.0
+            dashVel: 250.0 // TODO: make 240 and test?
         }
 
         final bg = new FlxSprite(0, 0);
@@ -111,7 +111,7 @@ class PlayState extends GameState {
         spritesGroup = new SpritesGroup();
 
         final cameraDiff = getScrollFromDir(levelData.fromStartDir);
-        camera.scroll.set(cameraDiff.x, cameraDiff.y);
+        camera.scroll.set(cameraDiff.x, cameraDiff.y + GLOBAL_Y_OFFSET);
 
         new FlxTimer().start(0.75, (_:FlxTimer) -> {
             createWorld();
@@ -191,6 +191,10 @@ class PlayState extends GameState {
                 player.setPosition(1120, 72);
                 currentRoom = 6;
                 moveRoom(Right);
+            } else if (currentWorld == LUp) {
+                player.setPosition(76, -570);
+                currentRoom = 6;
+                moveRoom(Up);
             }
         }
 
@@ -245,7 +249,7 @@ class PlayState extends GameState {
                         player.dashes = 0;
                     }
                     final midpoint = enemy.getMidpoint();
-                    generateExplosion(midpoint.x, midpoint.y, 'pop-aqua');
+                    generateExplosion(midpoint.x, midpoint.y, 'pop');
                     FlxG.camera.shake(0.01, 0.05);
                 });
             } else {
@@ -275,7 +279,7 @@ class PlayState extends GameState {
 
     function playerGetPowerup (powerup:Powerup, _:Player) {
         final midpoint = powerup.getMidpoint();
-        generateExplosion(midpoint.x, midpoint.y, 'pop-blue');
+        generateExplosion(midpoint.x, midpoint.y, 'pop');
         doPowerup(powerup.type);
         powerups.remove(powerup);
         remove(powerup);
@@ -349,8 +353,8 @@ class PlayState extends GameState {
 
     function overlapCheck (sprite:FlxSprite):Bool {
         return sprite != null && (rooms[currentRoom].collide.overlaps(sprite) ||
-        (rooms[currentRoom].inPlugs.alive && rooms[currentRoom].inPlugs.overlaps(sprite)) ||
-        (rooms[currentRoom].outPlugs.alive && rooms[currentRoom].outPlugs.overlaps(sprite)));
+            (rooms[currentRoom].inPlugs.alive && rooms[currentRoom].inPlugs.overlaps(sprite)) ||
+            (rooms[currentRoom].outPlugs.alive && rooms[currentRoom].outPlugs.overlaps(sprite)));
     }
 
     function collideCheck () {
@@ -364,7 +368,7 @@ class PlayState extends GameState {
         if (numEnemiesKilled == rooms[currentRoom].enemies.length) {
             if (currentWorld == LUp) {
                 generateExplosion(80, screenPoint.y + 10, 'warn', 180);
-            } else {
+            } else if (currentWorld == LDown) {
                 generateExplosion(80, screenPoint.y + 84, 'warn');
             }
 
@@ -379,10 +383,28 @@ class PlayState extends GameState {
     }
 
     public function bossDie () {
-        // TODO: bunch of explosions with hitstop
-        // generateExplosion(80, screenPoint.y + 84, 'warn');
-        new FlxTimer().start(1, (_:FlxTimer) -> {
+        hitStop(1.0, () -> {
             rooms[currentRoom].outPlugs.destroy();
+            rooms[currentRoom].outPlugs.alive = false;
+            for (i in 0...16) {
+                new FlxTimer().start(i / 8, (_:FlxTimer) -> {
+                    generateExplosion(
+                        Math.random() * boss.width + boss.x,
+                        Math.random() * boss.width + boss.y,
+                        'pop'
+                    );
+                });
+            }
+
+            new FlxTimer().start(2, (_:FlxTimer) -> {
+                FlxTween.tween(boss, { 'scale.x': 0.0 }, 0.2, { ease: FlxEase.backIn });
+                FlxTween.tween(
+                    boss,
+                    { 'scale.y': 2 },
+                    0.14,
+                    { ease: FlxEase.quintIn, startDelay: 0.06 }
+                );
+            });
         });
     }
 
@@ -393,7 +415,7 @@ class PlayState extends GameState {
         Game.inst.loseLevel(currentWorld, levelTime);
         hitStop(0.5, () -> {
             final midpoint = player.getMidpoint();
-            generateExplosion(midpoint.x, midpoint.y, 'pop-grey');
+            generateExplosion(midpoint.x, midpoint.y, 'pop');
             final toPos = getScrollFromDir(worldData[currentWorld].postLoseDir);
             toPos.x *= 10;
             toPos.y *= 10;
@@ -538,7 +560,7 @@ class PlayState extends GameState {
             case Left: newX -= 16;
             case Right: newX += 16;
             case Up: newY -= 32;
-            case Down: newY += 32;
+            case Down: newY += 24;
         }
 
         FlxTween.tween(player, { x: newX, y: newY }, 0.5);
@@ -566,6 +588,13 @@ class PlayState extends GameState {
 
     public function generateExplosion (x:Float, y:Float, anim:String, ?angle = 0.0) {
         final expl = explosions.getFirstAvailable();
+        if (anim == 'pop') {
+            if (currentWorld == LRight) {
+                anim = 'pop-grey';
+            } else {
+                anim = 'pop-aqua';
+            }
+        }
         expl.play(x, y, anim, angle);
     }
 
@@ -715,7 +744,6 @@ class PlayState extends GameState {
         if (currentWorld == LDown) {
             boss = new BossOne(this);
         } else if (currentWorld == LRight) {
-            // new boss here
             boss = new BossTwo(this);
         } else if (currentWorld == LUp) {
             boss = new BossThree(this);

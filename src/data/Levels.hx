@@ -325,13 +325,13 @@ final upLevels = [{
     exits: [Up => 4],
     shooters: [{
         time: 2.0,
-        offset: 1.0,
+        offset: 0.5,
         position: { x: 192, y: 72 },
         velocity: { x: -120, y: -240 },
         acceleration: { x: 0, y: 480 },
     }, {
         time: 2.0,
-        offset: 2.0,
+        offset: 1.5,
         position: { x: -32, y: 72 },
         velocity: { x: 120, y: -240 },
         acceleration: { x: 0, y: 480 },
@@ -355,28 +355,16 @@ final upLevels = [{
     exits: [Up => 6],
     shooters: [{
         time: 2.0,
-        offset: 1.0,
+        offset: 0.5,
         position: { x: 192, y: 80 },
         velocity: { x: -90, y: -240 },
-        acceleration: { x: 0, y: 480 },
+        acceleration: { x: 0, y: 480 }
     }, {
         time: 2.0,
-        offset: 2.0,
+        offset: 1.5,
         position: { x: -32, y: 80 },
         velocity: { x: 90, y: -240 },
-        acceleration: { x: 0, y: 480 },
-    // }, {
-    //     time: 2.0,
-    //     offset: 1.0,
-    //     position: { x: 192, y: 64 },
-    //     velocity: { x: -180, y: -240 },
-    //     acceleration: { x: 0, y: 480 },
-    // }, {
-    //     time: 2.0,
-    //     offset: 2.0,
-    //     position: { x: -32, y: 64 },
-    //     velocity: { x: 180, y: -240 },
-    //     acceleration: { x: 0, y: 480 },
+        acceleration: { x: 0, y: 480 }
     }]
 }, {
     roomNumber: '6',
