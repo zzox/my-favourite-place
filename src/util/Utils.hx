@@ -18,12 +18,13 @@ function angleBetweenMouse(point:FlxPoint, offset:Float = 0, asDegrees:Bool = fa
     return val;
 }
 
-function displaySeconds (seconds:Int):String {
+function displaySeconds (seconds:Float):String {
     return seconds < 10 ? '0' + seconds : '' + seconds;
 }
 
 function toDecimal (time:Float):String {
-    return (time + '').split('.')[1].substring(0, 2);
+    // check for js value being 0 instead of 0.0
+    return (time == 0 ? '0.0' : time + '').split('.')[1].substring(0, 2);
 }
 
 function secondsToMinutes (time:Float):String {

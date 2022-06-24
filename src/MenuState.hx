@@ -1,11 +1,17 @@
 import data.Game;
 import data.Levels;
+import display.Font;
 import display.MenuButton;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.text.FlxBitmapText;
+import util.Utils;
 
 class MenuState extends GameState {
     var buttons:Array<MenuButton>;
+    var deathText:FlxBitmapText;
+    var timeText:FlxBitmapText;
+    var totalTimeText:FlxBitmapText;
 
     override public function create () {
         super.create();
@@ -33,16 +39,38 @@ class MenuState extends GameState {
             buttons.push(button);
         }
 
+        deathText = makeText('', { x: 16, y: 64 });
+        add(deathText);
+        totalTimeText = makeText('', { x: 16, y: 71 });
+        add(totalTimeText);
+        timeText = makeText('', { x: 16, y: 78 });
+        add(timeText);
+
         addAimer();
     }
 
     override public function update (elapsed:Float) {
         super.update(elapsed);
 
+        var found = false;
         for (button in buttons) {
             if (button.overlapping) {
-                trace(Game.inst.worlds[button.world]);
+                found = true;
+                final world = Game.inst.worlds[button.world];
+
+                deathText.text = world.deaths + ' deaths';
+                totalTimeText.text = 'total: ' + timeToString(world.totalTime);
+
+                if (world.complete) {
+                    timeText.text = 'best:' + timeToString(world.bestTime);
+                }
             }
+        }
+
+        if (!found) {
+            deathText.text = '';
+            totalTimeText.text = '';
+            timeText.text = '';
         }
     }
 

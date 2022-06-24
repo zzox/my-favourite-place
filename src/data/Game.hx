@@ -37,7 +37,7 @@ class GameInstance {
     public function winLevel (world:Worlds, time:Float):Bool {
         worlds[world].totalTime += time;
         worlds[world].complete = true;
-        final newBest = time < worlds[world].bestTime;
+        final newBest = worlds[world].bestTime == 0 || time < worlds[world].bestTime;
         worlds[world].bestTime = newBest ? time : worlds[world].bestTime;
 
         // increment world
