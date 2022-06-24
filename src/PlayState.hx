@@ -278,6 +278,29 @@ class PlayState extends GameState {
     }
 
     function playerGetPowerup (powerup:Powerup, _:Player) {
+        var graphic:String = '';
+        if (powerup.type == PlusOneDash) {
+            graphic = AssetPaths.plus_dash_modal__png;
+        }
+
+        final modal = new FlxSprite(-160, 90, graphic);
+        modal.scrollFactor.set(0, 0);
+        add(modal);
+
+        FlxTween.tween(modal, { x: -80, y: 44 }, 0.5, { ease: FlxEase.cubeInOut }).then(
+            FlxTween.tween(
+                modal,
+                { x: 0, y: -16 },
+                0.5,
+                {
+                    ease: FlxEase.cubeInOut,
+                    onComplete: (_:FlxTween) -> {
+                        modal.destroy();
+                    }
+                }
+            )
+        );
+
         final midpoint = powerup.getMidpoint();
         generateExplosion(midpoint.x, midpoint.y, 'pop');
         doPowerup(powerup.type);

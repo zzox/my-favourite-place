@@ -51,6 +51,7 @@ typedef LevelData = {
     var ?shooters:Array<ShooterPlacement>;
 }
 
+// TODO: remove unused
 enum abstract Powerups(String) to String {
     var FasterDash = 'Fast Dash';
     var PlusOneJump = '+1 Jump';
