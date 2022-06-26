@@ -414,19 +414,19 @@ class PlayState extends GameState {
                 new FlxTimer().start(i / 8, (_:FlxTimer) -> {
                     generateExplosion(
                         Math.random() * boss.width + boss.x,
-                        Math.random() * boss.width + boss.y,
+                        Math.random() * boss.height + boss.y,
                         'pop'
                     );
                 });
             }
 
             new FlxTimer().start(2, (_:FlxTimer) -> {
-                FlxTween.tween(boss, { 'scale.x': 0.0 }, 0.2, { ease: FlxEase.backIn });
+                FlxTween.tween(boss, { 'scale.x': 0.0 }, 0.3, { ease: FlxEase.backIn });
                 FlxTween.tween(
                     boss,
                     { 'scale.y': 2 },
-                    0.14,
-                    { ease: FlxEase.quintIn, startDelay: 0.06 }
+                    0.2,
+                    { ease: FlxEase.quintIn, startDelay: 0.1 }
                 );
             });
         });
@@ -527,7 +527,7 @@ class PlayState extends GameState {
                     return true;
                 }
             case Right:
-                if (player.x > screenPoint.x + 160 + BOUNDS_DISTANCE) {
+                if (player.x > screenPoint.x + 160) {
                     return true;
                 }
             case Up:

@@ -28,6 +28,7 @@ class BossThree extends Boss {
     var currentAttackPos:Int = 0;
     var currentChargeDirection:Dir;
     var state:BossThreeState;
+    var fakeIndex:Int = 0;
 
     public function new (scene:PlayState) {
         super(scene);
@@ -51,7 +52,7 @@ class BossThree extends Boss {
             }
         }
 
-        if (x < -160 || x > 320 || y < -832 || y > -400) {
+        if (x < -80 || x > 240 || y < -752 || y > -480) {
             startAttack();
         }
 
@@ -59,6 +60,15 @@ class BossThree extends Boss {
     }
 
     function startAttack () {
+        var fakeAttack = false;
+        if (hp <= 4) {
+            if (fakeIndex == 0) {
+                fakeAttack = true;
+            }
+
+            fakeIndex = ++fakeIndex % 3;
+        }
+
         hurtTime = 0;
         velocity.set(0, 0);
         final attackChoice = attackPositions[currentAttackPos];
@@ -68,7 +78,7 @@ class BossThree extends Boss {
         state = Attacking;
         setPosition(attackChoice.startPos.x, attackChoice.startPos.y);
 
-        final startDelay = (hp / 8) * 1;
+        final startDelay = (hp / 8) + 0.25;
 
         FlxTween.tween(
             this,
@@ -80,11 +90,24 @@ class BossThree extends Boss {
                         animation.play('mad');
                     });
                     new FlxTimer().start(startDelay, (_:FlxTimer) -> {
-                        FlxVelocity.moveTowardsPoint(
-                            this,
-                            new FlxPoint(scene.player.x, scene.player.y),
-                            240
-                        );
+                        if (fakeAttack) {
+                            FlxTween.tween(
+                                this,
+                                { x: attackChoice.startPos.x, y: attackChoice.startPos.y },
+                                hp > 4 ? 1.0 : 0.5,
+                                {
+                                    onComplete: (_:FlxTween) -> {
+                                        startAttack();
+                                    }
+                                }
+                            );
+                        } else {
+                            FlxVelocity.moveTowardsPoint(
+                                this,
+                                new FlxPoint(scene.player.x, scene.player.y),
+                                240
+                            );
+                        }
                     });
                 }
             }

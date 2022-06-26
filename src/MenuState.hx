@@ -5,6 +5,7 @@ import display.MenuButton;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxBitmapText;
+import flixel.util.FlxTimer;
 import util.Utils;
 
 class MenuState extends GameState {
@@ -12,6 +13,7 @@ class MenuState extends GameState {
     var deathText:FlxBitmapText;
     var timeText:FlxBitmapText;
     var totalTimeText:FlxBitmapText;
+    var opened:Bool = false;
 
     override public function create () {
         super.create();
@@ -32,7 +34,11 @@ class MenuState extends GameState {
                 Math.floor(i / 2) * 20 + 8,
                 i,
                 item,
-                (world) -> selectWorld(world)
+                (world) -> {
+                    if (opened) {
+                        selectWorld(world);
+                    }
+                }
             );
             add(button);
             add(button.text);
@@ -47,6 +53,10 @@ class MenuState extends GameState {
         add(timeText);
 
         addAimer();
+
+        new FlxTimer().start(0.75, (_:FlxTimer) -> {
+            opened = true;
+        });
     }
 
     override public function update (elapsed:Float) {
