@@ -1,5 +1,6 @@
 package actors;
 
+import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
@@ -37,6 +38,8 @@ class Boss extends FlxSprite {
         hurtTime = 3.0;
         hurtFrame = 0;
         hp--;
+
+        FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.25);
 
         if (hp <= 0) {
             die();

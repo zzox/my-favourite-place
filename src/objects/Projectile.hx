@@ -18,6 +18,11 @@ class Projectile extends FlxSprite {
     override public function update (elapsed:Float) {
         super.update(elapsed);
         timeAlive += elapsed;
+
+        if (velocity.x < 0) {
+            flipX = true;
+        }
+
         if (!inWorldBounds() && timeAlive > MIN_TIME_ALIVE) {
             kill();
         }

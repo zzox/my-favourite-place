@@ -147,6 +147,7 @@ class Player extends FlxSprite {
             final midpoint = getMidpoint();
             if (touchingFloor) {
                 if (airTime != 0) {
+                    FlxG.sound.play(AssetPaths.choose_low_clip__mp3, 0.05);
                     scene.generateExplosion(midpoint.x, y + height, 'land');
                 }
                 airTime = 0;
@@ -198,6 +199,7 @@ class Player extends FlxSprite {
             ) {
                 jumping = true;
                 jumpTime = JUMP_START_TIME;
+                FlxG.sound.play(AssetPaths.choose_jump__mp3, 0.1);
                 scene.generateExplosion(midpoint.x, y + height, 'jump');
                 jumps++;
                 // jumpSound.play();
@@ -238,6 +240,7 @@ class Player extends FlxSprite {
     }
 
     function dash () {
+        FlxG.sound.play(AssetPaths.choose_dash__mp3, 0.25);
         final dashVel = FlxVelocity.velocityFromAngle(aimerDegree, scene.skills.dashVel);
         velocity.set(dashVel.x, dashVel.y);
         acceleration.set(0, 0);

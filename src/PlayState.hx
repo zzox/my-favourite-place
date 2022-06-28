@@ -186,7 +186,7 @@ class PlayState extends GameState {
         if (FlxG.keys.justPressed.G) {
             if (currentWorld == LDown) {
                 player.setPosition(72, 688);
-                currentRoom = 8;
+                currentRoom = 6;
                 moveRoom(Down);
             } else if (currentWorld == LRight) {
                 player.setPosition(1120, 72);
@@ -213,6 +213,7 @@ class PlayState extends GameState {
         if (player.dashing) {
             hitStop(0.1, () -> {
                 FlxG.camera.shake(0.01, 0.05);
+                FlxG.sound.play(AssetPaths.choose_dash_wall__mp3, 0.25);
             });
         }
     }
@@ -236,15 +237,18 @@ class PlayState extends GameState {
 
     function projHitPlayer (proj:Projectile, playerBody:FlxSprite) {
         if (!player.dead) {
+            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.1);
             loseLevel();
         }
     }
 
     function enemyHitPlayer (enemy:Enemy, playerBody:Player) {
         if (!enemy.dead && !player.dead) {
+            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.1);
             if (player.dashing || player.postDashTime > 0) {
                 enemy.hit();
                 hitStop(0.2, () -> {
+                    FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.25);
                     player.dashes--;
                     if (player.dashes < 0) {
                         player.dashes = 0;
@@ -262,6 +266,7 @@ class PlayState extends GameState {
 
     function bossHitPlayer (boss:Boss, playerBody:Player) {
         if (!boss.dead && !player.dead && boss.hurtTime < 0) {
+            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.1);
             if (player.dashing || player.postDashTime > 0) {
                 boss.hit();
                 hitStop(0.2, () -> {
@@ -283,6 +288,8 @@ class PlayState extends GameState {
         if (powerup.type == PlusOneDash) {
             graphic = AssetPaths.plus_dash_modal__png;
         }
+
+        FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
 
         final modal = new FlxSprite(-160, 90, graphic);
         modal.scrollFactor.set(0, 0);
@@ -396,6 +403,10 @@ class PlayState extends GameState {
                 generateExplosion(80, screenPoint.y + 84, 'warn');
             }
 
+            new FlxTimer().start(0.5, (_:FlxTimer) -> {
+                FlxG.sound.play(AssetPaths.choose_blip__mp3, 0.15);
+            });
+
             new FlxTimer().start(1, (_:FlxTimer) -> {
                 rooms[currentRoom].outPlugs.destroy();
                 rooms[currentRoom].outPlugs.alive = false;
@@ -408,6 +419,7 @@ class PlayState extends GameState {
 
     public function bossDie () {
         hitStop(1.0, () -> {
+            FlxG.sound.play(AssetPaths.choose_boss_die__mp3, 0.25);
             rooms[currentRoom].outPlugs.destroy();
             rooms[currentRoom].outPlugs.alive = false;
             for (i in 0...16) {
@@ -438,6 +450,7 @@ class PlayState extends GameState {
         transitioning = true;
         Game.inst.loseLevel(currentWorld, levelTime);
         hitStop(0.5, () -> {
+            FlxG.sound.play(AssetPaths.choose_die__mp3, 0.25);
             final midpoint = player.getMidpoint();
             generateExplosion(midpoint.x, midpoint.y, 'pop');
             final toPos = getScrollFromDir(worldData[currentWorld].postLoseDir);
@@ -478,6 +491,7 @@ class PlayState extends GameState {
             1,
             { ease: FlxEase.quadInOut, startDelay: 0.5 }
         );
+        FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
     }
 
     function updateDashCounter () {

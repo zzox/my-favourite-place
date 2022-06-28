@@ -1,6 +1,7 @@
 package actors;
 
 import data.Constants;
+import flixel.FlxG;
 import flixel.math.FlxPoint;
 import flixel.math.FlxVelocity;
 import flixel.tweens.FlxTween;
@@ -102,6 +103,7 @@ class BossThree extends Boss {
                                 }
                             );
                         } else {
+                            FlxG.sound.play(AssetPaths.choose_land__mp3, 0.2);
                             FlxVelocity.moveTowardsPoint(
                                 this,
                                 new FlxPoint(scene.player.x, scene.player.y),

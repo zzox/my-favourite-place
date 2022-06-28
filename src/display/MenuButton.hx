@@ -39,6 +39,10 @@ class MenuButton extends FlxSprite {
     override public function update (elapsed:Float) {
         super.update(elapsed);
 
+        if (!overlapping && FlxG.mouse.overlaps(this)) {
+            FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.25);
+        }
+
         overlapping = FlxG.mouse.overlaps(this);
         if (overlapping) {
             animation.play('hover');
@@ -48,6 +52,7 @@ class MenuButton extends FlxSprite {
                 animation.play('down');
                 if (!FlxG.mouse.pressed) {
                     callback(world);
+                    FlxG.sound.play(AssetPaths.isle_menu_two__mp3, 0.25);
                 }
             }
 

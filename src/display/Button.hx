@@ -15,6 +15,7 @@ enum ButtonType {
 class Button extends FlxSprite {
     var callback:Function;
     var pressed:Bool = false;
+    var overlapping:Bool = false;
 
     public function new (x:Int, y:Int, type:ButtonType, callback:Function) {
         super(x, y);
@@ -41,11 +42,17 @@ class Button extends FlxSprite {
     override public function update (elapsed:Float) {
         super.update(elapsed);
 
-        if (FlxG.mouse.overlaps(this)) {
+        if (!overlapping && FlxG.mouse.overlaps(this)) {
+            FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.25);
+        }
+
+        overlapping = FlxG.mouse.overlaps(this);
+        if (overlapping) {
             animation.play('hover');
             if (pressed) {
                 animation.play('down');
                 if (!FlxG.mouse.pressed) {
+                    FlxG.sound.play(AssetPaths.isle_menu_two__mp3, 0.25);
                     click();
                 }
             }

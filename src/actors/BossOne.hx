@@ -1,6 +1,7 @@
 package actors;
 
 import data.Constants;
+import flixel.FlxG;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
@@ -70,6 +71,7 @@ class BossOne extends Boss {
                 (_:FlxTween) -> {
                     new FlxTimer().start(chargeDelay, (_:FlxTimer) -> {
                         animation.play('chomp');
+                        FlxG.sound.play(AssetPaths.choose_land__mp3, 0.2);
                         velocity.set(attackChoice.vel.x, attackChoice.vel.y);
                     });
                 }
