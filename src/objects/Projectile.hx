@@ -19,9 +19,7 @@ class Projectile extends FlxSprite {
         super.update(elapsed);
         timeAlive += elapsed;
 
-        if (velocity.x < 0) {
-            flipX = true;
-        }
+        flipX = velocity.x > 0;
 
         if (!inWorldBounds() && timeAlive > MIN_TIME_ALIVE) {
             kill();

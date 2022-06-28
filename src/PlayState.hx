@@ -1,4 +1,5 @@
 import actors.Boss;
+import actors.BossFour;
 import actors.BossOne;
 import actors.BossThree;
 import actors.BossTwo;
@@ -66,7 +67,7 @@ class PlayState extends GameState {
 
     public var skills:PlayerSkills;
     var currentWorld:Worlds;
-    var currentRoom:Null<Int>;
+    public var currentRoom:Null<Int>;
     var rooms:Array<Room> = [];
 
     public var player:Player;
@@ -618,9 +619,11 @@ class PlayState extends GameState {
         }
         rooms[currentRoom].inPlugs.visible = true;
         roomNumber.text = 'Room ' + currentRoom;
-        if (currentWorld != LOut && currentRoom == rooms.length - 1) {
+        if (currentWorld != LOut && currentWorld != LThrough && currentRoom == rooms.length - 1) {
             boss.active = true;
             boss.visible = true;
+        } else if (currentWorld == LThrough) {
+            boss.enable();
         }
     }
 
@@ -796,6 +799,8 @@ class PlayState extends GameState {
             boss = new BossTwo(this);
         } else if (currentWorld == LUp) {
             boss = new BossThree(this);
+        } else if (currentWorld == LThrough) {
+            boss = new BossFour(this);
         }
 
         spritesGroup.add(powerups);

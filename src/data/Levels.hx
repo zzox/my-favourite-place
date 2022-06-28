@@ -72,10 +72,10 @@ final outLevels = [{
     isOpen: true,
     exits: [Right => 1],
     text: [{
-        text: 'A/D or LEFT/RIGHT to move',
+        text: 'A/D or LEFT/RIGHT: move',
         pos: { x: 12, y: 16 }
     }, {
-        text: 'W or Up or SPACE to jump',
+        text: 'W or Up or SPACE: jump',
         pos: { x: 18, y: 28 }
     }]
 }, {
@@ -86,19 +86,26 @@ final outLevels = [{
         pos: { x: 12, y: 68 }
     }],
     text: [{
-        text: 'Click to dash',
+        text: 'Click: dash',
         pos: { x: 36, y: 72 }
     }]
 }, {
     isOpen: true,
     exits: [Left => 3],
     text: [{
-        text: 'S or DOWN to fall',
+        text: 'S or DOWN: fall',
         pos: { x: 24, y: 16 }
     }]
 }, {
     isOpen: true,
-    exits: new Map()
+    exits: new Map(),
+    text: [{
+        text: 'good luck',
+        pos: { x: 16, y: 40 }
+    }, {
+        text: 'on your journey',
+        pos: { x: 24, y: 48 }
+    }]
 }];
 
 final downLevels = [{
@@ -362,6 +369,32 @@ final upLevels = [{
     exits: new Map()
 }];
 
+final throughLevels = [{
+    isOpen: true,
+    exits: [Down => 1]
+}, {
+    isOpen: false,
+    exits: [Down => 2],
+}, {
+    isOpen: false,
+    exits: [Down => 3]
+}, {
+    isOpen: true,
+    exits: [Down => 4]
+}, {
+    isOpen: true,
+    exits: [Down => 5]
+}, {
+    isOpen: true,
+    exits: [Down => 6]
+}, {
+    isOpen: true,
+    exits: [Down => 7]
+}, {
+    isOpen: false,
+    exits: new Map()
+}];
+
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
@@ -415,5 +448,18 @@ final worldData:Map<Worlds, WorldData> = [
         fromStartDir: Left,
         postWinDir: Right,
         postLoseDir: Down
+    },
+    LThrough => {
+        bgColor: 0xff000000,
+        titleColor: 0xffd7d7d7,
+        path: AssetPaths.through__ldtk,
+        start: { x: 24, y: 24 },
+        levels: throughLevels,
+        playerPath: AssetPaths.player_light__png,
+        deathDirs: [],
+        winDir: Right,
+        fromStartDir: Left,
+        postWinDir: Right,
+        postLoseDir: Up
     }
 ];

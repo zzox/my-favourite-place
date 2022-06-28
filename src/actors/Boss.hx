@@ -51,4 +51,6 @@ class Boss extends FlxSprite {
         velocity.set(0, 0);
         scene.bossDie();
     }
+
+    public function enable () {}
 }

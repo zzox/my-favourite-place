@@ -24,8 +24,6 @@ final attackPositions = shuffle([
 ]);
 
 class BossThree extends Boss {
-    static inline final HURT_FRAMES:Float = 3;
-
     var currentAttackPos:Int = 0;
     var currentChargeDirection:Dir;
     var state:BossThreeState;
