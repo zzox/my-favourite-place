@@ -101,7 +101,7 @@ class PlayState extends GameState {
 
         skills = {
             jumps: 1,
-            dashes: currentWorld == LOut ? 0 : 1,
+            dashes: getNumDashes(),
             dashVel: 250.0 // TODO: make 240 and test?
         }
 
@@ -112,8 +112,22 @@ class PlayState extends GameState {
 
         spritesGroup = new SpritesGroup();
 
+        var startYDiff = 0;
+        if (levelData.fromStartDir == Up) {
+            startYDiff = -6;
+        }
+
         final cameraDiff = getScrollFromDir(levelData.fromStartDir);
-        camera.scroll.set(cameraDiff.x, cameraDiff.y + GLOBAL_Y_OFFSET);
+        camera.scroll.set(cameraDiff.x, cameraDiff.y + startYDiff + GLOBAL_Y_OFFSET);
+
+        final levelNum = levelList.indexOf(currentWorld);
+        final levelText = 'level $levelNum: $currentWorld';
+        final startText = makeText(levelText, { x: cameraDiff.x, y: 42 + cameraDiff.y + startYDiff });
+        startText.autoSize = false;
+        startText.width = startText.fieldWidth = 160;
+        startText.alignment = FlxTextAlign.CENTER;
+        startText.color = levelData.titleColor;
+        add(startText);
 
         new FlxTimer().start(0.75, (_:FlxTimer) -> {
             createWorld();
@@ -122,7 +136,9 @@ class PlayState extends GameState {
                 camera,
                 { 'scroll.x': screenPoint.x, 'scroll.y': screenPoint.y },
                 0.5,
-                { ease: FlxEase.quadInOut,
+                {
+                    ease: FlxEase.quadInOut,
+                    startDelay: 0.75,
                     onComplete: (_:FlxTween) -> {
                         transitioning = false;
                     }
@@ -185,7 +201,7 @@ class PlayState extends GameState {
 
         // HACK: delete this!
         if (FlxG.keys.justPressed.G) {
-            if (currentWorld == LDown) {
+            if (currentWorld == LDown || currentWorld == LThrough) {
                 player.setPosition(72, 688);
                 currentRoom = 6;
                 moveRoom(Down);
@@ -467,7 +483,16 @@ class PlayState extends GameState {
                 camera,
                 { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
                 1,
-                { ease: FlxEase.quadInOut, startDelay: 0.5 }
+                { ease: FlxEase.quadInOut, startDelay: 0.5, onComplete:
+                    (_:FlxTween) -> {
+                        for (room in rooms) {
+                            room.collide.visible = false;
+                            room.spikes.visible = false;
+                            room.inPlugs.visible = false;
+                            room.outPlugs.visible = false;
+                        }
+                    }
+                }
             );
         });
     }
@@ -559,6 +584,9 @@ class PlayState extends GameState {
     }
 
     function moveRoom (dir:Dir) {
+        if (boss != null) {
+            boss.cancel();
+        }
         final isFinalRoom = worldData[currentWorld].winDir == dir && currentRoom == rooms.length - 1;
         if (worldData[currentWorld].deathDirs.contains(dir) || isFinalRoom) {
             if (checkBounds(dir)) {
@@ -630,7 +658,7 @@ class PlayState extends GameState {
     public function generateExplosion (x:Float, y:Float, anim:String, ?angle = 0.0) {
         final expl = explosions.getFirstAvailable();
         if (anim == 'pop') {
-            if (currentWorld == LRight) {
+            if (currentWorld == LRight || currentWorld == LThrough) {
                 anim = 'pop-grey';
             } else {
                 anim = 'pop-aqua';
@@ -872,5 +900,14 @@ class PlayState extends GameState {
         }
 
         menuGroup.add(roomNumber);
+    }
+
+    function getNumDashes ():Int {
+        if (currentWorld == LOut) {
+            return 0;
+        } else if (currentWorld == LThrough || currentWorld == LOver) {
+            return 2;
+        }
+        return 1;
     }
 }

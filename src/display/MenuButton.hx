@@ -32,7 +32,6 @@ class MenuButton extends FlxSprite {
         text.autoSize = false;
         text.width = text.fieldWidth = 60;
         text.alignment = FlxTextAlign.CENTER;
-        text.letterSpacing = -1;
         text.color = TEXT_COLOR;
     }
 
