@@ -141,6 +141,7 @@ class PlayState extends GameState {
                     startDelay: 0.75,
                     onComplete: (_:FlxTween) -> {
                         transitioning = false;
+                        startText.destroy();
                     }
                 }
             );
@@ -485,6 +486,7 @@ class PlayState extends GameState {
                 1,
                 { ease: FlxEase.quadInOut, startDelay: 0.5, onComplete:
                     (_:FlxTween) -> {
+                        boss.active = false;
                         for (room in rooms) {
                             room.collide.visible = false;
                             room.spikes.visible = false;
@@ -504,6 +506,8 @@ class PlayState extends GameState {
         // TODO: show star for new best?
         Game.inst.winLevel(currentWorld, levelTime);
         final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
+        toPos.x *= 10;
+        toPos.y *= 10;
         toPos.x += Std.int(camera.scroll.x);
         toPos.y += Std.int(camera.scroll.y);
         for (c in dashCounters) {

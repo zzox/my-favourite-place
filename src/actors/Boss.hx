@@ -53,4 +53,6 @@ class Boss extends FlxSprite {
     }
 
     public function enable () {}
+
+    public function cancel () {}
 }
