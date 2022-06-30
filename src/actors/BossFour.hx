@@ -66,15 +66,12 @@ class BossFour extends Boss {
             }
         }
 
-        trace(state);
-
         super.update(elapsed);
     }
 
     override public function enable () {
         active = true;
         startAttack();
-        trace('\n\n\nenabling');
     }
 
     override public function cancel () {
@@ -85,7 +82,6 @@ class BossFour extends Boss {
 
     function startAttack () {
         state = Waiting;
-        trace('starting attack', 1 + (3 * (1 - (scene.currentRoom / 7))));
         hurtTime = 0;
         velocity.set(0, 0);
         flipX = x < 80;
@@ -95,7 +91,6 @@ class BossFour extends Boss {
 
         FlxTween.tween(this, { x: x > 80 ? 156 : -20 }, 0.5, { onComplete:
             (_:FlxTween) -> {
-                trace('scrolling');
                 state = Scrolling;
             }
         });
@@ -104,18 +99,67 @@ class BossFour extends Boss {
             velocity.set(0, 0);
             animation.play('shoot');
             state = Attacking;
-            trace('shooting');
-
-            // TODO: if in last level, we shoot three
 
             final xVel = x > 80 ? -SHOOT_VEL : SHOOT_VEL;
             timers[1] = new FlxTimer().start(0.5, (_:FlxTimer) -> {
-                scene.shoot(
-                    x + 12,
-                    y + 18,
-                    { x: xVel, y: 0 },
-                    { x: 0, y: 0 }
-                );
+                if (scene.currentRoom == 7) {
+                    if (hp % 2 == 0) {
+                        scene.shoot(
+                            x + 12,
+                            y + 18,
+                            { x: xVel, y: 0 },
+                            { x: 0, y: 0 }
+                        );
+
+                        new FlxTimer().start(0.2, (_:FlxTimer) -> {
+                            scene.shoot(
+                                x + 12,
+                                y + 18,
+                                { x: xVel, y: 0 },
+                                { x: 0, y: 0 }
+                            );
+                        });
+
+                        if (hp <= 4) {
+                            new FlxTimer().start(0.4, (_:FlxTimer) -> {
+                                scene.shoot(
+                                    x + 12,
+                                    y + 18,
+                                    { x: xVel, y: 0 },
+                                    { x: 0, y: 0 }
+                                );
+                            });
+                        }
+                    } else {
+                        scene.shoot(
+                            x + 12,
+                            y + 18,
+                            { x: xVel, y: hp <= 4 ? 45 : 30 },
+                            { x: 0, y: 0 }
+                        );
+                        scene.shoot(
+                            x + 12,
+                            y + 18,
+                            { x: xVel, y: hp <= 4 ? -45 : -30 },
+                            { x: 0, y: 0 }
+                        );
+                        if (hp <= 4) {
+                            scene.shoot(
+                                x + 12,
+                                y + 18,
+                                { x: xVel, y: 0 },
+                                { x: 0, y: 0 }
+                            );
+                        }
+                    }
+                } else {
+                    scene.shoot(
+                        x + 12,
+                        y + 18,
+                        { x: xVel, y: 0 },
+                        { x: 0, y: 0 }
+                    );
+                }
             });
 
             timers[2] = new FlxTimer().start(1.0, (_:FlxTimer) -> {
