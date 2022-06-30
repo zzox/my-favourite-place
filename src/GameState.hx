@@ -54,6 +54,20 @@ class GameState extends FlxState {
         if (camera.scaleX != 1.0 || camera.scaleY != 1.0 || cameraXScale != 1.0 || cameraYScale != 1.0) {
             camera.setScale(cameraXScale, cameraYScale);
         }
+
+        if (FlxG.mouse.justPressed) {
+            final aimerAnim = new FlxSprite(0, 0);
+            aimerAnim.loadGraphic(AssetPaths.aimer_anim__png, true, 7, 7);
+            aimerAnim.animation.add('play', [0, 1, 2, 3], 30, false);
+            aimerAnim.scrollFactor.set(0, 0);
+            aimerAnim.animation.finishCallback = (_:String) -> {
+                aimerAnim.destroy();
+            };
+            add(aimerAnim);
+            aimerAnim.animation.play('play');
+            final pos = aimer.getScreenPosition();
+            aimerAnim.setPosition(pos.x - 3, pos.y - 3);
+        }
     }
 
     // so the child classes can add the aimer after other items
