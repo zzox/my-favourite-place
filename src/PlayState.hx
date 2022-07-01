@@ -82,6 +82,7 @@ class PlayState extends GameState {
     var bgSpritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
     var dashCounters:Array<FlxSprite>;
+    var unlimitedDash:FlxSprite;
     var clouds:Array<FlxSprite> = [];
 
     public var screenPoint:IntPoint;
@@ -132,10 +133,14 @@ class PlayState extends GameState {
             bgItem.alpha = 0.5;
             bgItem.scrollFactor.set(0, 0);
             bgSpritesGroup.add(bgItem);
-            numClouds = 6;
+            numClouds = 3;
             cloudYPosition = -45;
 
             bgSpritesGroup.add(new Rain());
+        } else if (currentWorld == LOver) {
+            final bgItem = new FlxSprite(0, 15, AssetPaths.forest_bg__png);
+            bgItem.scrollFactor.set(0, 0.05);
+            bgSpritesGroup.add(bgItem);
         }
 
         for (i in 0...numClouds) {
@@ -146,7 +151,7 @@ class PlayState extends GameState {
             );
             cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
             cloud.flipX = Math.random() < 0.5;
-            cloud.scrollFactor.set(0.05, 0.05);
+            cloud.scrollFactor.set(0.1, 0.1);
             FlxTween.tween(
                 cloud,
                 { x: cloud.x + 3 + Math.random() * 3 },
@@ -355,6 +360,8 @@ class PlayState extends GameState {
         var graphic:String = '';
         if (powerup.type == PlusOneDash) {
             graphic = AssetPaths.plus_dash_modal__png;
+        } else if (powerup.type == UnlimitedDashes) {
+            graphic = AssetPaths.infinity_dashes_modal__png;
         }
 
         FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
@@ -387,9 +394,13 @@ class PlayState extends GameState {
 
     function doPowerup (skill:Powerups) {
         switch (skill) {
-            case FasterDash: skills.dashVel += 125;
             case PlusOneDash: skills.dashes++;
-            case PlusOneJump: skills.jumps++;
+            case UnlimitedDashes:
+                unlimitedDash.visible = true;
+                for (c in dashCounters) {
+                    c.visible = false;
+                }
+                skills.dashes += 1000;
         }
     }
 
@@ -597,14 +608,16 @@ class PlayState extends GameState {
     }
 
     function updateDashCounter () {
-        for (i in 0...dashCounters.length) {
-            final dashItem = dashCounters[i];
-            dashItem.visible = i < skills.dashes;
-
-            if (i < skills.dashes - player.dashes) {
-                dashItem.animation.play('solid');
-            } else if (dashItem.animation.curAnim.name == 'solid') {
-                dashItem.animation.play('pop');
+        if (skills.dashes < 5) {
+            for (i in 0...dashCounters.length) {
+                final dashItem = dashCounters[i];
+                dashItem.visible = i < skills.dashes;
+                
+                if (i < skills.dashes - player.dashes) {
+                    dashItem.animation.play('solid');
+                } else if (dashItem.animation.curAnim.name == 'solid') {
+                    dashItem.animation.play('pop');
+                }
             }
         }
     }
@@ -723,7 +736,11 @@ class PlayState extends GameState {
         }
         rooms[currentRoom].inPlugs.visible = true;
         roomNumber.text = 'Room ' + currentRoom;
-        if (currentWorld != LOut && currentWorld != LThrough && currentRoom == rooms.length - 1) {
+        if (currentWorld != LOut &&
+            currentWorld != LThrough &&
+            currentWorld != LOver &&
+            currentRoom == rooms.length - 1
+        ) {
             boss.active = true;
             boss.visible = true;
         } else if (currentWorld == LThrough) {
@@ -734,7 +751,7 @@ class PlayState extends GameState {
     public function generateExplosion (x:Float, y:Float, anim:String, ?angle = 0.0) {
         final expl = explosions.getFirstAvailable();
         if (anim == 'pop') {
-            if (currentWorld == LRight || currentWorld == LThrough) {
+            if (currentWorld == LRight || currentWorld == LThrough || currentWorld == LOver) {
                 anim = 'pop-grey';
             } else {
                 anim = 'pop-aqua';
@@ -974,6 +991,11 @@ class PlayState extends GameState {
             menuGroup.add(counter);
             dashCounters.push(counter);
         }
+
+        unlimitedDash = new FlxSprite(2, 82, AssetPaths.unlimited_dash_counter__png);
+        unlimitedDash.visible = false;
+        unlimitedDash.scrollFactor.set(0, 0);
+        menuGroup.add(unlimitedDash);
 
         menuGroup.add(roomNumber);
     }
