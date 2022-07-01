@@ -5,6 +5,7 @@ import display.MenuButton;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.text.FlxBitmapText;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import util.Utils;
 
@@ -21,6 +22,20 @@ class MenuState extends GameState {
         final bg = new FlxSprite(0, 0);
         bg.makeGraphic(160, 90, 0xffffe9c5);
         add(bg);
+
+        // clouds
+        for (i in 0...3) {
+            final cloud = new FlxSprite(i * 40 + Math.random() * 40, 48 + Math.random() * 16, AssetPaths.cloud__png);
+            cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
+            cloud.flipX = Math.random() < 0.5;
+            FlxTween.tween(
+                cloud,
+                { x: cloud.x + 3 + Math.random() * 3 },
+                2 + Math.random() * 2,
+                { type: FlxTweenType.PINGPONG }
+            );
+            add(cloud);
+        }
 
         buttons = [];
         for (i in 0...levelList.length) {

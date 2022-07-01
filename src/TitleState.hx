@@ -35,6 +35,10 @@ class TitleState extends GameState {
         bg.scrollFactor.set(0, 0);
         add(bg);
 
+        final bgItem = new FlxSprite(0, 18, AssetPaths.castle_bg_1__png);
+        bgItem.alpha = 0.5;
+        add(bgItem);
+
         final title = new FlxSprite(0, 0, AssetPaths.title__png);
         title.color = 0xff0d2030;
         add(title);

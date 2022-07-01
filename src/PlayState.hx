@@ -13,6 +13,7 @@ import data.Levels;
 import display.Button;
 import display.Cinematics;
 import display.Font;
+import display.Rain;
 import flixel.FlxG;
 import flixel.FlxObject;
 import flixel.FlxSprite;
@@ -78,8 +79,10 @@ class PlayState extends GameState {
     var powerups:FlxTypedGroup<Powerup>;
     var boss:Boss;
     var spritesGroup:SpritesGroup;
+    var bgSpritesGroup:SpritesGroup;
     var menuGroup:FlxGroup;
     var dashCounters:Array<FlxSprite>;
+    var clouds:Array<FlxSprite> = [];
 
     public var screenPoint:IntPoint;
 
@@ -89,6 +92,7 @@ class PlayState extends GameState {
     var numEnemiesKilled:Int = 0;
     public var transitioning:Bool = true;
     var over:Bool = false;
+    var started:Bool = false;
 
     var timer:FlxBitmapText;
     var roomNumber:FlxBitmapText;
@@ -112,6 +116,49 @@ class PlayState extends GameState {
         add(bg);
 
         spritesGroup = new SpritesGroup();
+        bgSpritesGroup = new SpritesGroup();
+
+        var numClouds = 0;
+        var cloudYPosition = 0;
+        if (currentWorld == LDown) {
+            final bgItem = new FlxSprite(0, 18, AssetPaths.castle_bg_1__png);
+            bgItem.alpha = 0.5;
+            bgItem.scrollFactor.set(0, 0);
+            bgSpritesGroup.add(bgItem);
+            numClouds = 3;
+            cloudYPosition = 0;
+        } else if (currentWorld == LUp) {
+            final bgItem = new FlxSprite(80, 18, AssetPaths.castle_bg_2__png);
+            bgItem.alpha = 0.5;
+            bgItem.scrollFactor.set(0, 0);
+            bgSpritesGroup.add(bgItem);
+            numClouds = 6;
+            cloudYPosition = -45;
+
+            bgSpritesGroup.add(new Rain());
+        }
+
+        for (i in 0...numClouds) {
+            final cloud = new FlxSprite(
+                i * 40 + Math.random() * 40,
+                58 + Math.random() * 16 + cloudYPosition,
+                AssetPaths.cloud__png
+            );
+            cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
+            cloud.flipX = Math.random() < 0.5;
+            cloud.scrollFactor.set(0.05, 0.05);
+            FlxTween.tween(
+                cloud,
+                { x: cloud.x + 3 + Math.random() * 3 },
+                2 + Math.random() * 2,
+                { type: FlxTweenType.PINGPONG }
+            );
+
+            bgSpritesGroup.add(cloud);
+            clouds.push(cloud);
+        }
+
+        add(bgSpritesGroup);
 
         var startYDiff = 0;
         if (levelData.fromStartDir == Up) {
@@ -143,6 +190,7 @@ class PlayState extends GameState {
                     onComplete: (_:FlxTween) -> {
                         transitioning = false;
                         startText.destroy();
+                        started = true;
                     }
                 }
             );
@@ -158,9 +206,10 @@ class PlayState extends GameState {
         stoppedTime -= elapsed;
         if (stoppedTime < 0) {
             spritesGroup.updateParent(elapsed);
+            bgSpritesGroup.updateParent(elapsed);
         }
 
-        if (player != null && !player.dead) {
+        if (started && player != null && !player.dead) {
             levelTime += elapsed;
             timer.text = timeToString(levelTime);
             updateDashCounter();
@@ -487,8 +536,11 @@ class PlayState extends GameState {
                 1,
                 { ease: FlxEase.quadInOut, startDelay: 0.5, onComplete:
                     (_:FlxTween) -> {
-                        boss.active = false;
+                        if (boss != null) boss.active = false;
                         for (room in rooms) {
+                            for (c in clouds) {
+                                c.destroy();
+                            }
                             room.collide.visible = false;
                             room.spikes.visible = false;
                             room.inPlugs.visible = false;
@@ -522,7 +574,13 @@ class PlayState extends GameState {
                 camera,
                 { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
                 1,
-                { ease: FlxEase.quadInOut, startDelay: 0.5 }
+                {
+                    ease: FlxEase.quadInOut, startDelay: 0.5, onComplete: (_:FlxTween) -> {
+                        for (c in clouds) {
+                            c.destroy();
+                        }
+                    }
+                }
             );
             FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
         });
