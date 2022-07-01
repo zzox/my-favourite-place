@@ -56,10 +56,8 @@ typedef LevelData = {
     var ?text:Array<TextPlacement>;
 }
 
-// TODO: remove unused
 enum abstract Powerups(String) to String {
-    var FasterDash = 'Fast Dash';
-    var PlusOneJump = '+1 Jump';
+    var UnlimitedDashes = 'Unlimited Dashes';
     var PlusOneDash = '+1 Dash';
 }
 
@@ -395,6 +393,36 @@ final throughLevels = [{
     exits: new Map()
 }];
 
+final overLevels = [{
+    isOpen: true,
+    exits: [Up => 1],
+    powerups: [{
+        type: UnlimitedDashes,
+        pos: { x: 116, y: 66 }
+    }]
+}, {
+    isOpen: true,
+    exits: [Right => 2]
+}, {
+    isOpen: true,
+    exits: [Up => 3]
+}, {
+    isOpen: true,
+    exits: [Right => 4]
+}, {
+    isOpen: true,
+    exits: [Down => 5]
+}, {
+    isOpen: true,
+    exits: [Right => 6]
+}, {
+    isOpen: true,
+    exits: [Down => 7]
+}, {
+    isOpen: true,
+    exits: new Map()
+}];
+
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
@@ -461,5 +489,18 @@ final worldData:Map<Worlds, WorldData> = [
         fromStartDir: Left,
         postWinDir: Right,
         postLoseDir: Up
+    },
+    LOver => {
+        bgColor: 0xff211640,
+        titleColor: 0xffd7d7d7,
+        path: AssetPaths.over__ldtk,
+        start: { x: 18, y: 72 },
+        levels: overLevels,
+        playerPath: AssetPaths.player_light__png,
+        deathDirs: [],
+        winDir: Right,
+        fromStartDir: Left,
+        postWinDir: Up,
+        postLoseDir: Left
     }
 ];
