@@ -58,7 +58,7 @@ class GameState extends FlxState {
         if (FlxG.mouse.justPressed) {
             final aimerAnim = new FlxSprite(0, 0);
             aimerAnim.loadGraphic(AssetPaths.aimer_anim__png, true, 7, 7);
-            aimerAnim.animation.add('play', [0, 1, 2, 3], 30, false);
+            aimerAnim.animation.add('play', [0, 1, 2, 3], 24, false);
             aimerAnim.scrollFactor.set(0, 0);
             aimerAnim.animation.finishCallback = (_:String) -> {
                 aimerAnim.destroy();

@@ -11,6 +11,7 @@ import data.Constants;
 import data.Game;
 import data.Levels;
 import display.Button;
+import display.Cinematics;
 import display.Font;
 import flixel.FlxG;
 import flixel.FlxObject;
@@ -502,26 +503,39 @@ class PlayState extends GameState {
     function winLevel () {
         player.die();
         over = true;
-        transitioning = true;
-        // TODO: show star for new best?
-        Game.inst.winLevel(currentWorld, levelTime);
-        final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
-        toPos.x *= 10;
-        toPos.y *= 10;
-        toPos.x += Std.int(camera.scroll.x);
-        toPos.y += Std.int(camera.scroll.y);
+        roomNumber.visible = false;
         for (c in dashCounters) {
             c.destroy();
         }
-        roomNumber.visible = false;
-        createMenu(toPos, true);
-        FlxTween.tween(
-            camera,
-            { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
-            1,
-            { ease: FlxEase.quadInOut, startDelay: 0.5 }
-        );
-        FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
+        transitioning = true;
+
+        checkCinematics(() -> {
+            // TODO: show star for new best?
+            Game.inst.winLevel(currentWorld, levelTime);
+            final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
+            toPos.x *= 10;
+            toPos.y *= 10;
+            toPos.x += Std.int(camera.scroll.x);
+            toPos.y += Std.int(camera.scroll.y);
+            createMenu(toPos, true);
+            FlxTween.tween(
+                camera,
+                { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
+                1,
+                { ease: FlxEase.quadInOut, startDelay: 0.5 }
+            );
+            FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
+        });
+    }
+
+    function checkCinematics (callback: Void -> Void) {
+        if (currentWorld == LUp) {
+            runUpCinematic(this, callback);
+        } else if (currentWorld == LOver) {
+            runOverCinematic(this, callback);
+        } else {
+            callback();
+        }
     }
 
     function updateDashCounter () {

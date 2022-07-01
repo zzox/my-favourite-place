@@ -446,8 +446,8 @@ final worldData:Map<Worlds, WorldData> = [
         deathDirs: [],
         winDir: Right,
         fromStartDir: Left,
-        postWinDir: Right,
-        postLoseDir: Down
+        postWinDir: Up,
+        postLoseDir: Left
     },
     LThrough => {
         bgColor: 0xff000000,
