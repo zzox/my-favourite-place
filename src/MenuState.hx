@@ -97,8 +97,18 @@ class MenuState extends GameState {
 
                 if (world.complete) {
                     timeText.text = 'best: ' + timeToString(world.bestTime);
+                } else {
+                    timeText.text = '';
                 }
             }
+        }
+
+        if (FlxG.keys.pressed.SHIFT && FlxG.keys.pressed.R && FlxG.keys.pressed.T) {
+            reset();
+        }
+
+        if (FlxG.keys.pressed.SHIFT && FlxG.keys.pressed.H) {
+            launchHardcore();
         }
 
         if (!found) {
@@ -111,6 +121,27 @@ class MenuState extends GameState {
     function selectWorld (world:Worlds) {
         fadeOut(() -> {
             Game.inst.currentWorld = world;
+            Game.inst.isHardcore = false;
+            FlxG.switchState(new PlayState());
+            FlxTween.tween(sound1, { volume: 0.0 }, 0.5);
+            FlxTween.tween(sound2, { volume: 0.0 }, 0.5);
+        });
+    }
+
+    function reset () {
+        fadeOut(() -> {
+            FlxG.switchState(new TitleState());
+            Game.inst.clearSaveData();
+            FlxTween.tween(sound1, { volume: 0.0 }, 0.5);
+            FlxTween.tween(sound2, { volume: 0.0 }, 0.5);
+        });
+    }
+
+    function launchHardcore () {
+        fadeOut(() -> {
+            Game.inst.currentWorld = LOut;
+            Game.inst.isHardcore = true;
+            Game.inst.hardcoreTimeTotal = 0;
             FlxG.switchState(new PlayState());
             FlxTween.tween(sound1, { volume: 0.0 }, 0.5);
             FlxTween.tween(sound2, { volume: 0.0 }, 0.5);

@@ -14,20 +14,8 @@ class TitleState extends GameState {
     override public function create () {
         super.create();
 
-        // PROD: remove
-        // requires `-debug` flag
-        FlxG.debugger.visible = true;
-        FlxG.debugger.drawDebug = true;
-
         FlxG.mouse.visible = false;
         FlxG.mouse.useSystemCursor = true;
-
-        // options
-        // FlxG.autoPause = false;
-        // FlxG.sound.muteKeys = null;
-        // FlxG.sound.volumeUpKeys = null;
-        // FlxG.sound.volumeDownKeys = null;
-        // camera.pixelPerfectRender = true;
 
         FlxG.scaleMode = new PixelPerfectScaleMode();
 

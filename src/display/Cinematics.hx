@@ -25,7 +25,7 @@ class CinematicSprite extends FlxSprite {
     }
 }
 
-// needed?
+// TODO: needed?
 function runTimer (callback:Void -> Void, time:Float) {
     new FlxTimer().start(time, (_:FlxTimer) -> {
         callback();

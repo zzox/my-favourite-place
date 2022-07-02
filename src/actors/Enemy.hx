@@ -51,15 +51,6 @@ class Enemy extends FlxSprite {
     override public function update (elapsed:Float) {
         switch (type) {
             case Gremlin:
-                // if (velocity.x < 0) {
-                //     if (x < -32) {
-                //         x += 196;
-                //     }
-                // } else if (velocity.x > 0) {
-                //     if (x > 176) {
-                //         x -= 196;
-                //     }
-                // }
                 if (velocity.x < 0) {
                     if (x < -32) {
                         velocity.x = -velocity.x;

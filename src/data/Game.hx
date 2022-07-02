@@ -28,7 +28,10 @@ class GameInstance {
     public var levelCleared:Int = -1;
     public var hasMenuOptions:Bool = false;
 
+    public var hardcoreTimeTotal:Float;
+
     public function new () {
+        // for some strange reason I can't call `newWorldsData()` here
         for (item in levelList) {
             worlds[item] = {
                 complete: false,
@@ -46,8 +49,13 @@ class GameInstance {
     }
 
     public function winLevel (world:Worlds, time:Float):Bool {
+        if (isHardcore) {
+            hardcoreTimeTotal += time;
+        }
+
         worlds[world].totalTime += time;
         worlds[world].complete = true;
+
         final newBest = worlds[world].bestTime == 0 || time < worlds[world].bestTime;
         worlds[world].bestTime = newBest ? time : worlds[world].bestTime;
 
@@ -89,7 +97,22 @@ class GameInstance {
         options = FlxG.save.data.options;
     }
 
+    function newWorldsData () {
+        for (item in levelList) {
+            worlds[item] = {
+                complete: false,
+                bestTime: 0.0,
+                totalTime: 0.0,
+                deaths: 0
+            }
+        }
+    }
+
     public function clearSaveData () {
-        //
+        FlxG.save.bind(MFP_KEY, 'zzox');
+        FlxG.save.erase();
+        newWorldsData();
+        levelCleared = -1;
+        hasMenuOptions = false;
     }
 }

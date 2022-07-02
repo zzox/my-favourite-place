@@ -202,7 +202,6 @@ class Player extends FlxSprite {
                 FlxG.sound.play(AssetPaths.choose_jump__mp3, 0.1);
                 scene.generateExplosion(midpoint.x, y + height, 'jump');
                 jumps++;
-                // jumpSound.play();
             }
 
             if (!touchingFloor) {

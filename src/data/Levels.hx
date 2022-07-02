@@ -43,7 +43,6 @@ typedef WorldData = {
     var fromStartDir:Dir;
     var postWinDir:Dir;
     var postLoseDir:Dir;
-    // var hudColors:Array<Int>;
     var levels:Array<LevelData>;
     var songs:Array<String>;
 }

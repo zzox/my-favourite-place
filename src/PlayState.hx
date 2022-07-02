@@ -64,7 +64,7 @@ typedef PlayerSkills = {
 class PlayState extends GameState {
     static inline final BULLET_POOL_SIZE:Int = 100;
     static inline final ROOM_HEIGHT:Int = 96;
-    static inline final MAX_DASHES:Int = 5; // can be changed, fine to go way over
+    static inline final MAX_DASHES:Int = 2;
     static inline final OVERLAP_CHECK_DISTANCE:Int = 5;
     static inline final BOUNDS_DISTANCE:Int = 4;
 
@@ -111,7 +111,7 @@ class PlayState extends GameState {
         skills = {
             jumps: 1,
             dashes: getNumDashes(),
-            dashVel: 250.0 // TODO: make 240 and test?
+            dashVel: 250.0
         }
 
         final bg = new FlxSprite(0, 0);
@@ -217,10 +217,8 @@ class PlayState extends GameState {
     }
 
     override public function update(elapsed:Float) {
-        // positionAimer();
         super.update(elapsed);
 
-        // TODO: add other moving Flx items to `spritesGroup`
         stoppedTime -= elapsed;
         if (stoppedTime < 0) {
             spritesGroup.updateParent(elapsed);
@@ -248,8 +246,6 @@ class PlayState extends GameState {
             rooms[currentRoom].spikes.forEach((m:NamedMap) -> {
                 if (m.overlaps(player.body) && !player.dead) {
                     loseLevel();
-                    // TODO: remove following collide method and definition?
-                    // FlxG.collide(rooms[currentRoom].spikes, player, collideSpikes);
                 }
             });
 
@@ -301,23 +297,6 @@ class PlayState extends GameState {
                 FlxG.camera.shake(0.01, 0.05);
                 FlxG.sound.play(AssetPaths.choose_dash_wall__mp3, 0.5);
             });
-        }
-    }
-
-    function old_collideSpikes (spikes:NamedMap, player:Player) {
-        if (!player.dead && (
-            (player.isTouching(FlxObject.LEFT) && !player.isTouching(FlxObject.UP) &&
-            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_right') ||
-
-            (player.isTouching(FlxObject.RIGHT) && !player.isTouching(FlxObject.UP) &&
-            !player.isTouching(FlxObject.DOWN) && spikes.name == 'Spikes_left') ||
-
-            (player.isTouching(FlxObject.DOWN) && !player.isTouching(FlxObject.LEFT) &&
-            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_up') ||
-
-            (player.isTouching(FlxObject.UP) && !player.isTouching(FlxObject.LEFT) &&
-            !player.isTouching(FlxObject.RIGHT) && spikes.name == 'Spikes_down'))) {
-            loseLevel();
         }
     }
 
@@ -430,7 +409,7 @@ class PlayState extends GameState {
         We slide around corners on the y axis more aggressively, hence the `i <= 3` check for x vals.
     **/
     function dashOverlapCheck () {
-        // TODO: if this doesn't work, collideCheck() works ok
+        // if this doesn't work, collideCheck() works ok
         if (overlapCheck(player)) {
             final origPlayerPos = { x: player.x, y: player.y };
             // xMajor is moving more on the x axis than the y
@@ -440,7 +419,6 @@ class PlayState extends GameState {
                 Math.abs(player.velocity.x) / Math.abs(player.velocity.y) < 0.75 ||
                 Math.abs(player.velocity.y) / Math.abs(player.velocity.x) < 0.75
             ) {
-                // trace('\n\nchecking!!!', xMajor ? 'on y' : 'on x');
                 for (i in 1...OVERLAP_CHECK_DISTANCE) {
                     if (xMajor) {
                         player.y = origPlayerPos.y + i;
@@ -449,7 +427,6 @@ class PlayState extends GameState {
                     }
 
                     if (!overlapCheck(player)) {
-                        // trace('overlaps plus', i, xMajor ? 'on y' : 'on x');
                         return;
                     }
 
@@ -460,14 +437,11 @@ class PlayState extends GameState {
                     }
 
                     if (!overlapCheck(player)) {
-                        // trace('overlaps minus ', i, xMajor ? 'on y' : 'on x');
                         return;
                     }
                 }
 
                 player.setPosition(origPlayerPos.x, origPlayerPos.y);
-            } else {
-                trace('not checking!!', Math.abs(player.velocity.x) / Math.abs(player.velocity.y), Math.abs(player.velocity.y) / Math.abs(player.velocity.x));
             }
 
             collideCheck();
@@ -844,18 +818,31 @@ class PlayState extends GameState {
         FlxTween.tween(roomNumber, { x: 64, y: 44 });
         FlxTween.tween(timer, { x: 20, y: 52 });
 
-        menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, win ? Next : Retry, () -> {
-            fadeOutMusic();
-            fadeOut(() -> {
-                FlxG.switchState(new PlayState());
-            });
-        }));
-        menuGroup.add(new Button(Std.int(point.x + 82), point.y + 68, Quit, () -> {
-            fadeOutMusic();
-            fadeOut(() -> {
-                FlxG.switchState(new MenuState());
-            });
-        }));
+        if (Game.inst.isHardcore) {
+            menuGroup.add(new Button(Std.int(point.x + 63), point.y + 68, win ? Next : Quit, () -> {
+                fadeOutMusic();
+                fadeOut(() -> {
+                    if (win) {
+                        FlxG.switchState(new PlayState());
+                    } else {
+                        FlxG.switchState(new MenuState());
+                    }
+                });
+            }));
+        } else {
+            menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, win ? Next : Retry, () -> {
+                fadeOutMusic();
+                fadeOut(() -> {
+                    FlxG.switchState(new PlayState());
+                });
+            }));
+            menuGroup.add(new Button(Std.int(point.x + 82), point.y + 68, Quit, () -> {
+                fadeOutMusic();
+                fadeOut(() -> {
+                    FlxG.switchState(new MenuState());
+                });
+            }));
+        }
     }
 
     function createWorld () {
