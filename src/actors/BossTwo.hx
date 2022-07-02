@@ -9,12 +9,12 @@ enum BossTwoState {
     Attacking;
 }
 final scanPositions = [
-    { startPos: { x: 1088, y: 24 }, vel: { x: 240, y: 0 } },
-    { startPos: { x: 1280, y: 24 }, vel: { x: -240, y: 0 } },
+    { startPos: { x: 1088, y: 24 }, vel: { x: 180, y: 0 } },
+    { startPos: { x: 1280, y: 24 }, vel: { x: -180, y: 0 } },
 ];
 final attackPositions = [
-    { startPos: { x: 1088, y: 56 }, vel: { x: 300, y: 0 }, dir: Right },
-    { startPos: { x: 1280, y: 56 }, vel: { x: -300, y: 0 }, dir: Left },
+    { startPos: { x: 1088, y: 56 }, vel: { x: 240, y: 0 }, dir: Right },
+    { startPos: { x: 1280, y: 56 }, vel: { x: -240, y: 0 }, dir: Left },
 ];
 
 class BossTwo extends Boss {

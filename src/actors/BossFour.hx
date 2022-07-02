@@ -14,7 +14,7 @@ final attackPositions = [];
 class BossFour extends Boss {
     static inline final HURT_FRAMES:Float = 3;
     static inline final SHOOT_VEL:Int = 180;
-    static inline final ATTACK_VEL:Int = 240;
+    static inline final ATTACK_VEL:Int = 300;
 
     var state:BossFourState = Scrolling;
     var timers:Array<FlxTimer> = [];

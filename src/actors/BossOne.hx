@@ -10,10 +10,10 @@ enum BossState {
     Reversing;
 }
 final attackPositions = [
-    { startPos: { x: -32, y: 728 }, vel: { x: 240, y: 0 }, dir: Right },
-    { startPos: { x: 160, y: 728 }, vel: { x: -240, y: 0 }, dir: Left },
-    { startPos: { x: -32, y: 696 }, vel: { x: 240, y: 60 }, dir: Right },
-    { startPos: { x: 160, y: 696 }, vel: { x: -240, y: 60 }, dir: Left },
+    { startPos: { x: -32, y: 728 }, vel: { x: 180, y: 0 }, dir: Right },
+    { startPos: { x: 160, y: 728 }, vel: { x: -180, y: 0 }, dir: Left },
+    { startPos: { x: -32, y: 696 }, vel: { x: 180, y: 60 }, dir: Right },
+    { startPos: { x: 160, y: 696 }, vel: { x: -180, y: 60 }, dir: Left },
 ];
 
 class BossOne extends Boss {

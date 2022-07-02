@@ -105,7 +105,7 @@ class BossThree extends Boss {
                             FlxVelocity.moveTowardsPoint(
                                 this,
                                 new FlxPoint(scene.player.x, scene.player.y),
-                                240
+                                300
                             );
                         }
                     });
