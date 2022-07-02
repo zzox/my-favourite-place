@@ -19,6 +19,7 @@ import flixel.FlxObject;
 import flixel.FlxSprite;
 import flixel.FlxState;
 import flixel.group.FlxGroup;
+import flixel.system.FlxSound;
 import flixel.text.FlxBitmapText;
 import flixel.text.FlxText.FlxTextAlign;
 import flixel.text.FlxText.FlxTextBorderStyle;
@@ -84,6 +85,7 @@ class PlayState extends GameState {
     var dashCounters:Array<FlxSprite>;
     var unlimitedDash:FlxSprite;
     var clouds:Array<FlxSprite> = [];
+    var songs:Array<FlxSound> = [];
 
     public var screenPoint:IntPoint;
 
@@ -97,6 +99,7 @@ class PlayState extends GameState {
 
     var timer:FlxBitmapText;
     var roomNumber:FlxBitmapText;
+    var specialBgItem:FlxSprite;
 
     override public function create() {
         super.create();
@@ -119,6 +122,16 @@ class PlayState extends GameState {
         spritesGroup = new SpritesGroup();
         bgSpritesGroup = new SpritesGroup();
 
+        for (song in levelData.songs) {
+            if (song != null) {
+                songs.push(FlxG.sound.play(song, 0.0, true));
+            } else {
+                songs.push(null);
+            }
+        }
+
+        checkSongStanza();
+
         var numClouds = 0;
         var cloudYPosition = 0;
         if (currentWorld == LDown) {
@@ -138,9 +151,9 @@ class PlayState extends GameState {
 
             bgSpritesGroup.add(new Rain());
         } else if (currentWorld == LOver) {
-            final bgItem = new FlxSprite(0, 15, AssetPaths.forest_bg__png);
-            bgItem.scrollFactor.set(0, 0.05);
-            bgSpritesGroup.add(bgItem);
+            specialBgItem = new FlxSprite(0, 15, AssetPaths.forest_bg__png);
+            specialBgItem.scrollFactor.set(0, 0.05);
+            bgSpritesGroup.add(specialBgItem);
         }
 
         for (i in 0...numClouds) {
@@ -286,7 +299,7 @@ class PlayState extends GameState {
         if (player.dashing) {
             hitStop(0.1, () -> {
                 FlxG.camera.shake(0.01, 0.05);
-                FlxG.sound.play(AssetPaths.choose_dash_wall__mp3, 0.25);
+                FlxG.sound.play(AssetPaths.choose_dash_wall__mp3, 0.5);
             });
         }
     }
@@ -310,18 +323,18 @@ class PlayState extends GameState {
 
     function projHitPlayer (proj:Projectile, playerBody:FlxSprite) {
         if (!player.dead) {
-            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.1);
+            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.2);
             loseLevel();
         }
     }
 
     function enemyHitPlayer (enemy:Enemy, playerBody:Player) {
         if (!enemy.dead && !player.dead) {
-            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.1);
+            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.2);
             if (player.dashing || player.postDashTime > 0) {
                 enemy.hit();
                 hitStop(0.2, () -> {
-                    FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.25);
+                    FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.5);
                     player.dashes--;
                     if (player.dashes < 0) {
                         player.dashes = 0;
@@ -364,7 +377,7 @@ class PlayState extends GameState {
             graphic = AssetPaths.infinity_dashes_modal__png;
         }
 
-        FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
+        FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.5);
 
         final modal = new FlxSprite(-160, 90, graphic);
         modal.scrollFactor.set(0, 0);
@@ -483,7 +496,7 @@ class PlayState extends GameState {
             }
 
             new FlxTimer().start(0.5, (_:FlxTimer) -> {
-                FlxG.sound.play(AssetPaths.choose_blip__mp3, 0.15);
+                FlxG.sound.play(AssetPaths.choose_blip__mp3, 0.3);
             });
 
             new FlxTimer().start(1, (_:FlxTimer) -> {
@@ -498,7 +511,7 @@ class PlayState extends GameState {
 
     public function bossDie () {
         hitStop(1.0, () -> {
-            FlxG.sound.play(AssetPaths.choose_boss_die__mp3, 0.25);
+            FlxG.sound.play(AssetPaths.choose_boss_die__mp3, 0.5);
             rooms[currentRoom].outPlugs.destroy();
             rooms[currentRoom].outPlugs.alive = false;
             for (i in 0...16) {
@@ -529,7 +542,8 @@ class PlayState extends GameState {
         transitioning = true;
         Game.inst.loseLevel(currentWorld, levelTime);
         hitStop(0.5, () -> {
-            FlxG.sound.play(AssetPaths.choose_die__mp3, 0.25);
+            FlxG.sound.play(AssetPaths.choose_die__mp3, 0.5);
+            checkSongStanza();
             final midpoint = player.getMidpoint();
             generateExplosion(midpoint.x, midpoint.y, 'pop');
             final toPos = getScrollFromDir(worldData[currentWorld].postLoseDir);
@@ -564,6 +578,7 @@ class PlayState extends GameState {
     }
 
     function winLevel () {
+        player.visible = false;
         player.die();
         over = true;
         roomNumber.visible = false;
@@ -571,6 +586,7 @@ class PlayState extends GameState {
             c.destroy();
         }
         transitioning = true;
+        checkSongStanza();
 
         checkCinematics(() -> {
             // TODO: show star for new best?
@@ -587,13 +603,16 @@ class PlayState extends GameState {
                 1,
                 {
                     ease: FlxEase.quadInOut, startDelay: 0.5, onComplete: (_:FlxTween) -> {
+                        if (specialBgItem != null) {
+                            specialBgItem.destroy();
+                        }
                         for (c in clouds) {
                             c.destroy();
                         }
                     }
                 }
             );
-            FlxG.sound.play(AssetPaths.choose_powerup__mp3, 0.25);
+            FlxG.sound.play(AssetPaths.choose_plink__mp3, 0.5);
         });
     }
 
@@ -612,7 +631,7 @@ class PlayState extends GameState {
             for (i in 0...dashCounters.length) {
                 final dashItem = dashCounters[i];
                 dashItem.visible = i < skills.dashes;
-                
+
                 if (i < skills.dashes - player.dashes) {
                     dashItem.animation.play('solid');
                 } else if (dashItem.animation.curAnim.name == 'solid') {
@@ -723,6 +742,7 @@ class PlayState extends GameState {
     }
 
     function finishMovingRoom () {
+        checkSongStanza();
         transitioning = false;
         setBounds();
         player.cancelDash();
@@ -781,6 +801,37 @@ class PlayState extends GameState {
         FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
     }
 
+    function checkSongStanza () {
+        var room = currentRoom == null ? 0 : currentRoom;
+        var stanza = [1.0, 1.0, 0.0, 0.0, 0.0];
+        if (over) {
+            stanza = [1.0, 0.0, 0.0, 0.0, 0.0];
+        } else if (room == 7) {
+            stanza = [1.0, 1.0, 1.0, 0.0, 1.0];
+        } else if (room >= 4) {
+            stanza = [1.0, 1.0, 1.0, 1.0, 1.0];
+        } else if (room >= 2) {
+            stanza = [1.0, 1.0, 1.0, 1.0, 0.0];
+        } else if (room >= 1) {
+            stanza = [1.0, 1.0, 1.0, 0.0, 0.0];
+        }
+
+        for (i in 0...songs.length) {
+            final song = songs[i];
+            if (song != null) {
+                FlxTween.tween(song, { volume: stanza[i] });
+            }
+        }
+    }
+
+    function fadeOutMusic () {
+        for (song in songs) {
+            if (song != null) {
+                FlxTween.tween(song, { volume: 0 });
+            }
+        }
+    }
+
     function createMenu (point:IntPoint, win:Bool) {
         final resultTitle = new FlxSprite(
             point.x,
@@ -794,11 +845,13 @@ class PlayState extends GameState {
         FlxTween.tween(timer, { x: 20, y: 52 });
 
         menuGroup.add(new Button(Std.int(point.x + 45), point.y + 68, win ? Next : Retry, () -> {
+            fadeOutMusic();
             fadeOut(() -> {
                 FlxG.switchState(new PlayState());
             });
         }));
         menuGroup.add(new Button(Std.int(point.x + 82), point.y + 68, Quit, () -> {
+            fadeOutMusic();
             fadeOut(() -> {
                 FlxG.switchState(new MenuState());
             });

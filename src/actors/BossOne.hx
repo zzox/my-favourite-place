@@ -71,7 +71,7 @@ class BossOne extends Boss {
                 (_:FlxTween) -> {
                     new FlxTimer().start(chargeDelay, (_:FlxTimer) -> {
                         animation.play('chomp');
-                        FlxG.sound.play(AssetPaths.choose_land__mp3, 0.2);
+                        FlxG.sound.play(AssetPaths.choose_enemy_growl__mp3, 0.4);
                         velocity.set(attackChoice.vel.x, attackChoice.vel.y);
                     });
                 }

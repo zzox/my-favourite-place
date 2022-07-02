@@ -45,6 +45,7 @@ typedef WorldData = {
     var postLoseDir:Dir;
     // var hudColors:Array<Int>;
     var levels:Array<LevelData>;
+    var songs:Array<String>;
 }
 
 typedef LevelData = {
@@ -423,6 +424,21 @@ final overLevels = [{
     exits: new Map()
 }];
 
+final darkSongs = [
+    AssetPaths.choose_0_noise__mp3,
+    AssetPaths.choose_0_synth1__mp3,
+    AssetPaths.choose_0_synth2__mp3,
+    AssetPaths.choose_0_drums__mp3
+];
+
+final lightSongs = [
+    AssetPaths.choose_1_noise__mp3,
+    AssetPaths.choose_1_synth1__mp3,
+    AssetPaths.choose_1_synth2__mp3,
+    AssetPaths.choose_1_drums__mp3,
+    AssetPaths.choose_1_synth3__mp3
+];
+
 final worldData:Map<Worlds, WorldData> = [
     LOut => {
         bgColor: 0xffd7d7d7,
@@ -435,7 +451,8 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Down,
         fromStartDir: Up,
         postWinDir: Down,
-        postLoseDir: Up
+        postLoseDir: Up,
+        songs: darkSongs
     },
     LDown => {
         bgColor: 0xffffe9c5,
@@ -448,12 +465,12 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Down,
         fromStartDir: Up,
         postWinDir: Right,
-        postLoseDir: Up
+        postLoseDir: Up,
+        songs: lightSongs
     },
     LRight => {
         bgColor: 0xff0d2030,
         titleColor: 0xffd7d7d7,
-        // bgColor: 0xff7b7b7b,
         path: AssetPaths.right__ldtk,
         start: { x: 24, y: 24 },
         levels: rightLevels,
@@ -462,7 +479,8 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Right,
         fromStartDir: Up,
         postWinDir: Right,
-        postLoseDir: Left
+        postLoseDir: Left,
+        songs: darkSongs
     },
     LUp => {
         bgColor: 0xff9ba0ef,
@@ -475,7 +493,8 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Right,
         fromStartDir: Left,
         postWinDir: Up,
-        postLoseDir: Left
+        postLoseDir: Left,
+        songs: lightSongs
     },
     LThrough => {
         bgColor: 0xff000000,
@@ -488,7 +507,14 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Right,
         fromStartDir: Left,
         postWinDir: Right,
-        postLoseDir: Up
+        postLoseDir: Up,
+        songs: [
+            null,
+            AssetPaths.choose_fight_synth1__mp3,
+            AssetPaths.choose_fight_synth2__mp3,
+            AssetPaths.choose_fight_drums__mp3,
+            AssetPaths.choose_fight_synth3__mp3
+        ]
     },
     LOver => {
         bgColor: 0xff211640,
@@ -501,6 +527,12 @@ final worldData:Map<Worlds, WorldData> = [
         winDir: Right,
         fromStartDir: Left,
         postWinDir: Up,
-        postLoseDir: Left
+        postLoseDir: Left,
+        songs: [
+            AssetPaths.choose_2_crickets__mp3,
+            AssetPaths.choose_2_synth1__mp3,
+            AssetPaths.choose_2_synth2__mp3,
+            AssetPaths.choose_2_synth3__mp3
+        ]
     }
 ];

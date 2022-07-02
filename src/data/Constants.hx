@@ -1,6 +1,7 @@
 package data;
 
 final GLOBAL_Y_OFFSET = 6;
+final MFP_KEY = 'my-favorite-place-key';
 
 enum Dir {
     Left;

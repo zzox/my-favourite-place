@@ -1,6 +1,8 @@
 package data;
 
+import data.Constants;
 import data.Levels;
+import flixel.FlxG;
 
 class Game {
     public static final inst:GameInstance = new GameInstance();
@@ -20,8 +22,11 @@ typedef Options = {
 class GameInstance {
     public var isHardcore:Bool = false;
     public var currentWorld:Worlds;
+
     public var worlds:Map<Worlds, CompleteData> = new Map();
     public var options:Options = { crtFilter: true };
+    public var levelCleared:Int = -1;
+    public var hasMenuOptions:Bool = false;
 
     public function new () {
         for (item in levelList) {
@@ -31,6 +36,12 @@ class GameInstance {
                 totalTime: 0.0,
                 deaths: 0
             }
+        }
+
+        FlxG.save.bind(MFP_KEY, 'zzox');
+        if (FlxG.save.data.levelCleared != null) {
+            hasMenuOptions = true;
+            loadData();
         }
     }
 
@@ -42,11 +53,16 @@ class GameInstance {
 
         // increment world
         final levelIndex = levelList.indexOf(world);
+        if (levelIndex > levelCleared) {
+            levelCleared = levelIndex;
+        }
         currentWorld = levelList[levelIndex + 1];
 
         if (currentWorld == null) {
             trace('at the end!');
         }
+
+        saveData();
 
         return newBest;
     }
@@ -54,5 +70,26 @@ class GameInstance {
     public function loseLevel (world:Worlds, time:Float) {
         worlds[world].totalTime += time;
         worlds[world].deaths++;
+
+        saveData();
+    }
+
+    function saveData () {
+        FlxG.save.bind(MFP_KEY, 'zzox');
+        FlxG.save.data.levelCleared = levelCleared;
+        FlxG.save.data.worlds = worlds;
+        FlxG.save.data.options = options;
+        FlxG.save.flush();
+    }
+
+    function loadData () {
+        FlxG.save.bind(MFP_KEY, 'zzox');
+        levelCleared = FlxG.save.data.levelCleared;
+        worlds = FlxG.save.data.worlds;
+        options = FlxG.save.data.options;
+    }
+
+    public function clearSaveData () {
+        //
     }
 }

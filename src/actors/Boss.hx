@@ -39,7 +39,7 @@ class Boss extends FlxSprite {
         hurtFrame = 0;
         hp--;
 
-        FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.25);
+        FlxG.sound.play(AssetPaths.choose_enemy_hit__mp3, 0.5);
 
         if (hp <= 0) {
             die();

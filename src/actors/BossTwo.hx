@@ -109,7 +109,7 @@ class BossTwo extends Boss {
 
             setPosition(pos.startPos.x, pos.startPos.y);
             velocity.set(pos.vel.x, pos.vel.y);
-            FlxG.sound.play(AssetPaths.choose_land__mp3, 0.2);
+            FlxG.sound.play(AssetPaths.choose_enemy_growl__mp3, 0.4);
             currentAttackDirection = pos.dir;
         });
     }

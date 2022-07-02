@@ -1,5 +1,6 @@
 package actors;
 
+import flixel.FlxG;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
@@ -104,6 +105,7 @@ class BossFour extends Boss {
             timers[1] = new FlxTimer().start(0.5, (_:FlxTimer) -> {
                 if (scene.currentRoom == 7) {
                     if (hp % 2 == 0) {
+                        FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.4);
                         scene.shoot(
                             x + 12,
                             y + 18,
@@ -112,6 +114,7 @@ class BossFour extends Boss {
                         );
 
                         new FlxTimer().start(0.2, (_:FlxTimer) -> {
+                            FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.4);
                             scene.shoot(
                                 x + 12,
                                 y + 18,
@@ -122,6 +125,7 @@ class BossFour extends Boss {
 
                         if (hp <= 4) {
                             new FlxTimer().start(0.4, (_:FlxTimer) -> {
+                                FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.4);
                                 scene.shoot(
                                     x + 12,
                                     y + 18,
@@ -131,6 +135,7 @@ class BossFour extends Boss {
                             });
                         }
                     } else {
+                        FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.4);
                         scene.shoot(
                             x + 12,
                             y + 18,
@@ -153,6 +158,7 @@ class BossFour extends Boss {
                         }
                     }
                 } else {
+                    FlxG.sound.play(AssetPaths.choose_clip__mp3, 0.4);
                     scene.shoot(
                         x + 12,
                         y + 18,
@@ -168,6 +174,7 @@ class BossFour extends Boss {
 
             timers[3] = new FlxTimer().start(1.5, (_:FlxTimer) -> {
                 velocity.set(x > 80 ? -ATTACK_VEL : ATTACK_VEL, 0);
+                FlxG.sound.play(AssetPaths.choose_enemy_growl__mp3, 0.4);
             });
         });
         // tween, scroll, shoot, sprint

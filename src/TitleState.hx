@@ -1,3 +1,4 @@
+import data.Game;
 import display.CrtShader;
 import display.Font;
 import flixel.FlxG;
@@ -59,7 +60,12 @@ class TitleState extends GameState {
         if (FlxG.mouse.justPressed && started && !leaving) {
             leaving = true;
             fadeOut(() -> {
-                FlxG.switchState(new MenuState());
+                if (Game.inst.hasMenuOptions) {
+                    FlxG.switchState(new MenuState());
+                } else {
+                    Game.inst.currentWorld = LOut;
+                    FlxG.switchState(new PlayState());
+                }
             });
         }
     }

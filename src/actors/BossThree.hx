@@ -101,11 +101,11 @@ class BossThree extends Boss {
                                 }
                             );
                         } else {
-                            FlxG.sound.play(AssetPaths.choose_land__mp3, 0.2);
+                            FlxG.sound.play(AssetPaths.choose_enemy_growl__mp3, 0.4);
                             FlxVelocity.moveTowardsPoint(
                                 this,
                                 new FlxPoint(scene.player.x, scene.player.y),
-                                300
+                                240
                             );
                         }
                     });

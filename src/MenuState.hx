@@ -4,6 +4,7 @@ import display.Font;
 import display.MenuButton;
 import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.system.FlxSound;
 import flixel.text.FlxBitmapText;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
@@ -15,6 +16,9 @@ class MenuState extends GameState {
     var timeText:FlxBitmapText;
     var totalTimeText:FlxBitmapText;
     var opened:Bool = false;
+
+    var sound1:FlxSound;
+    var sound2:FlxSound;
 
     override public function create () {
         super.create();
@@ -41,23 +45,22 @@ class MenuState extends GameState {
         for (i in 0...levelList.length) {
             final item = levelList[i];
 
-            // TODO:
-            // check if the level before is complete,
-            // move buttons down?
-            final button = new MenuButton(
-                i % 2 == 0 ? 16 : 82,
-                Math.floor(i / 2) * 20 + 8,
-                i,
-                item,
-                (world) -> {
-                    if (opened) {
-                        selectWorld(world);
+            if (i <= Game.inst.levelCleared + 1) {
+                final button = new MenuButton(
+                    i % 2 == 0 ? 16 : 82,
+                    Math.floor(i / 2) * 20 + 8,
+                    i,
+                    item,
+                    (world) -> {
+                        if (opened) {
+                            selectWorld(world);
+                        }
                     }
-                }
-            );
-            add(button);
-            add(button.text);
-            buttons.push(button);
+                );
+                add(button);
+                add(button.text);
+                buttons.push(button);
+            }
         }
 
         deathText = makeText('', { x: 16, y: 64 });
@@ -72,6 +75,12 @@ class MenuState extends GameState {
         new FlxTimer().start(0.75, (_:FlxTimer) -> {
             opened = true;
         });
+
+        sound1 = FlxG.sound.play(AssetPaths.choose_1_noise__mp3, 0.0, true);
+        sound2 = FlxG.sound.play(AssetPaths.choose_1_synth1__mp3, 0.0, true);
+
+        FlxTween.tween(sound1, { volume: 1.0 }, 0.5);
+        FlxTween.tween(sound2, { volume: 1.0 }, 0.5);
     }
 
     override public function update (elapsed:Float) {
@@ -83,7 +92,7 @@ class MenuState extends GameState {
                 found = true;
                 final world = Game.inst.worlds[button.world];
 
-                deathText.text = world.deaths + ' deaths';
+                deathText.text = world.deaths + ' death' + (world.deaths == 1 ? '' : 's');
                 totalTimeText.text = 'total: ' + timeToString(world.totalTime);
 
                 if (world.complete) {
@@ -103,6 +112,8 @@ class MenuState extends GameState {
         fadeOut(() -> {
             Game.inst.currentWorld = world;
             FlxG.switchState(new PlayState());
+            FlxTween.tween(sound1, { volume: 0.0 }, 0.5);
+            FlxTween.tween(sound2, { volume: 0.0 }, 0.5);
         });
     }
 }
