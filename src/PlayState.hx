@@ -159,7 +159,7 @@ class PlayState extends GameState {
         for (i in 0...numClouds) {
             final cloud = new FlxSprite(
                 i * 40 + Math.random() * 40,
-                58 + Math.random() * 16 + cloudYPosition,
+                62 + Math.random() * 16 + cloudYPosition,
                 AssetPaths.cloud__png
             );
             cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
@@ -860,6 +860,8 @@ class PlayState extends GameState {
             final spikes = new FlxTypedGroup<NamedMap>();
 
             final point = map.levels['Level_$i'].point;
+
+            final collide = createTileLayer(map, 'Level_$i', 'Background', point);
 
             final spikesLeft = createTileLayer(map, 'Level_$i', 'Spikes_left', { x: point.x + 3, y: point.y });
             if (spikesLeft != null) {
