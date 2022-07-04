@@ -1,6 +1,7 @@
 package display;
 
 import data.Constants;
+import flixel.FlxCamera;
 import flixel.FlxSprite;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
@@ -50,6 +51,13 @@ function runUpCinematic (scene:PlayState, callback:Void -> Void) {
     });
 }
 
-function runOverCinematic (scene:PlayState, callback:Void -> Void) {
+function runOverCinematic (scene:PlayState, camera:FlxCamera, callback:Void -> Void) {
+    // tween camera. after waiting.
+    // player runs then stops.
+    // other player stands.
+    // other player runs, destroy both.
+    // show combined sprites
+    // spawn hearts
+    // generate stars
     callback();
 }

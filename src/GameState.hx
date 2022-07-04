@@ -24,7 +24,7 @@ class GameState extends FlxState {
         FlxTween.tween(this, { cameraYScale: 1.0 }, 0.75, { ease: FlxEase.quintIn });
 
         if (Game.inst.options.crtFilter) {
-            final crtShader = new CrtShader();
+            crtShader = new CrtShader();
             FlxG.camera.setFilters([new ShaderFilter(crtShader)]);
         }
     }
@@ -84,10 +84,6 @@ class GameState extends FlxState {
                 callback();
             }
         });
-        FlxTween.tween(this, { cameraYScale: 0 }, 0.5, { ease: FlxEase.quintIn, onComplete:
-            (_:FlxTween) -> {
-                callback();
-            }
-        });
+        FlxTween.tween(this, { cameraYScale: 0 }, 0.5, { ease: FlxEase.quintIn });
     }
 }

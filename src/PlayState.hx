@@ -159,7 +159,7 @@ class PlayState extends GameState {
         for (i in 0...numClouds) {
             final cloud = new FlxSprite(
                 i * 40 + Math.random() * 40,
-                62 + Math.random() * 16 + cloudYPosition,
+                54 + Math.random() * 16 + cloudYPosition,
                 AssetPaths.cloud__png
             );
             cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
@@ -278,6 +278,10 @@ class PlayState extends GameState {
                 player.setPosition(76, -570);
                 currentRoom = 6;
                 moveRoom(Up);
+            } else if (currentWorld == LOver) {
+                player.setPosition(556, -12);
+                currentRoom = 6;
+                moveRoom(Down);
             }
         }
 
@@ -528,7 +532,7 @@ class PlayState extends GameState {
             for (c in dashCounters) {
                 c.destroy();
             }
-            createMenu(toPos, false);
+            createMenu(toPos, false, false);
             FlxTween.tween(
                 camera,
                 { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
@@ -563,14 +567,17 @@ class PlayState extends GameState {
         checkSongStanza();
 
         checkCinematics(() -> {
-            // TODO: show star for new best?
-            Game.inst.winLevel(currentWorld, levelTime);
+            final newBest = Game.inst.winLevel(currentWorld, levelTime);
             final toPos = getScrollFromDir(worldData[currentWorld].postWinDir);
             toPos.x *= 10;
             toPos.y *= 10;
             toPos.x += Std.int(camera.scroll.x);
             toPos.y += Std.int(camera.scroll.y);
-            createMenu(toPos, true);
+            if (currentWorld == LOver) {
+                createEnding(toPos);
+            } else {
+                createMenu(toPos, true, newBest);
+            }
             FlxTween.tween(
                 camera,
                 { 'scroll.x': toPos.x, 'scroll.y': toPos.y },
@@ -594,7 +601,7 @@ class PlayState extends GameState {
         if (currentWorld == LUp) {
             runUpCinematic(this, callback);
         } else if (currentWorld == LOver) {
-            runOverCinematic(this, callback);
+            runOverCinematic(this, camera, callback);
         } else {
             callback();
         }
@@ -806,7 +813,7 @@ class PlayState extends GameState {
         }
     }
 
-    function createMenu (point:IntPoint, win:Bool) {
+    function createMenu (point:IntPoint, win:Bool, newBest:Bool) {
         final resultTitle = new FlxSprite(
             point.x,
             point.y,
@@ -814,6 +821,15 @@ class PlayState extends GameState {
         );
         resultTitle.color = worldData[currentWorld].titleColor;
         menuGroup.add(resultTitle);
+
+        if (newBest) {
+            new FlxTimer().start(2.0, (_:FlxTimer) -> {
+                FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.5);
+                final newBestItem = new FlxSprite(point.x + 48, point.y + 42, AssetPaths.new_best__png);
+                newBestItem.color = worldData[currentWorld].titleColor;
+                menuGroup.add(newBestItem);
+            });
+        }
 
         FlxTween.tween(roomNumber, { x: 64, y: 44 });
         FlxTween.tween(timer, { x: 20, y: 52 });
@@ -843,6 +859,19 @@ class PlayState extends GameState {
                 });
             }));
         }
+    }
+
+    function createEnding (point:IntPoint) {
+        persistentUpdate = true;
+        timer.visible = false;
+        openSubState(new FinalSubstate(endGame, point));
+    }
+
+    function endGame () {
+        fadeOut(() -> {
+            persistentUpdate = false;
+            FlxG.switchState(new TitleState());
+        });
     }
 
     function createWorld () {

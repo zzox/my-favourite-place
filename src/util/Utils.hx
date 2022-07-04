@@ -37,8 +37,16 @@ function secondsToMinutes (time:Float):String {
     return minutes + ':' + displaySeconds(seconds % 60);
 }
 
+function secondsToHours (seconds:Float):String {
+    if (seconds < 3600) {
+        return '';
+    }
+
+    return Math.floor(seconds / 3600) + ':';
+}
+
 function timeToString (time:Float):String {
-    return secondsToMinutes(time) + '.' + toDecimal(time);
+    return secondsToHours(time) + secondsToMinutes(time) + '.' + toDecimal(time);
 }
 
 function getScrollFromDir (dir:Dir):IntPoint {
