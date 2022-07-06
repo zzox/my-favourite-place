@@ -565,6 +565,10 @@ class PlayState extends GameState {
         }
         transitioning = true;
         checkSongStanza();
+        if (currentWorld == LOver) {
+            timer.destroy();
+            unlimitedDash.destroy();
+        }
 
         checkCinematics(() -> {
             final newBest = Game.inst.winLevel(currentWorld, levelTime);

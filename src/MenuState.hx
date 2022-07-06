@@ -27,6 +27,10 @@ class MenuState extends GameState {
         bg.makeGraphic(160, 90, 0xffffe9c5);
         add(bg);
 
+        final bgItem = new FlxSprite(0, 18, AssetPaths.castle_bg_1__png);
+        bgItem.alpha = 0.5;
+        add(bgItem);
+
         // clouds
         for (i in 0...3) {
             final cloud = new FlxSprite(i * 40 + Math.random() * 40, 48 + Math.random() * 16, AssetPaths.cloud__png);

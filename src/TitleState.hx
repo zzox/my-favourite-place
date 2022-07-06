@@ -4,6 +4,7 @@ import display.Font;
 import flixel.FlxG;
 import flixel.FlxSprite;
 import flixel.system.scaleModes.PixelPerfectScaleMode;
+import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 import openfl.filters.ShaderFilter;
 
@@ -14,8 +15,9 @@ class TitleState extends GameState {
     override public function create () {
         super.create();
 
+        FlxG.autoPause = false;
         FlxG.mouse.visible = false;
-        FlxG.mouse.useSystemCursor = true;
+        // FlxG.mouse.useSystemCursor = true;
 
         FlxG.scaleMode = new PixelPerfectScaleMode();
 
@@ -27,6 +29,20 @@ class TitleState extends GameState {
         final bgItem = new FlxSprite(0, 18, AssetPaths.castle_bg_1__png);
         bgItem.alpha = 0.5;
         add(bgItem);
+
+        // clouds
+        for (i in 0...3) {
+            final cloud = new FlxSprite(i * 40 + Math.random() * 40, 48 + Math.random() * 16, AssetPaths.cloud__png);
+            cloud.color = i % 2 == 0 ? 0xffa8a8a8 : 0xff7b7b7b;
+            cloud.flipX = Math.random() < 0.5;
+            FlxTween.tween(
+                cloud,
+                { x: cloud.x + 3 + Math.random() * 3 },
+                2 + Math.random() * 2,
+                { type: FlxTweenType.PINGPONG }
+            );
+            add(cloud);
+        }
 
         final title = new FlxSprite(0, 0, AssetPaths.title__png);
         title.color = 0xff0d2030;

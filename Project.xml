@@ -34,6 +34,7 @@
     <!-- _______________________________ Libraries ______________________________ -->
 
     <haxelib name="flixel" />
+    <!-- <haxelib name="newgrounds" /> -->
 
     <!--In case you want to use the addons package-->
     <haxelib name="flixel-addons" />
@@ -77,6 +78,9 @@
     <haxedef name="NAPE_RELEASE_BUILD" unless="debug" />
 
     <!-- _________________________________ Custom _______________________________ -->
+
+    <!--If we're building for newgrounds-->
+    <!-- <haxedef name="is_ng" /> -->
 
     <!--Place custom nodes like icons here (higher priority to override the HaxeFlixel icon)-->
     <template path="assets/templates/pixel-scale.html" rename="index.html" />

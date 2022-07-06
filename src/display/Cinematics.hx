@@ -109,7 +109,7 @@ function runOverCinematic (scene:PlayState, camera:FlxCamera, callback:Void -> V
 
             // generate hearts
             for (i in 0...6) {
-                final heart = new FlxSprite(678, 78, AssetPaths.heart__png);
+                final heart = new FlxSprite(674, 78, AssetPaths.heart__png);
                 FlxTween.tween(
                     heart,
                     { x: (heart.x + i * 8) - 24, y: heart.y - (Math.random() * 32 + 16) },
@@ -125,11 +125,11 @@ function runOverCinematic (scene:PlayState, camera:FlxCamera, callback:Void -> V
                 scene.add(heart);
             }
 
-            scene.add(new FlxSprite(670, 73, AssetPaths.player_collide__png));
+            scene.add(new FlxSprite(664, 73, AssetPaths.player_collide__png));
         }
     });
 
-    runTimer(12, () -> {
+    runTimer(10, () -> {
         callback();
     });
 }

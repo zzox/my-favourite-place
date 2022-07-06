@@ -1,12 +1,14 @@
 package data;
 
+import Keys;
 import data.Constants;
 import data.Levels;
 import flixel.FlxG;
-
-class Game {
-    public static final inst:GameInstance = new GameInstance();
-}
+#if is_ng
+import io.newgrounds.NG;
+import io.newgrounds.crypto.Cipher;
+import io.newgrounds.crypto.EncryptionFormat;
+#end
 
 typedef CompleteData = {
     var complete:Bool;
@@ -17,6 +19,25 @@ typedef CompleteData = {
 
 typedef Options = {
     var crtFilter:Bool;
+}
+
+#if is_ng
+function unlockMedal (medalNum:Int) {
+    final medal = NG.core.medals.get(medalNum);
+    if (medal != null && !medal.unlocked) {
+        medal.sendUnlock();
+    }
+}
+function sendScore (scoreBoard:Int, time:Float) {
+    final score = NG.core.scoreBoards.get(scoreBoard);
+    if (score != null) {
+        score.postScore(Std.int(time * 1000));
+    }
+}
+#end
+
+class Game {
+    public static final inst:GameInstance = new GameInstance();
 }
 
 class GameInstance {
@@ -40,6 +61,14 @@ class GameInstance {
                 deaths: 0
             }
         }
+
+#if is_ng
+        NG.create(appId);
+        NG.createAndCheckSession(appId);
+        NG.core.requestMedals();
+        NG.core.requestScoreBoards();
+        NG.core.initEncryption(encKey, Cipher.RC4, EncryptionFormat.BASE_64);
+#end
 
         FlxG.save.bind(MFP_KEY, 'zzox');
         if (FlxG.save.data.levelCleared != null) {
@@ -65,6 +94,22 @@ class GameInstance {
             levelCleared = levelIndex;
         }
         currentWorld = levelList[levelIndex + 1];
+
+#if is_ng
+        if (world == LDown) {
+            unlockMedal(level1Medal);
+        } else if (world == LThrough) {
+            unlockMedal(level4Medal);
+        } else if (world == LOver) {
+            unlockMedal(gameMedal);
+            if (isHardcore) {
+                unlockMedal(hardcoreMedal);
+                sendScore(hardcoreHS, hardcoreTimeTotal);
+            }
+        }
+
+        sendScore(levelHSMap[world], time);
+#end
 
         saveData();
 

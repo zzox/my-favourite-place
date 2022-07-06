@@ -54,7 +54,10 @@ class FinalSubstate extends FlxSubState {
             },
             0
         );
-        deathsText = makeLevelText('deaths: $deaths', { x: point.x, y: point.y + 12 });
+        deathsText = makeLevelText(
+            Game.inst.isHardcore ? 'deaths: 0' : 'deaths: $deaths',
+            { x: point.x, y: point.y + 12 }
+        );
         add(deathsText);
 
         final totalTime:Float = Lambda.fold(
@@ -124,12 +127,10 @@ class FinalSubstate extends FlxSubState {
                     FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.5);
                 });
 
-                if (!Game.inst.isHardcore) {
-                    new FlxTimer().start(3.0, (_:FlxTimer) -> {
-                        bestTimesText.visible = true;
-                        FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.5);
-                    });
-                }
+                new FlxTimer().start(3.0, (_:FlxTimer) -> {
+                    bestTimesText.visible = true;
+                    FlxG.sound.play(AssetPaths.isle_menu_one__mp3, 0.5);
+                });
 
                 new FlxTimer().start(6.0, (_:FlxTimer) -> {
                     thanksText1.visible = true;
