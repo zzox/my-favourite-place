@@ -29,7 +29,7 @@
 
     <set name="BUILD_DIR" value="export" />
     <classpath name="src" />
-    <assets path="assets" />
+    <assets path="assets" exclude="*.aseprite" />
 
     <!-- _______________________________ Libraries ______________________________ -->
 

@@ -22,7 +22,7 @@ class Star extends FlxSprite {
         final twinkleSpace = Math.floor(Math.random() * 32 + 32);
         final twinkleSpaceArray = [for (i in 0...twinkleSpace) 0];
 
-        scrollFactor.set(0, 0.1);
+        scrollFactor.set(0, Math.random() < 0.5 ? 0.1 : 0.05);
 
         animation.add('single', [0]);
         animation.add('x', [1]);
@@ -35,12 +35,8 @@ class Star extends FlxSprite {
 
         flipX = Math.random() < 0.5;
 
-        // alpha = Math.random() * 0.8 + 0.2;
-
-        trace(anim);
-        trace(flipX);
-        trace(alpha);
-        trace(color);
+        // causes annoying flicker issue when on the same screen as bitmap text
+        alpha = Math.random() * 0.5 + 0.2;
 
         animation.play(anim);
     }

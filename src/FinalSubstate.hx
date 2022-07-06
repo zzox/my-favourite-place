@@ -29,15 +29,17 @@ class FinalSubstate extends FlxSubState {
         super(null);
 
         this.callback = callback;
-        this.point = point;
+        this.point = { x: Std.int(point.x), y: Std.int(point.y) };
     }
 
     override public function create () {
+        add(makeText('B', { x: point.x, y: point.y }));
+
         for (_ in 0...20) {
             add(
                 new Star(
                     Std.int(Math.random() * 160),
-                    Std.int(Math.random() * -85)
+                    Std.int(Math.random() * -85) - 5
                 )
             );
         }
@@ -52,7 +54,7 @@ class FinalSubstate extends FlxSubState {
             },
             0
         );
-        deathsText = makeLevelText('$deaths deaths', { x: point.x, y: point.y + 12 });
+        deathsText = makeLevelText('deaths: $deaths', { x: point.x, y: point.y + 12 });
         add(deathsText);
 
         final totalTime:Float = Lambda.fold(
@@ -73,7 +75,7 @@ class FinalSubstate extends FlxSubState {
         );
         final bestsString = timeToString(bestTime);
         bestTimesText = makeLevelText(
-            Game.inst.isHardcore ? '' : 'Sum of Bests: $bestsString',
+            Game.inst.isHardcore ? 'HARDCORE MODE' : 'Sum of Bests: $bestsString',
             { x: point.x, y: point.y + 28 }
         );
         add(bestTimesText);

@@ -778,7 +778,6 @@ class PlayState extends GameState {
     }
 
     function setBounds () {
-        // TEMP: static
         FlxG.worldBounds.set(screenPoint.x, screenPoint.y, 160, 90);
     }
 
@@ -983,6 +982,10 @@ class PlayState extends GameState {
                 shooters: shooters,
                 textItems: textItems
             };
+        }
+
+        if (currentWorld == LOver) {
+            createTileLayer(map, 'Level_8', 'Ground', { x: 640, y: 0 });
         }
 
         if (currentWorld == LDown) {

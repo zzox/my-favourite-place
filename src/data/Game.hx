@@ -66,10 +66,6 @@ class GameInstance {
         }
         currentWorld = levelList[levelIndex + 1];
 
-        if (currentWorld == null) {
-            trace('at the end!');
-        }
-
         saveData();
 
         return newBest;

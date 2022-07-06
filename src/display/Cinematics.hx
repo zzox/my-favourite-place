@@ -2,7 +2,9 @@ package display;
 
 import data.Constants;
 import flixel.FlxCamera;
+import flixel.FlxG;
 import flixel.FlxSprite;
+import flixel.tweens.FlxEase;
 import flixel.tweens.FlxTween;
 import flixel.util.FlxTimer;
 
@@ -26,8 +28,7 @@ class CinematicSprite extends FlxSprite {
     }
 }
 
-// TODO: needed?
-function runTimer (callback:Void -> Void, time:Float) {
+function runTimer (time:Float, callback:Void -> Void) {
     new FlxTimer().start(time, (_:FlxTimer) -> {
         callback();
     });
@@ -52,12 +53,83 @@ function runUpCinematic (scene:PlayState, callback:Void -> Void) {
 }
 
 function runOverCinematic (scene:PlayState, camera:FlxCamera, callback:Void -> Void) {
-    // tween camera. after waiting.
-    // player runs then stops.
-    // other player stands.
-    // other player runs, destroy both.
-    // show combined sprites
-    // spawn hearts
-    // generate stars
-    callback();
+    final player = new CinematicSprite(
+        { x: 648, y: 73 },
+        AssetPaths.player_light__png,
+        [
+            { name: 'stand', frames: [0], speed: 1 },
+            { name: 'run', frames: [0, 1, 1, 2, 2], speed: 24 },
+        ]
+    );
+    player.animation.play('stand');
+    player.flipX = true;
+
+    final otherPlayer = new CinematicSprite(
+        { x: 760, y: 73 },
+        AssetPaths.player_light__png,
+        [
+            { name: 'sit', frames: [5], speed: 1 },
+            { name: 'stand', frames: [6], speed: 1 },
+            { name: 'run', frames: [6, 7, 7, 8, 8], speed: 24 },
+        ]
+    );
+    otherPlayer.animation.play('sit');
+
+    scene.add(player);
+    scene.add(otherPlayer);
+
+    FlxTween.tween(
+        camera,
+        { 'scroll.x': 640, 'scroll.y': 6 },
+        1,
+        { ease: FlxEase.quadInOut, startDelay: 1 }
+    );
+
+    runTimer(4, () -> {
+        otherPlayer.animation.play('stand');
+    });
+
+    runTimer(6, () -> {
+        player.animation.play('run');
+        otherPlayer.animation.play('run');
+    });
+
+    FlxTween.tween(player, { x: 664 }, 0.5, { startDelay: 6, onComplete:
+        (_:FlxTween) -> {
+            player.animation.play('stand');
+        }
+    });
+
+    FlxTween.tween(otherPlayer, { x: 670 }, 1.5, { startDelay: 6, onComplete:
+        (_:FlxTween) -> {
+            player.destroy();
+            otherPlayer.destroy();
+            FlxG.sound.play(AssetPaths.choose_blip__mp3, 0.5);
+            FlxG.camera.shake(0.01, 0.05);
+
+            // generate hearts
+            for (i in 0...6) {
+                final heart = new FlxSprite(678, 78, AssetPaths.heart__png);
+                FlxTween.tween(
+                    heart,
+                    { x: (heart.x + i * 8) - 24, y: heart.y - (Math.random() * 32 + 16) },
+                    0.5,
+                    { ease: FlxEase.cubeOut, startDelay: 0.5 * Math.random(), onComplete:
+                        (_:FlxTween) -> {
+                            new FlxTimer().start(Math.random() * 1, (_:FlxTimer) -> {
+                                heart.destroy();
+                            });
+                        }
+                    }
+                );
+                scene.add(heart);
+            }
+
+            scene.add(new FlxSprite(670, 73, AssetPaths.player_collide__png));
+        }
+    });
+
+    runTimer(12, () -> {
+        callback();
+    });
 }
