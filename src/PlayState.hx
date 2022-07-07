@@ -264,27 +264,6 @@ class PlayState extends GameState {
             checkRooms();
         }
 
-        // HACK: delete this!
-        if (FlxG.keys.justPressed.G) {
-            if (currentWorld == LDown || currentWorld == LThrough) {
-                player.setPosition(72, 688);
-                currentRoom = 6;
-                moveRoom(Down);
-            } else if (currentWorld == LRight) {
-                player.setPosition(1120, 72);
-                currentRoom = 6;
-                moveRoom(Right);
-            } else if (currentWorld == LUp) {
-                player.setPosition(76, -570);
-                currentRoom = 6;
-                moveRoom(Up);
-            } else if (currentWorld == LOver) {
-                player.setPosition(556, -12);
-                currentRoom = 6;
-                moveRoom(Down);
-            }
-        }
-
         if (FlxG.keys.justPressed.ESCAPE && !over) {
             loseLevel();
         }
