@@ -55,7 +55,7 @@ class GameState extends FlxState {
             camera.setScale(cameraXScale, cameraYScale);
         }
 
-        if (FlxG.mouse.justPressed) {
+        if (FlxG.mouse.justPressed && aimer != null) {
             final aimerAnim = new FlxSprite(0, 0);
             aimerAnim.loadGraphic(AssetPaths.aimer_anim__png, true, 7, 7);
             aimerAnim.animation.add('play', [0, 1, 2, 3], 24, false);
