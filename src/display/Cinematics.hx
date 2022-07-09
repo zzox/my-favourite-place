@@ -85,6 +85,10 @@ function runOverCinematic (scene:PlayState, camera:FlxCamera, callback:Void -> V
         { ease: FlxEase.quadInOut, startDelay: 1 }
     );
 
+    runTimer(1, () -> {
+        scene.timer.destroy();
+    });
+
     runTimer(4, () -> {
         otherPlayer.animation.play('stand');
     });

@@ -177,7 +177,6 @@ class BossFour extends Boss {
                 FlxG.sound.play(AssetPaths.choose_enemy_growl__mp3, 0.4);
             });
         });
-        // tween, scroll, shoot, sprint
     }
 
     override function hit () {

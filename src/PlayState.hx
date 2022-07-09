@@ -97,9 +97,16 @@ class PlayState extends GameState {
     var over:Bool = false;
     var started:Bool = false;
 
-    var timer:FlxBitmapText;
+    public var timer:FlxBitmapText;
     var roomNumber:FlxBitmapText;
     var specialBgItem:FlxSprite;
+
+    var fromQuickRestart:Bool;
+
+    public function new (fromQuickRestart:Bool = false) {
+        super();
+        this.fromQuickRestart = fromQuickRestart;
+    }
 
     override public function create() {
         super.create();
@@ -204,7 +211,7 @@ class PlayState extends GameState {
                 0.5,
                 {
                     ease: FlxEase.quadInOut,
-                    startDelay: 0.75,
+                    startDelay: fromQuickRestart ? 0.01 : 0.75,
                     onComplete: (_:FlxTween) -> {
                         transitioning = false;
                         startText.destroy();
@@ -266,6 +273,12 @@ class PlayState extends GameState {
 
         if (FlxG.keys.justPressed.ESCAPE && !over) {
             loseLevel();
+        }
+
+        if (FlxG.keys.justPressed.T && !Game.inst.isHardcore) {
+            Game.inst.loseLevel(currentWorld, levelTime);
+            Game.inst.currentWorld = currentWorld;
+            FlxG.switchState(new PlayState(true));
         }
     }
 
@@ -545,7 +558,6 @@ class PlayState extends GameState {
         transitioning = true;
         checkSongStanza();
         if (currentWorld == LOver) {
-            timer.destroy();
             unlimitedDash.destroy();
         }
 
@@ -706,6 +718,9 @@ class PlayState extends GameState {
     }
 
     function finishMovingRoom () {
+        if (boss != null) {
+            boss.cancel();
+        }
         checkSongStanza();
         transitioning = false;
         setBounds();
