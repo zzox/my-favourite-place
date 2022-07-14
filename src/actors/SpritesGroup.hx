@@ -2,6 +2,7 @@ package actors;
 
 import flixel.group.FlxGroup;
 
+// Group of sprites to control separately from main game update
 class SpritesGroup extends FlxGroup {
     public function new () {
         super ();

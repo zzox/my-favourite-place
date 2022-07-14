@@ -2,8 +2,6 @@ package actors;
 
 import flixel.FlxG;
 import flixel.FlxSprite;
-import flixel.tweens.FlxEase;
-import flixel.tweens.FlxTween;
 
 class Boss extends FlxSprite {
     static inline final HURT_FRAMES:Float = 3;

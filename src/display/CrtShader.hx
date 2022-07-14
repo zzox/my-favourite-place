@@ -4,7 +4,6 @@ import flixel.FlxG;
 import flixel.system.FlxAssets.FlxShader;
 
 // from: https://gist.github.com/Beeblerox/54324d9d5aa19b27651b7cda9130f5dd
-
 class CrtShader extends FlxShader {
     @:glFragmentSource('
         #pragma header
